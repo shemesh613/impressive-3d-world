@@ -441,6 +441,42 @@ const hband = new THREE.Mesh(
 hband.position.set(0, 8, -89);
 scene.add(hband);
 
+// ---- CANVAS TEXT SIGNS ----
+function makeTextSign(text, x, y, z, color, rotY) {
+  const cv = document.createElement('canvas');
+  cv.width = 256; cv.height = 80;
+  const cx = cv.getContext('2d');
+  cx.fillStyle = 'rgba(0,0,0,0.85)';
+  cx.fillRect(0, 0, 256, 80);
+  cx.strokeStyle = color;
+  cx.lineWidth = 3;
+  cx.strokeRect(3, 3, 250, 74);
+  cx.fillStyle = color;
+  cx.shadowColor = color;
+  cx.shadowBlur = 18;
+  cx.font = 'bold 32px Arial';
+  cx.textAlign = 'center';
+  cx.textBaseline = 'middle';
+  cx.fillText(text, 128, 42);
+  const tex = new THREE.CanvasTexture(cv);
+  const mesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.5, 1.1),
+    new THREE.MeshBasicMaterial({ map: tex, transparent: true })
+  );
+  mesh.position.set(x, y, z);
+  mesh.rotation.y = rotY || 0;
+  scene.add(mesh);
+  const pl = new THREE.PointLight(new THREE.Color(color), 1, 6);
+  pl.position.set(x, y, z + 0.5);
+  scene.add(pl);
+}
+makeTextSign('NEON CITY', -9.5, 10, -7, '#00ffff', 0);
+makeTextSign('HOTEL ✦', 9.5, 12, -9, '#ff00ff', Math.PI);
+makeTextSign('CYBER BAR', -9.5, 8, -17, '#ffff00', 0);
+makeTextSign('CLUB 3D', 9.5, 9, -19, '#ff6600', Math.PI);
+makeTextSign('FUTURE', -9.5, 11, 7, '#00ff88', 0);
+makeTextSign('DRIVE ▶', 9.5, 8, 9, '#ff0088', Math.PI);
+
 // ---- NEON SIGNS ----
 function makeSign(x, y, z, color, w, h) {
   const frame = new THREE.Mesh(
@@ -577,6 +613,40 @@ scene.traverse(obj => {
     windowMeshes.push({ mesh: obj, base: obj.material.emissiveIntensity });
   }
 });
+
+// ---- PUDDLES ----
+const puddleMat = new THREE.MeshStandardMaterial({ color: 0x112233, roughness: 0.05, metalness: 0.9, envMapIntensity: 1 });
+[[-6,-5],[-7,-14],[6,-8],[7,-20],[-5,4],[5,12]].forEach(([x,z]) => {
+  const p = new THREE.Mesh(new THREE.CircleGeometry(1.2+Math.random(), 12), puddleMat);
+  p.rotation.x = -Math.PI/2;
+  p.position.set(x, 0.008, z);
+  scene.add(p);
+});
+
+// ---- SYNTHWAVE AUDIO (user-triggered) ----
+let audioStarted = false;
+function startAudio() {
+  if (audioStarted) return;
+  audioStarted = true;
+  const ac = new AudioContext();
+  function note(freq, start, dur, vol=0.06) {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sawtooth'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, ac.currentTime + start);
+    g.gain.linearRampToValueAtTime(vol, ac.currentTime + start + 0.01);
+    g.gain.linearRampToValueAtTime(0, ac.currentTime + start + dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(ac.currentTime + start); o.stop(ac.currentTime + start + dur + 0.1);
+  }
+  function beat() {
+    const seq = [110,0,138.6,0,110,0,164.8,146.8];
+    seq.forEach((f,i) => { if(f) note(f, i*0.25, 0.22, 0.04); });
+    note(55, 0, 2, 0.05); note(55, 2, 2, 0.05);
+  }
+  beat(); setInterval(beat, 2000);
+}
+document.addEventListener('keydown', startAudio, { once: true });
+document.addEventListener('click', startAudio, { once: true });
 
 // ---- INPUT ----
 const keys = {};
