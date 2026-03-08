@@ -37,6 +37,11 @@
       border-radius: 2px; transition: width 0.1s;
     }
     #speednum { color: #00f5ff; font-size: 11px; letter-spacing: 2px; font-family: monospace; }
+    #scanlines {
+      position: fixed; inset: 0; z-index: 7; pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    }
+    #minimap { border-color: rgba(0,245,255,0.6); box-shadow: 0 0 10px rgba(0,245,255,0.3); }
     #minimap {
       position: fixed; bottom: 55px; left: 20px; z-index: 10;
       width: 100px; height: 100px; border: 1px solid rgba(0,245,255,0.4);
@@ -73,6 +78,7 @@
   <p>✦ INTERACTIVE 3D WORLD ✦</p>
 </div>
 <div id="vignette"></div>
+<div id="scanlines"></div>
 <div id="speedlines"></div>
 <div id="minimap"><canvas id="mmCanvas" width="100" height="100"></canvas></div>
 <div id="ctrl">W A S D — נהיגה &nbsp;|&nbsp; גרור עכבר — סיבוב מצלמה</div>
@@ -210,6 +216,21 @@ for (let z = -45; z < 45; z += 6) {
   mark.position.set(0, 0.02, z);
   scene.add(mark);
 }
+
+// ---- SHOOTING STARS ----
+const shootingStars = [];
+function spawnShootingStar() {
+  const geo = new THREE.BufferGeometry();
+  const pts = new Float32Array(6);
+  pts[0] = (Math.random()-0.5)*200; pts[1] = 40+Math.random()*40; pts[2] = -50-Math.random()*80;
+  pts[3] = pts[0]+10; pts[4] = pts[1]-5; pts[5] = pts[2]+10;
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+  const mat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 });
+  const line = new THREE.Line(geo, mat);
+  scene.add(line);
+  shootingStars.push({ line, life: 1.0, vx: 0.8, vy: -0.4, vz: 0.8 });
+}
+setInterval(spawnShootingStar, 3000);
 
 // ---- STARS ----
 const starPositions = [];
@@ -548,6 +569,15 @@ const glow = new THREE.PointLight(0x00aaff, 2, 4);
 glow.position.set(0, 0.1, 0);
 car.add(glow);
 
+// Collect window meshes for flickering
+const windowMeshes = [];
+scene.traverse(obj => {
+  if (obj.isMesh && obj.material.emissiveIntensity > 0.4 && obj.material.emissiveIntensity < 3 &&
+      obj.geometry.type === 'PlaneGeometry' && obj.position.y > 1 && obj.position.y < 20) {
+    windowMeshes.push({ mesh: obj, base: obj.material.emissiveIntensity });
+  }
+});
+
 // ---- INPUT ----
 const keys = {};
 window.addEventListener('keydown', e => { keys[e.code] = true; e.preventDefault(); });
@@ -618,6 +648,27 @@ function animate() {
     pl.light.position.z = Math.cos(a) * 14;
     pl.light.intensity = 2.5 + Math.sin(t * 2 + i) * 0.8;
   });
+
+  // Animate shooting stars
+  for (let i = shootingStars.length-1; i >= 0; i--) {
+    const s = shootingStars[i];
+    const pos = s.line.geometry.attributes.position;
+    for (let j = 0; j < 2; j++) {
+      pos.array[j*3] += s.vx; pos.array[j*3+1] += s.vy; pos.array[j*3+2] += s.vz;
+    }
+    pos.needsUpdate = true;
+    s.life -= 0.015;
+    s.line.material.opacity = s.life;
+    if (s.life <= 0) { scene.remove(s.line); shootingStars.splice(i,1); }
+  }
+
+  // Flicker windows (randomly)
+  if (Math.floor(t*10) % 3 === 0) {
+    windowMeshes.forEach(w => {
+      if (Math.random() > 0.97) w.mesh.material.emissiveIntensity = Math.random() * 3;
+      else w.mesh.material.emissiveIntensity += (w.base - w.mesh.material.emissiveIntensity) * 0.1;
+    });
+  }
 
   // Animate orbs
   orbs.forEach(o => {
