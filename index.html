@@ -817,32 +817,32 @@ function animate() {
   // Draw gauge
   const gc = document.getElementById('gauge');
   const gctx = gc.getContext('2d');
-  const cx = 45, cy = 50, r = 38;
+  const gcx = 45, gcy = 50, gr = 38;
   const kmhVal = Math.abs(speed) / MAX_SPEED;
   gctx.clearRect(0,0,90,90);
   // bg circle
-  gctx.beginPath(); gctx.arc(cx,cy,r,0,Math.PI*2);
+  gctx.beginPath(); gctx.arc(gcx,gcy,gr,0,Math.PI*2);
   gctx.fillStyle='rgba(0,0,0,0.6)'; gctx.fill();
   gctx.strokeStyle='rgba(0,245,255,0.3)'; gctx.lineWidth=2; gctx.stroke();
   // track
-  gctx.beginPath(); gctx.arc(cx,cy,r-6, Math.PI*0.75, Math.PI*2.25);
+  gctx.beginPath(); gctx.arc(gcx,gcy,gr-6, Math.PI*0.75, Math.PI*2.25);
   gctx.strokeStyle='rgba(255,255,255,0.1)'; gctx.lineWidth=6; gctx.stroke();
   // speed arc
   const endAngle = Math.PI*0.75 + kmhVal * Math.PI*1.5;
   const grad = gctx.createLinearGradient(0,0,90,0);
   grad.addColorStop(0,'#00f5ff'); grad.addColorStop(1,'#ff00ff');
-  gctx.beginPath(); gctx.arc(cx,cy,r-6, Math.PI*0.75, endAngle);
+  gctx.beginPath(); gctx.arc(gcx,gcy,gr-6, Math.PI*0.75, endAngle);
   gctx.strokeStyle=grad; gctx.lineWidth=6; gctx.stroke();
   // needle dot
   const needleA = Math.PI*0.75 + kmhVal*Math.PI*1.5;
-  gctx.beginPath(); gctx.arc(cx + Math.cos(needleA)*(r-6), cy + Math.sin(needleA)*(r-6), 4, 0, Math.PI*2);
+  gctx.beginPath(); gctx.arc(gcx + Math.cos(needleA)*(gr-6), gcy + Math.sin(needleA)*(gr-6), 4, 0, Math.PI*2);
   gctx.fillStyle='#fff'; gctx.fill();
   // speed text
   gctx.fillStyle='#00f5ff'; gctx.font='bold 16px monospace';
   gctx.textAlign='center'; gctx.textBaseline='middle';
-  gctx.fillText(Math.abs(Math.round(speed*200)), cx, cy-4);
+  gctx.fillText(Math.abs(Math.round(speed*200)), gcx, gcy-4);
   gctx.font='8px monospace'; gctx.fillStyle='rgba(255,255,255,0.5)';
-  gctx.fillText('KM/H', cx, cy+10);
+  gctx.fillText('KM/H', gcx, gcy+10);
 
   // Animate clouds
   cloudGroup.position.x = Math.sin(t * 0.05) * 5;
