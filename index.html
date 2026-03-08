@@ -19,6 +19,10 @@
       background-clip: text;
     }
     #ui p { color: rgba(255,255,255,0.4); letter-spacing: 5px; margin-top: 8px; font-size: 13px; }
+    #hint { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      color: rgba(0,245,255,0.6); font-size: 13px; letter-spacing: 4px; z-index: 10;
+      pointer-events: none; animation: hintFade 3s ease-in-out forwards; }
+    @keyframes hintFade { 0%{opacity:0} 20%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
     #ctrl {
       position: fixed; bottom: 25px; left: 0; right: 0;
       text-align: center; color: rgba(255,255,255,0.35);
@@ -78,6 +82,7 @@
   <p>✦ INTERACTIVE 3D WORLD ✦</p>
 </div>
 <div id="vignette"></div>
+<div id="hint">✦ W A S D לנהיגה &nbsp;|&nbsp; CLICK לניצוצות ✦</div>
 <div id="scanlines"></div>
 <div id="speedlines"></div>
 <div id="minimap"><canvas id="mmCanvas" width="100" height="100"></canvas></div>
@@ -272,6 +277,40 @@ makeArch(-22, 0xff00ff);
 makeArch(-32, 0xffff00);
 makeArch(-42, 0x00ff88);
 makeArch(-52, 0xff6600);
+
+// ---- NEON CLOUDS ----
+const cloudGroup = new THREE.Group();
+[[0x440066,0,45,-60],[0x003344,-30,50,-80],[0x220033,30,42,-70]].forEach(([c,x,y,z]) => {
+  for(let i=0;i<5;i++){
+    const sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(4+Math.random()*4, 7, 5),
+      new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.12, depthWrite: false })
+    );
+    sphere.position.set(x+i*5-10, y+Math.random()*3, z+Math.random()*8);
+    cloudGroup.add(sphere);
+  }
+});
+scene.add(cloudGroup);
+
+// ---- CLICK SPARKS ----
+const sparkParticles = [];
+function spawnSparks(x, y, z, color) {
+  for(let i=0;i<15;i++){
+    const spark = new THREE.Mesh(
+      new THREE.SphereGeometry(0.06, 4, 4),
+      new THREE.MeshBasicMaterial({ color: color || 0xffff00 })
+    );
+    spark.position.set(x,y,z);
+    const vel = new THREE.Vector3((Math.random()-0.5)*0.3, Math.random()*0.4+0.1, (Math.random()-0.5)*0.3);
+    scene.add(spark);
+    sparkParticles.push({ mesh: spark, vel, life: 1.0 });
+  }
+}
+renderer.domElement.addEventListener('click', (e) => {
+  const colors = [0x00f5ff, 0xff00ff, 0xffff00, 0x00ff88, 0xff6600];
+  spawnSparks(car.position.x+(Math.random()-0.5)*4, 0.5, car.position.z+(Math.random()-0.5)*4,
+    colors[Math.floor(Math.random()*colors.length)]);
+});
 
 // ---- RAIN ----
 const rainCount = 800;
@@ -718,6 +757,24 @@ function animate() {
     pl.light.position.z = Math.cos(a) * 14;
     pl.light.intensity = 2.5 + Math.sin(t * 2 + i) * 0.8;
   });
+
+  // Animate clouds
+  cloudGroup.position.x = Math.sin(t * 0.05) * 5;
+
+  // Animate sparks
+  for(let i = sparkParticles.length-1; i>=0; i--) {
+    const s = sparkParticles[i];
+    s.mesh.position.add(s.vel);
+    s.vel.y -= 0.012;
+    s.life -= 0.04;
+    s.mesh.material.opacity = s.life;
+    s.mesh.material.transparent = true;
+    if(s.life <= 0) { scene.remove(s.mesh); sparkParticles.splice(i,1); }
+  }
+
+  // Pulse sky color
+  const skyHue = (Math.sin(t*0.05)*0.05+0.75);
+  renderer.setClearColor(new THREE.Color().setHSL(skyHue, 0.8, 0.02));
 
   // Animate shooting stars
   for (let i = shootingStars.length-1; i >= 0; i--) {
