@@ -41,6 +41,11 @@
       position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
       background: #000; color: #ff4444; font-size: 20px; text-align: center; z-index: 99;
     }
+    #vignette {
+      position: fixed; inset: 0; z-index: 9; pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
+    }
+    #ui h1 { text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(255,0,255,0.4); }
   </style>
 </head>
 <body>
@@ -49,6 +54,7 @@
   <h1>עולם תלת-ממדי</h1>
   <p>✦ INTERACTIVE 3D WORLD ✦</p>
 </div>
+<div id="vignette"></div>
 <div id="ctrl">W A S D — נהיגה &nbsp;|&nbsp; גרור עכבר — סיבוב מצלמה</div>
 <div id="hud">
   <div id="speednum">0 KM/H</div>
@@ -187,6 +193,20 @@ const starGeo = new THREE.BufferGeometry();
 starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
 scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.2, transparent: true, opacity: 0.7 })));
 
+// ---- RAIN ----
+const rainCount = 800;
+const rainPos = new Float32Array(rainCount * 3);
+for (let i = 0; i < rainCount; i++) {
+  rainPos[i*3]   = (Math.random()-0.5)*80;
+  rainPos[i*3+1] = Math.random()*30;
+  rainPos[i*3+2] = (Math.random()-0.5)*80;
+}
+const rainGeo = new THREE.BufferGeometry();
+rainGeo.setAttribute('position', new THREE.Float32BufferAttribute(rainPos, 3));
+const rainMat = new THREE.PointsMaterial({ color: 0x99ccff, size: 0.08, transparent: true, opacity: 0.4 });
+const rain = new THREE.Points(rainGeo, rainMat);
+scene.add(rain);
+
 // ---- MOON ----
 const moon = new THREE.Mesh(
   new THREE.SphereGeometry(4, 16, 16),
@@ -262,6 +282,31 @@ function makeBuilding(x, z, w, h, d, color) {
     }
   }
 }
+
+// ---- NEON SIGNS ----
+function makeSign(x, y, z, color, w, h) {
+  const frame = new THREE.Mesh(
+    new THREE.BoxGeometry(w, h, 0.1),
+    new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 3, wireframe: false })
+  );
+  frame.position.set(x, y, z);
+  scene.add(frame);
+  const inner = new THREE.Mesh(
+    new THREE.BoxGeometry(w*0.7, h*0.5, 0.05),
+    new THREE.MeshStandardMaterial({ color: 0x000000 })
+  );
+  inner.position.set(x, y, z+0.08);
+  scene.add(inner);
+  const pl = new THREE.PointLight(color, 1.5, 8);
+  pl.position.set(x, y, z+1);
+  scene.add(pl);
+}
+makeSign(-9.5, 7, -8, 0x00ffff, 2.5, 1);
+makeSign(9.5, 9, -10, 0xff00ff, 3, 1.2);
+makeSign(-9.5, 5, -16, 0xffff00, 2, 0.8);
+makeSign(9.5, 6, -18, 0x00ff88, 2.8, 1);
+makeSign(-9.5, 8, 6, 0xff6600, 2.2, 0.9);
+makeSign(9.5, 7, 8, 0x8800ff, 2.5, 1);
 
 const bdata = [
   [-8, -6, 3, 9, 3, 0xff00ff],  [8, -6, 3, 11, 3, 0x00f5ff],
@@ -419,6 +464,14 @@ function animate() {
     pl.light.position.z = Math.cos(a) * 14;
     pl.light.intensity = 2.5 + Math.sin(t * 2 + i) * 0.8;
   });
+
+  // Animate rain
+  const rp = rainGeo.attributes.position;
+  for (let i = 0; i < rainCount; i++) {
+    rp.array[i*3+1] -= 0.3;
+    if (rp.array[i*3+1] < 0) rp.array[i*3+1] = 30;
+  }
+  rp.needsUpdate = true;
 
   // Animate floating particles
   floatParticles.rotation.y = t * 0.03;
