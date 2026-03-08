@@ -45,7 +45,14 @@
       position: fixed; inset: 0; z-index: 9; pointer-events: none;
       background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
     }
-    #ui h1 { text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(255,0,255,0.4); }
+    #ui h1 {
+      text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(255,0,255,0.4);
+      animation: titlePulse 2s ease-in-out infinite;
+    }
+    @keyframes titlePulse {
+      0%,100% { text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(255,0,255,0.4); }
+      50% { text-shadow: 0 0 50px rgba(0,245,255,1), 0 0 100px rgba(255,0,255,0.8), 0 0 150px rgba(255,255,0,0.3); }
+    }
   </style>
 </head>
 <body>
@@ -193,6 +200,34 @@ const starGeo = new THREE.BufferGeometry();
 starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
 scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.2, transparent: true, opacity: 0.7 })));
 
+// ---- NEON ARCHES ----
+function makeArch(z, color) {
+  const archGroup = new THREE.Group();
+  // left post
+  const postMat = new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 2 });
+  [-3.5, 3.5].forEach(x => {
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 5, 8), postMat);
+    post.position.set(x, 2.5, 0);
+    archGroup.add(post);
+  });
+  // top bar
+  const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 7.2, 8), postMat);
+  bar.rotation.z = Math.PI / 2;
+  bar.position.set(0, 5.1, 0);
+  archGroup.add(bar);
+  // glow
+  const pl = new THREE.PointLight(color, 1.5, 10);
+  pl.position.set(0, 5, 0);
+  archGroup.add(pl);
+  archGroup.position.z = z;
+  scene.add(archGroup);
+}
+makeArch(-10, 0x00f5ff);
+makeArch(-20, 0xff00ff);
+makeArch(-30, 0xffff00);
+makeArch(-40, 0x00ff88);
+makeArch(10, 0xff6600);
+
 // ---- RAIN ----
 const rainCount = 800;
 const rainPos = new Float32Array(rainCount * 3);
@@ -317,12 +352,12 @@ const horizon = new THREE.Mesh(horizonGeo, horizonMat);
 horizon.position.set(0, 10, -90);
 scene.add(horizon);
 
-// Horizon light band
+// Horizon light band - raised high so it doesn't block view
 const hband = new THREE.Mesh(
-  new THREE.PlaneGeometry(200, 2),
-  new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.3, side: THREE.DoubleSide })
+  new THREE.PlaneGeometry(200, 3),
+  new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.2, side: THREE.DoubleSide })
 );
-hband.position.set(0, 1.5, -89);
+hband.position.set(0, 8, -89);
 scene.add(hband);
 
 // ---- NEON SIGNS ----
