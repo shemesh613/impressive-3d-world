@@ -207,6 +207,19 @@ const rainMat = new THREE.PointsMaterial({ color: 0x99ccff, size: 0.08, transpar
 const rain = new THREE.Points(rainGeo, rainMat);
 scene.add(rain);
 
+// ---- AURORA ----
+const auroraColors = [0x00ff88, 0x0088ff, 0xff00ff, 0x00ffff];
+const auroraPlanes = [];
+auroraColors.forEach((c, i) => {
+  const geo = new THREE.PlaneGeometry(180, 25);
+  const mat = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.06, side: THREE.DoubleSide, depthWrite: false });
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(0, 35 + i * 8, -70);
+  m.rotation.x = -0.3 + i * 0.1;
+  scene.add(m);
+  auroraPlanes.push(m);
+});
+
 // ---- MOON ----
 const moon = new THREE.Mesh(
   new THREE.SphereGeometry(4, 16, 16),
@@ -355,6 +368,15 @@ const bdata = [
 ];
 bdata.forEach(d => makeBuilding(...d));
 
+// ---- EXHAUST PARTICLES ----
+const exhaustCount = 60;
+const exhaustPos = new Float32Array(exhaustCount * 3);
+const exhaustGeo = new THREE.BufferGeometry();
+exhaustGeo.setAttribute('position', new THREE.Float32BufferAttribute(exhaustPos, 3));
+const exhaustMat = new THREE.PointsMaterial({ color: 0x4466ff, size: 0.25, transparent: true, opacity: 0.7 });
+const exhaustParticles = new THREE.Points(exhaustGeo, exhaustMat);
+scene.add(exhaustParticles);
+
 // ---- CAR ----
 const car = new THREE.Group();
 scene.add(car);
@@ -500,6 +522,29 @@ function animate() {
     pl.light.position.x = Math.sin(a) * 14;
     pl.light.position.z = Math.cos(a) * 14;
     pl.light.intensity = 2.5 + Math.sin(t * 2 + i) * 0.8;
+  });
+
+  // Animate aurora
+  auroraPlanes.forEach((a, i) => {
+    a.material.opacity = 0.04 + 0.04 * Math.sin(t * 0.5 + i * 1.5);
+    a.position.x = Math.sin(t * 0.2 + i) * 20;
+  });
+
+  // Animate exhaust
+  const ep = exhaustGeo.attributes.position;
+  for (let i = 0; i < exhaustCount; i++) {
+    ep.array[i*3]   = car.position.x + (Math.random()-0.5)*0.4 - Math.sin(car.rotation.y)*1.8;
+    ep.array[i*3+1] = car.position.y + 0.3 + Math.random()*0.3;
+    ep.array[i*3+2] = car.position.z + (Math.random()-0.5)*0.4 - Math.cos(car.rotation.y)*1.8;
+  }
+  ep.needsUpdate = true;
+  exhaustMat.opacity = Math.abs(speed) > 0.05 ? 0.6 : 0.1;
+
+  // Pulse road edge strips
+  scene.traverse(obj => {
+    if (obj.isMesh && obj.material.emissive && obj.material.emissive.getHex() === 0x00f5ff && obj.geometry.type === 'PlaneGeometry') {
+      obj.material.emissiveIntensity = 1.5 + Math.sin(t * 3) * 0.5;
+    }
   });
 
   // Animate rain
