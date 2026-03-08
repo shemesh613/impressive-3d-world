@@ -77,10 +77,23 @@
       0%,100% { text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(255,0,255,0.4); }
       50% { text-shadow: 0 0 50px rgba(0,245,255,1), 0 0 100px rgba(255,0,255,0.8), 0 0 150px rgba(255,255,0,0.3); }
     }
+    #c { filter: contrast(1.08) saturate(1.3) brightness(1.05); }
+    #chromatic {
+      position: fixed; inset: 0; z-index: 6; pointer-events: none;
+      mix-blend-mode: screen; opacity: 0.04;
+      background: radial-gradient(ellipse at 48% 50%, transparent 60%, rgba(255,0,100,0.5) 100%),
+                  radial-gradient(ellipse at 52% 50%, transparent 60%, rgba(0,100,255,0.5) 100%);
+    }
+    #ui p { animation: subtitleGlow 3s ease-in-out infinite; }
+    @keyframes subtitleGlow {
+      0%,100% { color: rgba(0,245,255,0.4); text-shadow: none; }
+      50% { color: rgba(0,245,255,0.8); text-shadow: 0 0 20px rgba(0,245,255,0.6); }
+    }
   </style>
 </head>
 <body>
 <canvas id="c"></canvas>
+<div id="chromatic"></div>
 <div id="ui">
   <h1>עולם תלת-ממדי</h1>
   <p>✦ INTERACTIVE 3D WORLD ✦</p>
@@ -380,7 +393,90 @@ auroraColors.forEach((c, i) => {
   auroraPlanes.push(m);
 });
 
-// ---- MOON ----
+// ---- MOUNTAIN SILHOUETTES ----
+function makeMountain(x, z, w, h, color) {
+  const shape = new THREE.Shape();
+  shape.moveTo(-w/2, 0);
+  shape.lineTo(-w*0.35, h*0.55);
+  shape.lineTo(-w*0.1, h*0.82);
+  shape.lineTo(0, h);
+  shape.lineTo(w*0.15, h*0.75);
+  shape.lineTo(w*0.3, h*0.6);
+  shape.lineTo(w/2, 0);
+  shape.closePath();
+  const geo = new THREE.ShapeGeometry(shape);
+  const mat = new THREE.MeshBasicMaterial({ color: color || 0x07001a, side: THREE.DoubleSide, depthWrite: false });
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(x, 0, z);
+  scene.add(m);
+  // glow strip on mountain peak
+  const glowMat = new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false });
+  const glowGeo = new THREE.PlaneGeometry(w * 0.6, 1.5);
+  const glowM = new THREE.Mesh(glowGeo, glowMat);
+  glowM.position.set(x, h * 0.97, z + 0.5);
+  scene.add(glowM);
+}
+for (let i = 0; i < 10; i++) {
+  const xi = (i - 5) * 22;
+  makeMountain(xi, -88, 18 + Math.random() * 12, 18 + Math.random() * 22);
+}
+
+// ---- HOLOGRAPHIC RINGS ----
+const rings = [];
+[{z:-5,c:0x00f5ff},{z:-25,c:0xff00ff},{z:-45,c:0xffff00},{z:-65,c:0x00ff88}].forEach(({z,c},i) => {
+  const geo = new THREE.TorusGeometry(4.5, 0.09, 16, 80);
+  const mat = new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 4 });
+  const ring = new THREE.Mesh(geo, mat);
+  ring.position.set(0, 5, z);
+  ring.rotation.x = Math.PI / 2;
+  scene.add(ring);
+  const pl = new THREE.PointLight(c, 2.5, 18);
+  pl.position.copy(ring.position);
+  scene.add(pl);
+  rings.push({ mesh: ring, pl, baseY: 5, phase: i * Math.PI / 2 });
+  // inner ring
+  const geo2 = new THREE.TorusGeometry(3.2, 0.04, 8, 60);
+  const mat2 = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.4 });
+  const ring2 = new THREE.Mesh(geo2, mat2);
+  ring2.position.copy(ring.position);
+  ring2.rotation.x = Math.PI / 2;
+  scene.add(ring2);
+  rings.push({ mesh: ring2, pl: null, baseY: 5, phase: i * Math.PI / 2 + 0.5 });
+});
+
+// ---- LIGHT BEAMS (searchlights from buildings) ----
+const beams = [];
+[[-8,-6,0x00f5ff],[8,-6,0xff00ff],[-12,-12,0xffff00],[12,-12,0x00ff88]].forEach(([x,z,c],i) => {
+  const geo = new THREE.CylinderGeometry(0.05, 1.2, 60, 8, 1, true);
+  const mat = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.04, side: THREE.DoubleSide, depthWrite: false });
+  const beam = new THREE.Mesh(geo, mat);
+  beam.position.set(x, 30, z);
+  scene.add(beam);
+  beams.push({ mesh: beam, phase: i * Math.PI / 2 });
+});
+
+// ---- FLOATING CYBER CITY SIGN ----
+const signCv = document.createElement('canvas');
+signCv.width = 512; signCv.height = 128;
+const sctx = signCv.getContext('2d');
+sctx.clearRect(0, 0, 512, 128);
+sctx.font = 'bold 56px Arial';
+sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+for (let gi = 6; gi >= 0; gi--) {
+  sctx.shadowBlur = gi * 18;
+  sctx.shadowColor = '#00f5ff';
+  sctx.fillStyle = gi === 0 ? '#ffffff' : `rgba(0,${200+gi*8},255,${0.5+gi*0.08})`;
+  sctx.fillText('✦ CYBER CITY 2084 ✦', 256, 64);
+}
+const signTex = new THREE.CanvasTexture(signCv);
+const floatingSign = new THREE.Mesh(
+  new THREE.PlaneGeometry(22, 5.5),
+  new THREE.MeshBasicMaterial({ map: signTex, transparent: true, depthWrite: false, side: THREE.DoubleSide })
+);
+floatingSign.position.set(0, 24, -38);
+scene.add(floatingSign);
+
+// ---- NEON MOON ----
 const moon = new THREE.Mesh(
   new THREE.SphereGeometry(4, 16, 16),
   new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xaaccff, emissiveIntensity: 1.5 })
@@ -843,6 +939,27 @@ function animate() {
   gctx.fillText(Math.abs(Math.round(speed*200)), gcx, gcy-4);
   gctx.font='8px monospace'; gctx.fillStyle='rgba(255,255,255,0.5)';
   gctx.fillText('KM/H', gcx, gcy+10);
+
+  // Animate rings
+  rings.forEach((r, i) => {
+    r.mesh.rotation.z += 0.008 * (i % 2 === 0 ? 1 : -1);
+    r.mesh.position.y = r.baseY + Math.sin(t * 0.7 + r.phase) * 0.8;
+    if (r.pl) {
+      r.pl.position.y = r.mesh.position.y;
+      r.pl.intensity = 2 + Math.sin(t * 1.5 + r.phase) * 1;
+    }
+  });
+
+  // Animate light beams
+  beams.forEach((b, i) => {
+    b.mesh.material.opacity = 0.025 + 0.035 * Math.abs(Math.sin(t * 0.4 + b.phase));
+    b.mesh.rotation.y = t * 0.2 + b.phase;
+  });
+
+  // Animate floating sign
+  floatingSign.position.y = 24 + Math.sin(t * 0.25) * 1.5;
+  floatingSign.rotation.y = Math.sin(t * 0.08) * 0.08;
+  floatingSign.material.opacity = 0.7 + Math.sin(t * 0.5) * 0.3;
 
   // Animate clouds
   cloudGroup.position.x = Math.sin(t * 0.05) * 5;
