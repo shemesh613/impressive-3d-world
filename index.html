@@ -217,21 +217,7 @@ scene.add(road);
   scene.add(markInst);
 }
 
-// ---- SHOOTING STARS: pooled, max 5 ----
-const shootingStars = [];
-function spawnShootingStar() {
-  if (shootingStars.length >= 5) return;
-  const pts = new Float32Array(6);
-  pts[0] = (Math.random()-0.5)*200; pts[1] = 40+Math.random()*40; pts[2] = -50-Math.random()*80;
-  pts[3] = pts[0]+10; pts[4] = pts[1]-5; pts[5] = pts[2]+10;
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-  const mat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 });
-  const line = new THREE.Line(geo, mat);
-  scene.add(line);
-  shootingStars.push({ line, life: 1.0, vx: 0.8, vy: -0.4, vz: 0.8 });
-}
-setInterval(spawnShootingStar, 4000);
+// Shooting stars removed — dynamic geometry creation killed FPS
 
 // ---- STARS: 2000→800 ----
 const starPositions = [];
@@ -272,25 +258,10 @@ const cloudGroup = new THREE.Group();
 });
 scene.add(cloudGroup);
 
-// ---- CLICK SPARKS: pooled, max 30 ----
-const sparkParticles = [];
-const sparkGeo = new THREE.SphereGeometry(0.06, 3, 3);
-function spawnSparks(x, y, z, color) {
-  const count = Math.min(8, 30 - sparkParticles.length);
-  for(let i=0;i<count;i++){
-    const spark = new THREE.Mesh(sparkGeo, new THREE.MeshBasicMaterial({ color: color||0xffff00, transparent: true }));
-    spark.position.set(x,y,z);
-    scene.add(spark);
-    sparkParticles.push({ mesh: spark, vel: new THREE.Vector3((Math.random()-0.5)*0.3, Math.random()*0.4+0.1, (Math.random()-0.5)*0.3), life: 1.0 });
-  }
-}
-renderer.domElement.addEventListener('click', () => {
-  const colors = [0x00f5ff, 0xff00ff, 0xffff00, 0x00ff88, 0xff6600];
-  spawnSparks(car.position.x+(Math.random()-0.5)*4, 0.5, car.position.z+(Math.random()-0.5)*4, colors[Math.floor(Math.random()*colors.length)]);
-});
+// Click sparks removed — dynamic scene.add/remove kills FPS
 
-// ---- RAIN: 800→300 ----
-const rainCount = 300;
+// ---- RAIN: 800→100 ----
+const rainCount = 100;
 const rainPos = new Float32Array(rainCount*3);
 for (let i=0;i<rainCount;i++) { rainPos[i*3]=(Math.random()-0.5)*80; rainPos[i*3+1]=Math.random()*30; rainPos[i*3+2]=(Math.random()-0.5)*80; }
 const rainGeo = new THREE.BufferGeometry();
@@ -648,12 +619,12 @@ const _camPos = new THREE.Vector3();
 const clock = new THREE.Clock();
 let frameCount = 0;
 
-// Cache DOM refs
-const gctx = document.getElementById('gauge').getContext('2d');
-const mmCtx = document.getElementById('mmCanvas').getContext('2d');
-const speedlinesEl = document.getElementById('speedlines');
+// Cache DOM refs — gauge and minimap hidden (too expensive to redraw)
+document.getElementById('gauge').style.display = 'none';
+document.getElementById('minimap').style.display = 'none';
+document.getElementById('speedlines').style.display = 'none';
+document.getElementById('hud').style.display = 'block';
 const speednumEl = document.getElementById('speednum');
-const speedfillEl = document.getElementById('speedfill');
 
 // ---- ANIMATE ----
 function animate() {
@@ -687,36 +658,10 @@ function animate() {
   // Traffic
   traffic.forEach(tc => { tc.group.position.z += tc.speed; if (tc.group.position.z>30) tc.group.position.z=-100; });
 
-  // Gauge + minimap: every 3rd frame only
-  if (frameCount%3===0) {
-    const kmhVal = Math.abs(speed)/MAX_SPEED;
-    gctx.clearRect(0,0,90,90);
-    gctx.beginPath(); gctx.arc(45,50,38,0,Math.PI*2);
-    gctx.fillStyle='rgba(0,0,0,0.6)'; gctx.fill();
-    gctx.strokeStyle='rgba(0,245,255,0.3)'; gctx.lineWidth=2; gctx.stroke();
-    gctx.beginPath(); gctx.arc(45,50,32, Math.PI*0.75, Math.PI*2.25);
-    gctx.strokeStyle='rgba(255,255,255,0.1)'; gctx.lineWidth=6; gctx.stroke();
-    const endA = Math.PI*0.75+kmhVal*Math.PI*1.5;
-    const grad = gctx.createLinearGradient(0,0,90,0);
-    grad.addColorStop(0,'#00f5ff'); grad.addColorStop(1,'#ff00ff');
-    gctx.beginPath(); gctx.arc(45,50,32, Math.PI*0.75, endA);
-    gctx.strokeStyle=grad; gctx.lineWidth=6; gctx.stroke();
-    gctx.beginPath(); gctx.arc(45+Math.cos(endA)*32, 50+Math.sin(endA)*32, 4, 0, Math.PI*2);
-    gctx.fillStyle='#fff'; gctx.fill();
-    gctx.fillStyle='#00f5ff'; gctx.font='bold 16px monospace'; gctx.textAlign='center'; gctx.textBaseline='middle';
-    gctx.fillText(Math.abs(Math.round(speed*200)), 45, 46);
-    gctx.font='8px monospace'; gctx.fillStyle='rgba(255,255,255,0.5)'; gctx.fillText('KM/H', 45, 60);
-
-    mmCtx.fillStyle='rgba(0,0,0,0.8)'; mmCtx.fillRect(0,0,100,100);
-    mmCtx.strokeStyle='rgba(0,245,255,0.15)'; mmCtx.lineWidth=0.5;
-    for(let i=0;i<100;i+=10){mmCtx.beginPath();mmCtx.moveTo(i,0);mmCtx.lineTo(i,100);mmCtx.stroke();mmCtx.beginPath();mmCtx.moveTo(0,i);mmCtx.lineTo(100,i);mmCtx.stroke();}
-    bdata.forEach(d => { mmCtx.fillStyle='#'+d[5].toString(16).padStart(6,'0'); mmCtx.fillRect(50+d[0]*1.2-2, 50+d[2]*1.2-2, 4, 6); });
-    mmCtx.fillStyle='#00f5ff'; mmCtx.beginPath(); mmCtx.arc(50+car.position.x*1.2, 50+car.position.z*1.2, 3, 0, Math.PI*2); mmCtx.fill();
-    mmCtx.strokeStyle='rgba(0,245,255,0.5)'; mmCtx.lineWidth=1; mmCtx.strokeRect(0,0,100,100);
-
+  // HUD — simple text only, every 6th frame
+  if (frameCount%6===0) {
     const kmh = Math.abs(Math.round(speed*200));
     speednumEl.textContent = kmh+' KM/H';
-    speedfillEl.style.width = (kmh/56*100)+'%';
   }
 
   // Rings
@@ -734,64 +679,36 @@ function animate() {
   floatingSign.material.opacity = 0.7+Math.sin(t*0.5)*0.3;
   cloudGroup.position.x = Math.sin(t*0.05)*5;
 
-  // Sparks
-  for(let i=sparkParticles.length-1;i>=0;i--) {
-    const s = sparkParticles[i];
-    s.mesh.position.add(s.vel); s.vel.y -= 0.012;
-    s.life -= 0.04; s.mesh.material.opacity = s.life;
-    if(s.life<=0) { scene.remove(s.mesh); sparkParticles.splice(i,1); }
-  }
-
-  // Shooting stars + dispose
-  for (let i=shootingStars.length-1;i>=0;i--) {
-    const s = shootingStars[i];
-    const pos = s.line.geometry.attributes.position;
-    for (let j=0;j<2;j++) { pos.array[j*3]+=s.vx; pos.array[j*3+1]+=s.vy; pos.array[j*3+2]+=s.vz; }
-    pos.needsUpdate = true;
-    s.life -= 0.015; s.line.material.opacity = s.life;
-    if (s.life<=0) { scene.remove(s.line); s.line.geometry.dispose(); s.line.material.dispose(); shootingStars.splice(i,1); }
-  }
-
-  // Orbs
-  orbs.forEach(o => {
-    o.angle += o.speed*0.01;
-    o.mesh.position.set(Math.cos(o.angle)*12, 4+Math.sin(t*1.5+o.angle)*1.5, Math.sin(o.angle)*12-10);
-  });
-
-  // Aurora — every 2nd frame
-  if (frameCount%2===0) {
+  // Orbs + Aurora — every 4th frame
+  if (frameCount%4===0) {
+    orbs.forEach(o => {
+      o.angle += o.speed*0.04;
+      o.mesh.position.set(Math.cos(o.angle)*12, 4+Math.sin(t*1.5+o.angle)*1.5, Math.sin(o.angle)*12-10);
+    });
     auroraPlanes.forEach((a,i) => { a.material.opacity = 0.04+0.04*Math.sin(t*0.5+i*1.5); a.position.x = Math.sin(t*0.2+i)*20; });
   }
 
-  // Exhaust
-  const ep = exhaustGeo.attributes.position;
-  for (let i=0;i<exhaustCount;i++) {
-    ep.array[i*3] = car.position.x+(Math.random()-0.5)*0.4-Math.sin(car.rotation.y)*1.8;
-    ep.array[i*3+1] = car.position.y+0.3+Math.random()*0.3;
-    ep.array[i*3+2] = car.position.z+(Math.random()-0.5)*0.4-Math.cos(car.rotation.y)*1.8;
-  }
-  ep.needsUpdate = true;
-  exhaustMat.opacity = Math.abs(speed)>0.05 ? 0.6 : 0.1;
-
-  // Road edge pulse — direct ref, NO traverse!
-  const pulseVal = 0.7+Math.sin(t*3)*0.3;
-  roadEdgeStrips[0].material.opacity = pulseVal;
-  roadEdgeStrips[1].material.opacity = pulseVal;
-
-  // Rain
-  const rp = rainGeo.attributes.position;
-  for (let i=0;i<rainCount;i++) { rp.array[i*3+1]-=0.3; if(rp.array[i*3+1]<0) rp.array[i*3+1]=30; }
-  rp.needsUpdate = true;
-
-  // Float particles — every 2nd frame
-  if (frameCount%2===0) {
-    floatParticles.rotation.y = t*0.03;
-    const fp = floatGeo.attributes.position;
-    for (let i=1;i<fp.count*3;i+=3) fp.array[i] += Math.sin(t+i)*0.002;
-    fp.needsUpdate = true;
+  // Exhaust — every 3rd frame
+  if (frameCount%3===0) {
+    const ep = exhaustGeo.attributes.position;
+    for (let i=0;i<exhaustCount;i++) {
+      ep.array[i*3] = car.position.x+(Math.random()-0.5)*0.4-Math.sin(car.rotation.y)*1.8;
+      ep.array[i*3+1] = car.position.y+0.3+Math.random()*0.3;
+      ep.array[i*3+2] = car.position.z+(Math.random()-0.5)*0.4-Math.cos(car.rotation.y)*1.8;
+    }
+    ep.needsUpdate = true;
+    exhaustMat.opacity = Math.abs(speed)>0.05 ? 0.6 : 0.1;
   }
 
-  speedlinesEl.style.opacity = Math.abs(speed)/MAX_SPEED>0.5 ? (Math.abs(speed)/MAX_SPEED-0.5)*2 : 0;
+  // Rain — every 4th frame only
+  if (frameCount%4===0) {
+    const rp = rainGeo.attributes.position;
+    for (let i=0;i<rainCount;i++) { rp.array[i*3+1]-=1.2; if(rp.array[i*3+1]<0) rp.array[i*3+1]=30; }
+    rp.needsUpdate = true;
+  }
+
+  // Float particles — just rotate, no per-vertex update
+  floatParticles.rotation.y = t*0.03;
 
   renderer.render(scene, camera);
 }
