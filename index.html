@@ -318,23 +318,23 @@ const _col=new THREE.Color();
 
 // ---- GROUND ----
 scene.add((() => {
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,2000),new THREE.MeshBasicMaterial({color:0x1a2a3a}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,6000),new THREE.MeshBasicMaterial({color:0x1a2a3a}));
   m.rotation.x=-Math.PI/2;return m;
 })());
 
 // ---- ROAD ----
 {
-  const road=new THREE.Mesh(new THREE.PlaneGeometry(10,2000),new THREE.MeshBasicMaterial({color:0x2a3050}));
+  const road=new THREE.Mesh(new THREE.PlaneGeometry(10,6000),new THREE.MeshBasicMaterial({color:0x2a3050}));
   road.rotation.x=-Math.PI/2;road.position.y=.01;scene.add(road);
   const edgeMat=new THREE.MeshBasicMaterial({color:0x22c55e});window._edgeMat=edgeMat;
   [-5.2,5.2].forEach(x=>{
-    const e=new THREE.Mesh(new THREE.PlaneGeometry(.2,2000),edgeMat);
+    const e=new THREE.Mesh(new THREE.PlaneGeometry(.2,6000),edgeMat);
     e.rotation.x=-Math.PI/2;e.position.set(x,.02,0);scene.add(e);
   });
   // Side glow
   const glowMat=new THREE.MeshBasicMaterial({color:0x0d3320});
   [-6.5,6.5].forEach(x=>{
-    const s=new THREE.Mesh(new THREE.PlaneGeometry(2,2000),glowMat);
+    const s=new THREE.Mesh(new THREE.PlaneGeometry(2,6000),glowMat);
     s.rotation.x=-Math.PI/2;s.position.set(x,.005,0);scene.add(s);
   });
 }
@@ -342,17 +342,20 @@ scene.add((() => {
 // ---- ROAD MARKS ----
 {
   const g=new THREE.PlaneGeometry(.2,3);const m=new THREE.MeshBasicMaterial({color:0xfbbf24});
-  const inst=new THREE.InstancedMesh(g,m,200);
-  for(let i=0;i<200;i++){
+  const inst=new THREE.InstancedMesh(g,m,600);
+  for(let i=0;i<600;i++){
     dummy.position.set(0,.03,-50+i*6);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
     inst.setMatrixAt(i,dummy.matrix);
   }
+}
+// ---- CROSS STREETS ----
+{  const crossGeo=new THREE.PlaneGeometry(30,.15);  const crossMat=new THREE.MeshBasicMaterial({color:0x334455});  const crossN=40;  const crossInst=new THREE.InstancedMesh(crossGeo,crossMat,crossN);  for(let i=0;i<crossN;i++){    dummy.position.set(0,.015,i*80+50);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();    crossInst.setMatrixAt(i,dummy.matrix);  }  crossInst.instanceMatrix.needsUpdate=true;scene.add(crossInst);}
   inst.instanceMatrix.needsUpdate=true;scene.add(inst);
 }
 
 // ---- BUILDINGS (city-like) ----
 const bdata=[];
-for(let z=-100;z<=600;z+=10){
+for(let z=-100;z<=2000;z+=10){
   bdata.push([-10,z,2.5+Math.random()*2,4+Math.random()*12,2.5+Math.random()*2]);
   bdata.push([10,z,2.5+Math.random()*2,4+Math.random()*12,2.5+Math.random()*2]);
   if(Math.random()>.5)bdata.push([-16,z,2+Math.random()*2,3+Math.random()*8,2+Math.random()*2]);
@@ -376,16 +379,17 @@ for(let z=-100;z<=600;z+=10){
   const n=wp.length/3;const geo=new THREE.PlaneGeometry(.35,.35);const mat=new THREE.MeshBasicMaterial({color:0xaaffcc});
   const inst=new THREE.InstancedMesh(geo,mat,n);
   for(let i=0;i<n;i++){dummy.position.set(wp[i*3],wp[i*3+1],wp[i*3+2]);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix)}
+}
   inst.instanceMatrix.needsUpdate=true;scene.add(inst);
 }
 
 // ---- TREES (lollipop style) ----
-{  const trunkGeo=new THREE.CylinderGeometry(.15,.2,2,5);  const trunkMat=new THREE.MeshBasicMaterial({color:0x5c4033});  const leafGeo=new THREE.SphereGeometry(1.2,6,5);  const leafColors=[0x16a34a,0x22c55e,0x15803d,0x4ade80,0x86efac];  const treePositions=[];  for(let z=-80;z<=550;z+=15){    if(Math.random()>.35)treePositions.push([-7.5+(Math.random()-.5)*2,z]);    if(Math.random()>.35)treePositions.push([7.5+(Math.random()-.5)*2,z]);  }  const trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,treePositions.length);  const leafInst=new THREE.InstancedMesh(leafGeo,new THREE.MeshBasicMaterial(),treePositions.length);  treePositions.forEach(([x,z],i)=>{    dummy.position.set(x,1,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    trunkInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,3+Math.random()*.5,z);dummy.scale.setScalar(.7+Math.random()*.5);dummy.updateMatrix();    leafInst.setMatrixAt(i,dummy.matrix);leafInst.setColorAt(i,_col.setHex(leafColors[i%leafColors.length]));  });  trunkInst.instanceMatrix.needsUpdate=true;leafInst.instanceMatrix.needsUpdate=true;  if(leafInst.instanceColor)leafInst.instanceColor.needsUpdate=true;  scene.add(trunkInst);scene.add(leafInst);}// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=550;z+=20){lampPositions.push([-6,z],[6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshBasicMaterial({color:0x888888});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.25,4,4);  const glowMat2=new THREE.MeshBasicMaterial({color:0xffffaa});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
+{  const trunkGeo=new THREE.CylinderGeometry(.15,.2,2,5);  const trunkMat=new THREE.MeshBasicMaterial({color:0x5c4033});  const leafGeo=new THREE.SphereGeometry(1.2,6,5);  const leafColors=[0x16a34a,0x22c55e,0x15803d,0x4ade80,0x86efac];  const treePositions=[];  for(let z=-80;z<=2000;z+=15){    if(Math.random()>.35)treePositions.push([-7.5+(Math.random()-.5)*2,z]);    if(Math.random()>.35)treePositions.push([7.5+(Math.random()-.5)*2,z]);  }  const trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,treePositions.length);  const leafInst=new THREE.InstancedMesh(leafGeo,new THREE.MeshBasicMaterial(),treePositions.length);  treePositions.forEach(([x,z],i)=>{    dummy.position.set(x,1,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    trunkInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,3+Math.random()*.5,z);dummy.scale.setScalar(.7+Math.random()*.5);dummy.updateMatrix();    leafInst.setMatrixAt(i,dummy.matrix);leafInst.setColorAt(i,_col.setHex(leafColors[i%leafColors.length]));  });  trunkInst.instanceMatrix.needsUpdate=true;leafInst.instanceMatrix.needsUpdate=true;  if(leafInst.instanceColor)leafInst.instanceColor.needsUpdate=true;  scene.add(trunkInst);scene.add(leafInst);}// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=2000;z+=20){lampPositions.push([-6,z],[6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshBasicMaterial({color:0x888888});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.25,4,4);  const glowMat2=new THREE.MeshBasicMaterial({color:0xffffaa});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
 // Sky + Stars + Moon
 // ---- CLOUDS ----
 const cloudGeo=new THREE.SphereGeometry(1,6,4);const cloudMat=new THREE.MeshBasicMaterial({color:0x1a3a2a,transparent:true,opacity:.4});const CLOUD_N=20;const cloudInst=new THREE.InstancedMesh(cloudGeo,cloudMat,CLOUD_N);const cloudData=[];for(let i=0;i<CLOUD_N;i++){cloudData.push({x:(Math.random()-.5)*80,y:18+Math.random()*12,z:Math.random()*400-50,sx:2+Math.random()*3,sy:.5+Math.random()*.3,sz:1+Math.random()*1.5,spd:.002+Math.random()*.003})}function updateClouds(){cloudData.forEach((c,i)=>{c.x+=c.spd;if(c.x>50)c.x=-50;dummy.position.set(c.x,c.y,c.z);dummy.scale.set(c.sx,c.sy,c.sz);dummy.rotation.set(0,0,0);dummy.updateMatrix();cloudInst.setMatrixAt(i,dummy.matrix)});cloudInst.instanceMatrix.needsUpdate=true}updateClouds();scene.add(cloudInst);
 scene.add(new THREE.Mesh(new THREE.SphereGeometry(200,8,4),new THREE.MeshBasicMaterial({color:0x071020,side:THREE.BackSide})));
-{const p=new Float32Array(200*3);for(let i=0;i<200;i++){p[i*3]=(Math.random()-.5)*240;p[i*3+1]=Math.random()*60+10;p[i*3+2]=(Math.random()-.5)*240}
+{const p=new Float32Array(200*3);for(let i=0;i<600;i++){p[i*3]=(Math.random()-.5)*240;p[i*3+1]=Math.random()*60+10;p[i*3+2]=(Math.random()-.5)*240}
 const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(p,3));scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0xffffff,size:.15})))}
 {const m=new THREE.Mesh(new THREE.SphereGeometry(4,8,8),new THREE.MeshBasicMaterial({color:0xddeeff}));m.position.set(-40,50,-80);scene.add(m)}
 
