@@ -164,6 +164,8 @@
   <div class="stats">בחירות ירוקות: <span id="finalGreen">0</span></div>
   <div class="stats">בחירות אדומות: <span id="finalRed">0</span></div>
   <div class="stats">רצף ירוקים הכי ארוך: <span id="finalStreak">0</span> 🔥</div>
+  <div class="stats">מרחק: <span id="finalDist">0</span>m 🛣️</div>
+  <div class="stats" id="finalStars" style="font-size:clamp(24px,5vw,40px)"></div>
   <div class="stats" id="finalMsg"></div>
   <button id="restartBtn" onclick="restartGame()">נסיעה חדשה! 🔄</button>
 </div>
@@ -179,6 +181,7 @@
     <button class="ctrl-btn brake" id="btnDown">🔽</button>
   </div>
   <div class="ctrl-group"><button class="ctrl-btn" id="btnRight">➡️</button></div>
+  <div class="ctrl-group"><button class="ctrl-btn" id="btnHonk" style="background:rgba(251,191,36,.2);border-color:rgba(251,191,36,.4)" onclick="sfxHonk()">📯</button></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
@@ -292,6 +295,7 @@ function sfxBoost(){[600,800,1000,1200].forEach((f,i)=>setTimeout(()=>playTone(f
 function sfxLevelUp(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.2,'sine',.1),i*100))}
 function screenFlash(cls){const el=document.getElementById("screenFlash");el.className=cls;el.style.opacity="1";setTimeout(()=>{el.style.opacity="0";el.className=""},300)}
 function sfxScenario(){playTone(440,.15,'triangle',.1);setTimeout(()=>playTone(554,.15,'triangle',.08),100)}
+function sfxHonk(){playTone(350,.15,"square",.12);setTimeout(()=>playTone(440,.2,"square",.1),100)}
 
 // ---- RENDERER ----
 let renderer;try{
