@@ -343,9 +343,9 @@ function roadX(z){
   if(z<0)return 0;
   const s=z%600;
   const base=Math.sin(z*.004)*10+Math.sin(z*.013)*6;
-  const sharp=(s<120)?0:(s<200)?((s-120)/80)*18:(s<350)?18-((s-200)/150)*36:(s<450)?-18+((s-350)/100)*18:0;
+  const sharp=(s<120)?0:(s<200)?((s-120)/80)*28:(s<350)?28-((s-200)/150)*56:(s<450)?-28+((s-350)/100)*28:0;
   const twist=Math.floor(z/600)%2===0?1:-1;
-  return base+sharp*twist*.7;
+  return base+sharp*twist*1.0;
 }
 
 // ---- GROUND ----
@@ -1232,10 +1232,10 @@ function animate(){
     // Car follows curve by position pull (NOT rotation) - curves stay visible!
     const curX=roadX(car.position.z);
     const aheadX=roadX(car.position.z+30);
-    const curvePull=(curX-car.position.x)*.04;
+    const curvePull=(curX-car.position.x)*.012;
     car.position.x+=curvePull;
     // Visual tilt only - slight lean into curves for feel
-    const curveAngle=Math.atan2(aheadX-curX,30)*.25;
+    const curveAngle=Math.atan2(aheadX-curX,30)*.12;
     car.rotation.y=dir+curveAngle;
     car.position.x+=Math.sin(dir)*spd;
     car.position.z+=Math.cos(dir)*spd;
@@ -1533,8 +1533,8 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   // Camera
   _cv.set(car.position.x-Math.sin(dir+cTh)*14,7+cPh*4,car.position.z-Math.cos(dir+cTh)*14);
-  cam.position.lerp(_cv,.08);
-  _ct.set(car.position.x+Math.sin(dir)*8,1.5,car.position.z+Math.cos(dir)*8);cam.lookAt(_ct);
+  cam.position.lerp(_cv,.045);
+  _ct.set(car.position.x+Math.sin(dir)*20,2,car.position.z+Math.cos(dir)*20);cam.lookAt(_ct);
 
 
   // Minimap render
