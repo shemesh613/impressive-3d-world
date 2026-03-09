@@ -339,7 +339,14 @@ const _ct=new THREE.Vector3();
 const _col=new THREE.Color();
 
 // ---- ROAD CURVE FUNCTION ----
-function roadX(z){return Math.sin(z*.005)*6+Math.sin(z*.015)*3+Math.cos(z*.009)*4}
+function roadX(z){
+  if(z<0)return 0;
+  const s=z%800,p=s/800;
+  const base=Math.sin(z*.004)*8+Math.sin(z*.011)*5;
+  const sharp=(s<200)?0:(s<300)?((s-200)/100)*12:(s<500)?12-((s-300)/200)*24:(s<600)?-12+((s-500)/100)*12:0;
+  const twist=Math.floor(z/800)%2===0?1:-1;
+  return base+sharp*twist*.5;
+}
 
 // ---- GROUND ----
 scene.add((() => {
@@ -361,9 +368,9 @@ scene.add((() => {
   const glowR=new THREE.InstancedMesh(glowGeo,glowMat,RSEGS);
   for(let i=0;i<RSEGS;i++){
     const z=-50+i*SLEN,zc=z+SLEN/2,x=roadX(zc);
-    const ca=Math.atan2(roadX(zc+1)-roadX(zc-1),2);
+    const ca=Math.atan2(roadX(zc+2)-roadX(zc-2),4);
     const cosA=Math.cos(ca),sinA=Math.sin(ca);
-    dummy.rotation.set(-Math.PI/2,ca,0);dummy.scale.setScalar(1);
+    dummy.rotation.order='YXZ';dummy.rotation.set(-Math.PI/2,ca,0);dummy.scale.setScalar(1);
     dummy.position.set(x,.01,zc);dummy.updateMatrix();roadInst.setMatrixAt(i,dummy.matrix);
     dummy.position.set(x-5.2*cosA,.02,zc+5.2*sinA);dummy.updateMatrix();edgeL.setMatrixAt(i,dummy.matrix);
     dummy.position.set(x+5.2*cosA,.02,zc-5.2*sinA);dummy.updateMatrix();edgeR.setMatrixAt(i,dummy.matrix);
@@ -858,10 +865,12 @@ for(let z=-100;z<=2800;z+=10){
 {
   const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshBasicMaterial();
   const inst=new THREE.InstancedMesh(geo,mat,bdata.length);
+  const biomes=[[0x22c55e,0x10b981,0x059669,0x34d399],[0xd4a054,0xb8860b,0xcd853f,0xdeb887],[0x6495ed,0x4169e1,0x87ceeb,0xb0c4de],[0xcd5c5c,0xb22222,0xdc143c,0xe9967a],[0x9370db,0x8a2be2,0xba55d3,0xdda0dd]];
+  function biomeColor(z,i){const b=biomes[Math.floor(z/500)%biomes.length];return b[i%b.length]}
   const colors=[0x22c55e,0x10b981,0x059669,0x34d399,0x6ee7b7,0x14b8a6,0x0d9488,0x2dd4bf];
   bdata.forEach((b,i)=>{
     dummy.position.set(b[0],b[3]/2,b[1]);dummy.scale.set(b[2],b[3],b[4]);dummy.rotation.set(0,0,0);dummy.updateMatrix();
-    inst.setMatrixAt(i,dummy.matrix);inst.setColorAt(i,_col.setHex(colors[i%colors.length]));
+    inst.setMatrixAt(i,dummy.matrix);inst.setColorAt(i,_col.setHex(biomeColor(b[1],i)));
   });
   inst.instanceMatrix.needsUpdate=true;inst.instanceColor.needsUpdate=true;scene.add(inst);
 }
@@ -921,7 +930,7 @@ const followerPos=[];
 for(let i=0;i<FOLLOWER_N;i++)followerPos.push({x:0,z:-(i+1)*6,y:.4});
 
 // ---- GREEN COLLECTIBLES ----
-const MAX_GREENS=10;
+const MAX_GREENS=5;
 const greens=[];
 const greenInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1.3,0),new THREE.MeshBasicMaterial({color:0x55ff77,transparent:true,opacity:1.0}),MAX_GREENS);
 greenInst.frustumCulled=false;scene.add(greenInst);
@@ -952,7 +961,7 @@ function spawnGreen(){
 // ---- POWER-UPS (golden diamonds) ----
 const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.8,1),new THREE.MeshBasicMaterial({color:0xfbbf24}),MAX_POWERUPS);powerupInst.frustumCulled=false;scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const z=car.position.z+(60+Math.random()*40);const rx=roadX(z);const x=rx+(Math.random()-.5)*7;  powerups.push({x,z,y:2.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
 // ---- OBSTACLES (red) ----
-const MAX_OBS=6;
+const MAX_OBS=3;
 const obstacles=[];
 const obsInst=new THREE.InstancedMesh(new THREE.BoxGeometry(2,2,2),new THREE.MeshBasicMaterial({color:0xff2222,transparent:true,opacity:0.9}),MAX_OBS);
 obsInst.frustumCulled=false;scene.add(obsInst);
@@ -1265,7 +1274,7 @@ function animate(){
     followerInst.instanceMatrix.needsUpdate=true;
 
     // Spawn
-    if(fc%20===0){spawnGreen();if(Math.random()<.1+level*.02)spawnObstacle();if(Math.random()<.15)spawnPowerup()}
+    if(fc%40===0){spawnGreen();if(Math.random()<.08+level*.01)spawnObstacle();if(Math.random()<.15)spawnPowerup()}
 
     // Clean
     for(let i=greens.length-1;i>=0;i--){if(greens[i].z<car.position.z-50)greens.splice(i,1)}
@@ -1294,10 +1303,10 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
       const dist=car.position.z;
       const zone=Math.floor(dist/500)%5;
       const t=(dist%500)/500;
-      const skyColors=[0x0a1628,0x1a0a28,0x0a2818,0x281a0a,0x0a1828];
-      const groundColors=[0x1a2a3a,0x2a1a3a,0x1a3a2a,0x3a2a1a,0x1a2a3a];
-      const fogColors=[0x0a1628,0x1a0a28,0x0a2818,0x281a0a,0x0a1828];
-      const edgeColors=[0x22c55e,0xa855f7,0x06b6d4,0xf97316,0x3b82f6];
+      const skyColors=[0x0a1628,0x1a0525,0x051a10,0x1a1005,0x0a0a28];
+      const groundColors=[0x1a2a3a,0x2a1a2a,0x1a2a1a,0x2a2a1a,0x1a1a3a];
+      const fogColors=[0x0a1628,0x1a0525,0x051a10,0x1a1005,0x0a0a28];
+      const edgeColors=[0x22c55e,0xe040fb,0x00e5ff,0xff9100,0x536dfe];
       const nextZone=(zone+1)%5;
       const sc=_col.setHex(skyColors[zone]);const sn=new THREE.Color(skyColors[nextZone]);sc.lerp(sn,t);
       renderer.setClearColor(sc);
