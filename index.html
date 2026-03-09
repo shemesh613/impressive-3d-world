@@ -674,7 +674,7 @@ function animate(){
   requestAnimationFrame(animate);fc++;
 
   if(gameActive&&!scenarioActive){
-    const maxSpd=boostTimer>0?.4:.28;
+    const maxSpd=turboTimer>0?.5:boostTimer>0?.4:.28;
     if(keys.ArrowUp||keys.KeyW)spd=Math.min(maxSpd,spd+.014);
     else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.12,spd-.012);
     else spd*=.975;
@@ -691,7 +691,7 @@ function animate(){
     if(car.position.x<-4.5)car.position.x+=(-4.5-car.position.x)*.05+.05;
     if(car.position.x>4.5)car.position.x+=(4.5-car.position.x)*.05-.05;
 
-    if(boostTimer>0){boostTimer--;car.children[0].material.color.setHex(fc%10<5?0x4ade80:0x22c55e)}
+    if(boostTimer>0)boostTimer--;if(shieldTimer>0)shieldTimer--;if(turboTimer>0)turboTimer--;if(shieldTimer>0)car.children[0].material.color.setHex(fc%10<5?0x60a5fa:0x3b82f6);else if(turboTimer>0)car.children[0].material.color.setHex(fc%10<5?0xfbbf24:0xf59e0b);else if(boostTimer>0){car.children[0].material.color.setHex(fc%10<5?0x4ade80:0x22c55e)}
     else{car.children[0].material.color.setHex(0x22c55e)}
 
     // Follower cars
@@ -706,14 +706,16 @@ function animate(){
     followerInst.instanceMatrix.needsUpdate=true;
 
     // Spawn
-    if(fc%30===0){spawnGreen();if(Math.random()<.2+level*.03)spawnObstacle()}
+    if(fc%30===0){spawnGreen();if(Math.random()<.2+level*.03)spawnObstacle();if(Math.random()<.08)spawnPowerup()}
 
     // Clean
     for(let i=greens.length-1;i>=0;i--){if(greens[i].z<car.position.z-30)greens.splice(i,1)}
     for(let i=obstacles.length-1;i>=0;i--){if(obstacles[i].z<car.position.z-30)obstacles.splice(i,1)}
+    for(let i=powerups.length-1;i>=0;i--){if(powerups[i].z<car.position.z-30)powerups.splice(i,1)}
 
-    // Bob greens
+    // Bob greens & powerups
     for(let i=0;i<greens.length;i++){greens[i].y=1.2+Math.sin(fc*.05+i)*.2}
+    for(let i=0;i<powerups.length;i++){powerups[i].y=1.5+Math.sin(fc*.06+i)*.4}
 
     checkCollisions();
 
@@ -735,7 +737,7 @@ function animate(){
   }
 
   updateInstances(greens,greenInst,MAX_GREENS,true);
-  updateInstances(obstacles,obsInst,MAX_OBS,false);
+  updateInstances(obstacles,obsInst,MAX_OBS,false);updateInstances(powerups,powerupInst,MAX_POWERUPS,true);
   updateParticles();
   if(fc%6===0){updateHUD();if(window._edgeMat){const fc2=flow/100;window._edgeMat.color.setRGB(1-fc2,fc2,.2)}}
 
