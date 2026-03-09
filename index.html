@@ -148,6 +148,8 @@
 </div>
 
 <!-- FOLLOWERS -->
+<!-- TIP -->
+<div id="tip" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:42;display:none;background:rgba(0,40,20,.9);border:1px solid rgba(74,222,128,.3);border-radius:16px;padding:10px 20px;color:#a7f3d0;font-size:clamp(13px,2.5vw,17px);text-align:center;max-width:400px;pointer-events:none;direction:rtl"></div>
 <div id="followers" id="followersEl">🚗🚗🚗 חברים נוסעים אחריך!</div>
 
 <!-- LEVEL UP -->
@@ -409,7 +411,7 @@ for(let i=0;i<FOLLOWER_N;i++)followerPos.push({x:0,z:-(i+1)*6,y:.4});
 // ---- GREEN COLLECTIBLES ----
 const MAX_GREENS=10;
 const greens=[];
-const greenInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.5,0),new THREE.MeshBasicMaterial({color:0x22c55e}),MAX_GREENS);
+const greenInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.3,0),new THREE.MeshBasicMaterial({color:0x22c55e}),MAX_GREENS);
 scene.add(greenInst);
 
 function spawnGreen(){
@@ -562,7 +564,7 @@ function choose(type){
   fb.style.display='block';
   fb.style.animation='none';
   requestAnimationFrame(()=>{fb.style.animation='feedPop .6s ease'});
-  setTimeout(()=>{fb.style.display='none'},2200);
+  setTimeout(()=>{fb.style.display='none'},2200);const tipEl=document.getElementById('tip');const tips=['💡 טיפ: דברים קטנים — לא שווה לריב עליהם!','💡 טיפ: כשמתגמשים — כולם נהנים יותר!','💡 טיפ: לפעמים ויתור = ניצחון!','💡 טיפ: חברים אוהבים מי שזורם!','💡 טיפ: מה שחשוב — עוצרים. מה שלא — ממשיכים!','💡 טיפ: בכביש ובחיים — זרימה זה הכוח!'];tipEl.textContent=tips[Math.floor(Math.random()*tips.length)];tipEl.style.display='block';setTimeout(()=>{tipEl.style.display='none'},3500);
 
   // Level up check
   if(scenariosAnswered>0&&scenariosAnswered%4===0){
@@ -704,7 +706,7 @@ function animate(){
     for(let i=obstacles.length-1;i>=0;i--){if(obstacles[i].z<car.position.z-30)obstacles.splice(i,1)}
 
     // Bob greens
-    for(let i=0;i<greens.length;i++){greens[i].y=1+Math.sin(fc*.05+i)*.3}
+    for(let i=0;i<greens.length;i++){greens[i].y=1.2+Math.sin(fc*.05+i)*.2}
 
     checkCollisions();
 
