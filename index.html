@@ -308,7 +308,7 @@ document.body.prepend(renderer.domElement);}catch(e){document.getElementById('st
 const scene=new THREE.Scene();
 const cam=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,1,400);
 cam.position.set(0,10,18);
-scene.fog=new THREE.FogExp2(0x0a1628,.003);
+scene.fog=new THREE.FogExp2(0x0a1628,.0018);
 
 const dummy=new THREE.Object3D();
 const _v=new THREE.Vector3();
@@ -348,6 +348,43 @@ scene.add((() => {
     inst.setMatrixAt(i,dummy.matrix);
   }
   inst.instanceMatrix.needsUpdate=true;scene.add(inst);
+}
+
+
+// ---- PARKS ----
+{
+  const parkGeo=new THREE.PlaneGeometry(4,6);
+  const parkMat=new THREE.MeshBasicMaterial({color:0x0d4a25});
+  const parkN=30;
+  const parkInst=new THREE.InstancedMesh(parkGeo,parkMat,parkN);
+  for(let i=0;i<parkN;i++){
+    const side=i%2===0?-14:14;
+    dummy.position.set(side,.02,i*60+30);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
+    parkInst.setMatrixAt(i,dummy.matrix);
+  }
+  parkInst.instanceMatrix.needsUpdate=true;scene.add(parkInst);
+}
+
+// ---- PARK BENCHES ----
+{
+  const benchGeo=new THREE.BoxGeometry(.8,.3,.4);
+  const benchMat=new THREE.MeshBasicMaterial({color:0x8B5A2B});
+  const benchN=30;
+  const benchInst=new THREE.InstancedMesh(benchGeo,benchMat,benchN);
+  for(let i=0;i<benchN;i++){
+    const side=i%2===0?-13:13;
+    dummy.position.set(side,.25,i*60+32);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    benchInst.setMatrixAt(i,dummy.matrix);
+  }
+  benchInst.instanceMatrix.needsUpdate=true;scene.add(benchInst);
+}
+// ---- SIDEWALKS ----
+{
+  const swMat=new THREE.MeshBasicMaterial({color:0x1e3a2e});
+  [-5.8,5.8].forEach(x=>{
+    const sw=new THREE.Mesh(new THREE.BoxGeometry(1.2,.15,6000),swMat);
+    sw.position.set(x,.08,0);scene.add(sw);
+  });
 }
 // ---- CROSS STREETS ----
 {  const crossGeo=new THREE.PlaneGeometry(30,.15);  const crossMat=new THREE.MeshBasicMaterial({color:0x334455});  const crossN=40;  const crossInst=new THREE.InstancedMesh(crossGeo,crossMat,crossN);  for(let i=0;i<crossN;i++){    dummy.position.set(0,.015,i*80+50);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();    crossInst.setMatrixAt(i,dummy.matrix);  }  crossInst.instanceMatrix.needsUpdate=true;scene.add(crossInst);}
