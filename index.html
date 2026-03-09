@@ -2,428 +2,353 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8">
-  <title>עולם תלת-ממדי</title>
+  <title>Cyber City 2084</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-    canvas { display: block; }
-    #ui { position: fixed; top: 30px; left: 0; right: 0; text-align: center; z-index: 10; pointer-events: none; }
-    #ui h1 {
-      font-size: clamp(24px, 4vw, 60px); font-weight: 900; letter-spacing: 6px;
-      background: linear-gradient(90deg, #00f5ff, #ff00ff, #ffff00);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 30px rgba(0,245,255,0.8);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%,100% { filter: brightness(1); } 50% { filter: brightness(1.5); }
-    }
-    #ui p { color: rgba(0,245,255,0.5); letter-spacing: 5px; margin-top: 8px; font-size: 13px; }
-    #ctrl { position: fixed; bottom: 25px; left: 0; right: 0; text-align: center;
-      color: rgba(255,255,255,0.35); font-size: 12px; letter-spacing: 3px; z-index: 10; pointer-events: none; }
-    #speed { position: fixed; bottom: 55px; right: 30px; z-index: 10; pointer-events: none;
-      color: #00f5ff; font: bold 14px monospace; letter-spacing: 2px; }
-    #vignette { position: fixed; inset: 0; z-index: 5; pointer-events: none;
-      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%); }
+    *{margin:0;padding:0}
+    body{background:#000;overflow:hidden}
+    canvas{display:block}
+    #ui{position:fixed;top:20px;left:0;right:0;text-align:center;z-index:10;pointer-events:none}
+    #ui h1{font:900 clamp(22px,4vw,50px) 'Segoe UI',sans-serif;letter-spacing:6px;
+      background:linear-gradient(90deg,#0ff,#f0f,#ff0);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    #ctrl{position:fixed;bottom:20px;left:0;right:0;text-align:center;color:rgba(255,255,255,.3);font:12px sans-serif;letter-spacing:3px;z-index:10;pointer-events:none}
+    #speed{position:fixed;bottom:50px;right:25px;z-index:10;pointer-events:none;color:#0ff;font:bold 14px monospace}
+    #fps{position:fixed;top:10px;right:10px;z-index:10;pointer-events:none;color:#0f0;font:11px monospace}
   </style>
 </head>
 <body>
-<div id="ui"><h1>עולם תלת-ממדי</h1><p>✦ INTERACTIVE 3D WORLD ✦</p></div>
-<div id="vignette"></div>
-<div id="ctrl">W A S D — נהיגה &nbsp;|&nbsp; גרור עכבר — סיבוב מצלמה</div>
+<div id="ui"><h1>CYBER CITY 2084</h1></div>
+<div id="ctrl">W A S D — Drive &nbsp;|&nbsp; Drag — Camera</div>
 <div id="speed">0 KM/H</div>
+<div id="fps"></div>
 
-<script type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
-</script>
-<script type="module">
-import * as THREE from 'three';
-
+<script src="three.min.js"></script>
+<script>
 // ---- RENDERER ----
-const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
-renderer.setPixelRatio(1);
-renderer.setSize(innerWidth, innerHeight);
-renderer.setClearColor(0x05000f);
-document.body.prepend(renderer.domElement);
+const R = new THREE.WebGLRenderer({antialias:false, powerPreference:'high-performance', stencil:false, depth:true});
+R.setPixelRatio(1);
+R.setSize(innerWidth, innerHeight);
+R.setClearColor(0x050010);
+R.sortObjects = false; // skip sorting — no transparent objects
+document.body.prepend(R.domElement);
 
 const scene = new THREE.Scene();
-// No fog — saves per-fragment GPU cost
-const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 300);
-camera.position.set(0, 8, 16);
+const cam = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 1, 200);
+cam.position.set(0, 8, 16);
 
-// ---- ALL MESHBASIC — ZERO LIGHTS NEEDED ----
+const D = new THREE.Object3D(); // reusable dummy
 
-// Ground
-scene.add(Object.assign(new THREE.Mesh(
-  new THREE.PlaneGeometry(100, 100),
-  new THREE.MeshBasicMaterial({ color: 0x0d0d1a })
-), { rotation: new THREE.Euler(-Math.PI/2, 0, 0) }));
+// ---- GROUND (1 draw call) ----
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(120, 120),
+  new THREE.MeshBasicMaterial({color:0x0a0a18})
+);
+ground.rotation.x = -Math.PI/2;
+scene.add(ground);
 
-// Grid
-const grid = new THREE.GridHelper(100, 40, 0x003344, 0x110022);
-grid.material.opacity = 0.5; grid.material.transparent = true;
-scene.add(grid);
-
-// Road
-scene.add(Object.assign(new THREE.Mesh(
-  new THREE.PlaneGeometry(6, 100),
-  new THREE.MeshBasicMaterial({ color: 0x111122 })
-), { rotation: new THREE.Euler(-Math.PI/2, 0, 0), position: new THREE.Vector3(0, 0.01, 0) }));
-
-// Road marks — 1 InstancedMesh
+// ---- ROAD (1 draw call — merged geometry) ----
 {
-  const g = new THREE.PlaneGeometry(0.25, 3);
-  const m = new THREE.MeshBasicMaterial({ color: 0xffdd00 });
-  const count = 15;
-  const inst = new THREE.InstancedMesh(g, m, count);
-  const d = new THREE.Object3D();
-  for (let i = 0; i < count; i++) {
-    d.position.set(0, 0.02, -42 + i * 6);
-    d.rotation.set(-Math.PI/2, 0, 0);
-    d.updateMatrix();
-    inst.setMatrixAt(i, d.matrix);
-  }
-  scene.add(inst);
-}
-
-// Road edge strips
-[-3.2, 3.2].forEach(x => {
-  scene.add(Object.assign(new THREE.Mesh(
-    new THREE.PlaneGeometry(0.12, 100),
-    new THREE.MeshBasicMaterial({ color: 0x00f5ff })
-  ), { rotation: new THREE.Euler(-Math.PI/2, 0, 0), position: new THREE.Vector3(x, 0.015, 0) }));
-});
-
-// Stars — single Points object
-{
-  const pos = new Float32Array(200 * 3);
-  for (let i = 0; i < 200; i++) {
-    pos[i*3] = (Math.random()-0.5)*300;
-    pos[i*3+1] = Math.random()*80+10;
-    pos[i*3+2] = (Math.random()-0.5)*300;
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.2 })));
-}
-
-// Sky dome
-scene.add(new THREE.Mesh(
-  new THREE.SphereGeometry(150, 12, 6),
-  new THREE.MeshBasicMaterial({ color: 0x05001a, side: THREE.BackSide })
-));
-
-// Buildings — ALL in ONE InstancedMesh per color
-const bdata = [
-  [-8,-6,3,9,3,0xff00ff],[8,-6,3,11,3,0x00f5ff],
-  [-12,-12,2.5,13,2.5,0x00f5ff],[12,-12,2.5,8,2.5,0xff6600],
-  [-8,-18,3,7,3,0xffff00],[8,-18,3,15,3,0x00ff88],
-  [-12,-24,2,10,2,0xff00ff],[12,-24,2,12,2,0xffff00],
-  [-8,6,3,8,3,0x00ff88],[8,6,3,10,3,0xff00ff],
-  [-12,12,2.5,12,2.5,0xffff00],[12,12,2.5,7,2.5,0x00f5ff],
-];
-
-// Group buildings by color for instancing
-const buildingsByColor = {};
-bdata.forEach(([x,z,w,h,d,color]) => {
-  if (!buildingsByColor[color]) buildingsByColor[color] = [];
-  buildingsByColor[color].push({x,z,w,h,d});
-});
-
-// Each color = 1 draw call (box geometry is reused)
-const dummy = new THREE.Object3D();
-Object.entries(buildingsByColor).forEach(([color, buildings]) => {
-  const geo = new THREE.BoxGeometry(1, 1, 1);
-  const mat = new THREE.MeshBasicMaterial({ color: parseInt(color) });
-  const inst = new THREE.InstancedMesh(geo, mat, buildings.length);
-  buildings.forEach((b, i) => {
-    dummy.position.set(b.x, b.h/2, b.z);
-    dummy.scale.set(b.w, b.h, b.d);
-    dummy.updateMatrix();
-    inst.setMatrixAt(i, dummy.matrix);
+  const geo = new THREE.Geometry();
+  // Main road
+  const road = new THREE.PlaneGeometry(6, 120);
+  road.rotateX(-Math.PI/2);
+  road.translate(0, 0.01, 0);
+  geo.merge(road);
+  // Edge lines
+  [-3.2, 3.2].forEach(x => {
+    const e = new THREE.PlaneGeometry(0.1, 120);
+    e.rotateX(-Math.PI/2);
+    e.translate(x, 0.02, 0);
+    geo.merge(e);
   });
-  scene.add(inst);
-});
+  scene.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color:0x111125})));
+}
 
-// Windows — ALL in 1 InstancedMesh
+// ---- ROAD MARKS (1 instanced) ----
 {
-  const winPositions = [];
-  bdata.forEach(([x,z,w,h,d]) => {
-    for (let iy=0;iy<Math.floor(h/2);iy++) {
-      for (let ix=-1;ix<=1;ix++) {
-        if (Math.random()>0.4) winPositions.push(x+ix*0.8, iy*1.4+1.5, z+d/2+0.01);
+  const g = new THREE.PlaneBufferGeometry(0.2, 2.5);
+  const m = new THREE.MeshBasicMaterial({color:0xffdd00});
+  const inst = new THREE.InstancedMesh(g, m, 16);
+  for (let i=0;i<16;i++){
+    D.position.set(0, 0.03, -45+i*6);
+    D.rotation.set(-Math.PI/2,0,0);
+    D.scale.set(1,1,1);
+    D.updateMatrix();
+    inst.setMatrixAt(i, D.matrix);
+  }
+  scene.add(inst);
+}
+
+// ---- BUILDINGS (1 instanced mesh — ALL buildings, single color) ----
+const bdata = [
+  [-8,-6,3,9,3],  [8,-6,3,11,3],
+  [-12,-12,2.5,13,2.5], [12,-12,2.5,8,2.5],
+  [-8,-18,3,7,3], [8,-18,3,15,3],
+  [-12,-24,2,10,2], [12,-24,2,12,2],
+  [-8,6,3,8,3],   [8,6,3,10,3],
+  [-12,12,2.5,12,2.5], [12,12,2.5,7,2.5],
+  [-8,18,3,6,3],  [8,18,3,9,3],
+  [-12,24,2,11,2], [12,24,2,8,2],
+];
+{
+  const geo = new THREE.BoxBufferGeometry(1,1,1);
+  const mat = new THREE.MeshBasicMaterial({color:0x1a0a2e});
+  const inst = new THREE.InstancedMesh(geo, mat, bdata.length);
+  const colors = [0xff00ff,0x00f5ff,0x00ff88,0xffff00,0xff6600,0x8800ff];
+  bdata.forEach((b,i) => {
+    D.position.set(b[0], b[3]/2, b[1]);
+    D.scale.set(b[2], b[3], b[4]);
+    D.rotation.set(0,0,0);
+    D.updateMatrix();
+    inst.setMatrixAt(i, D.matrix);
+    inst.setColorAt(i, new THREE.Color(colors[i % colors.length]));
+  });
+  inst.instanceColor.needsUpdate = true;
+  scene.add(inst);
+}
+
+// ---- WINDOWS (1 instanced) ----
+{
+  const wp = [];
+  bdata.forEach(b => {
+    for(let y=0;y<Math.floor(b[3]/2);y++){
+      for(let x=-1;x<=1;x++){
+        if(Math.random()>.5) wp.push(b[0]+x*.7, y*1.3+1.5, b[1]+b[4]/2+.01);
       }
     }
   });
-  const winGeo = new THREE.PlaneGeometry(0.5, 0.5);
-  const winMat = new THREE.MeshBasicMaterial({ color: 0xffff88 });
-  const winInst = new THREE.InstancedMesh(winGeo, winMat, winPositions.length/3);
-  for (let i = 0; i < winPositions.length/3; i++) {
-    dummy.position.set(winPositions[i*3], winPositions[i*3+1], winPositions[i*3+2]);
-    dummy.scale.set(1,1,1); dummy.rotation.set(0,0,0);
-    dummy.updateMatrix();
-    winInst.setMatrixAt(i, dummy.matrix);
+  const geo = new THREE.PlaneBufferGeometry(.4,.4);
+  const mat = new THREE.MeshBasicMaterial({color:0xffff88});
+  const n = wp.length/3;
+  const inst = new THREE.InstancedMesh(geo, mat, n);
+  for(let i=0;i<n;i++){
+    D.position.set(wp[i*3],wp[i*3+1],wp[i*3+2]);
+    D.scale.set(1,1,1); D.rotation.set(0,0,0);
+    D.updateMatrix();
+    inst.setMatrixAt(i, D.matrix);
   }
-  scene.add(winInst);
+  scene.add(inst);
 }
 
-// Lamps — 1 InstancedMesh for bulbs only (poles skip for perf)
+// ---- LAMPS (1 instanced) ----
 {
-  const lampPos = [];
-  for (let z=-40;z<40;z+=10) { lampPos.push([-4.5,z]); lampPos.push([4.5,z]); }
-  const bulbGeo = new THREE.SphereGeometry(0.25, 6, 6);
-  const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffffaa });
-  const bulbInst = new THREE.InstancedMesh(bulbGeo, bulbMat, lampPos.length);
-  lampPos.forEach(([x,z], i) => {
-    dummy.position.set(x+Math.sign(x)*1.5, 5, z);
-    dummy.scale.set(1,1,1); dummy.updateMatrix();
-    bulbInst.setMatrixAt(i, dummy.matrix);
+  const geo = new THREE.SphereBufferGeometry(.2,4,4);
+  const mat = new THREE.MeshBasicMaterial({color:0xffffaa});
+  const positions = [];
+  for(let z=-40;z<40;z+=12){positions.push([-5.5,z],[5.5,z]);}
+  const inst = new THREE.InstancedMesh(geo, mat, positions.length);
+  positions.forEach(([x,z],i)=>{
+    D.position.set(x,4.5,z); D.scale.set(1,1,1); D.updateMatrix();
+    inst.setMatrixAt(i, D.matrix);
   });
-  scene.add(bulbInst);
+  scene.add(inst);
 }
 
-// Arches — 1 InstancedMesh for bars
+// ---- ARCHES (1 instanced — all bars + posts merged conceptually as cylinders) ----
 {
-  const archColors = [0x00f5ff, 0xff00ff, 0xffff00, 0x00ff88, 0xff6600];
-  const archZs = [-12, -22, -32, -42, -52];
-  archColors.forEach((c, idx) => {
-    const mat = new THREE.MeshBasicMaterial({ color: c });
-    const barGeo = new THREE.CylinderGeometry(0.08, 0.08, 7.2, 6);
-    const postGeo = new THREE.CylinderGeometry(0.08, 0.08, 5, 6);
-    // top bar
-    const bar = new THREE.Mesh(barGeo, mat);
-    bar.rotation.z = Math.PI/2; bar.position.set(0, 5.1, archZs[idx]);
-    scene.add(bar);
+  const geo = new THREE.CylinderBufferGeometry(.06,.06,1,4);
+  const mat = new THREE.MeshBasicMaterial({color:0x00f5ff});
+  const archZ = [-15,-25,-35,-45];
+  // 4 arches * 3 parts = 12 instances
+  const inst = new THREE.InstancedMesh(geo, mat, archZ.length * 3);
+  const archColors = [0x00f5ff,0xff00ff,0xffff00,0x00ff88];
+  let idx = 0;
+  archZ.forEach((z,ai) => {
+    // top bar (horizontal)
+    D.position.set(0,5,z); D.rotation.set(0,0,Math.PI/2); D.scale.set(1,7,1);
+    D.updateMatrix(); inst.setMatrixAt(idx, D.matrix);
+    inst.setColorAt(idx, new THREE.Color(archColors[ai]));
+    idx++;
     // 2 posts
-    [-3.5, 3.5].forEach(x => {
-      const post = new THREE.Mesh(postGeo, mat);
-      post.position.set(x, 2.5, archZs[idx]);
-      scene.add(post);
+    [-3.5,3.5].forEach(x => {
+      D.position.set(x,2.5,z); D.rotation.set(0,0,0); D.scale.set(1,5,1);
+      D.updateMatrix(); inst.setMatrixAt(idx, D.matrix);
+      inst.setColorAt(idx, new THREE.Color(archColors[ai]));
+      idx++;
     });
   });
+  inst.instanceColor.needsUpdate = true;
+  scene.add(inst);
 }
 
-// Holographic rings — 4 rings
+// ---- RINGS (4 — kept as individual for animation) ----
 const rings = [];
-[{z:-5,c:0x00f5ff},{z:-25,c:0xff00ff},{z:-45,c:0xffff00},{z:-65,c:0x00ff88}].forEach(({z,c},i) => {
-  const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(4.5, 0.09, 6, 32),
-    new THREE.MeshBasicMaterial({ color: c })
-  );
-  ring.position.set(0, 5, z); ring.rotation.x = Math.PI/2;
-  scene.add(ring);
-  rings.push({ mesh: ring, baseY: 5, phase: i*Math.PI/2 });
+[{z:-10,c:0x00f5ff},{z:-30,c:0xff00ff},{z:-50,c:0xffff00},{z:-70,c:0x00ff88}].forEach(({z,c},i)=>{
+  const r = new THREE.Mesh(new THREE.TorusBufferGeometry(4,.06,4,24), new THREE.MeshBasicMaterial({color:c}));
+  r.position.set(0,5,z); r.rotation.x=Math.PI/2;
+  scene.add(r); rings.push({m:r,y:5,p:i*1.5});
 });
 
-// Text sign (1 canvas texture)
+// ---- SKY (1 draw) ----
+scene.add(new THREE.Mesh(
+  new THREE.SphereBufferGeometry(100,8,4),
+  new THREE.MeshBasicMaterial({color:0x030012,side:THREE.BackSide})
+));
+
+// ---- STARS (1 Points draw) ----
 {
-  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 128;
-  const ctx = cv.getContext('2d');
-  ctx.font = 'bold 56px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.shadowBlur = 30; ctx.shadowColor = '#00f5ff';
-  ctx.fillStyle = '#ffffff'; ctx.fillText('✦ CYBER CITY 2084 ✦', 256, 64);
-  const sign = new THREE.Mesh(
-    new THREE.PlaneGeometry(20, 5),
-    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, side: THREE.DoubleSide })
-  );
-  sign.position.set(0, 22, -38);
-  scene.add(sign);
+  const p = new Float32Array(150*3);
+  for(let i=0;i<150;i++){p[i*3]=(Math.random()-.5)*200;p[i*3+1]=Math.random()*60+10;p[i*3+2]=(Math.random()-.5)*200;}
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(p,3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({color:0xffffff,size:.15})));
 }
 
-// Moon
-scene.add(Object.assign(new THREE.Mesh(
-  new THREE.SphereGeometry(4, 10, 10),
-  new THREE.MeshBasicMaterial({ color: 0xddeeff })
-), { position: new THREE.Vector3(-40, 50, -80) }));
-
-// Mountains — simple triangles
-for (let i=0;i<8;i++) {
-  const w = 20+Math.random()*10, h = 20+Math.random()*20;
-  const shape = new THREE.Shape();
-  shape.moveTo(-w/2, 0); shape.lineTo(0, h); shape.lineTo(w/2, 0); shape.closePath();
-  const m = new THREE.Mesh(new THREE.ShapeGeometry(shape),
-    new THREE.MeshBasicMaterial({ color: 0x07001a, side: THREE.DoubleSide }));
-  m.position.set((i-4)*25, 0, -90);
-  scene.add(m);
+// ---- MOON (1 draw) ----
+{
+  const m = new THREE.Mesh(new THREE.SphereBufferGeometry(3,6,6), new THREE.MeshBasicMaterial({color:0xddeeff}));
+  m.position.set(-35,45,-70); scene.add(m);
 }
-
-// Rain removed — buffer uploads kill FPS
-
-// Energy orbs — 6 simple spheres
-const orbs = [];
-[0x00f5ff, 0xff00ff, 0xffff00, 0x00ff88, 0xff6600, 0x8800ff].forEach((c, i) => {
-  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.4, 6, 6), new THREE.MeshBasicMaterial({ color: c }));
-  const angle = (i/6)*Math.PI*2;
-  orb.position.set(Math.cos(angle)*12, 4, Math.sin(angle)*12-10);
-  scene.add(orb);
-  orbs.push({ mesh: orb, angle, speed: 0.3+Math.random()*0.3 });
-});
 
 // ---- CAR ----
 const car = new THREE.Group();
+// Body + cabin + headlights + taillights = merged geometry
+{
+  const geo = new THREE.Geometry();
+  // Body
+  const body = new THREE.BoxGeometry(1.8,.6,3.6);
+  body.translate(0,.5,0); geo.merge(body);
+  // Cabin
+  const cabin = new THREE.BoxGeometry(1.4,.5,2);
+  cabin.translate(0,1.05,-.15); geo.merge(cabin);
+  car.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color:0x00ccff})));
+}
+// Headlights merged
+{
+  const geo = new THREE.Geometry();
+  [-0.5,0.5].forEach(x=>{
+    const h=new THREE.BoxGeometry(.25,.12,.04);
+    h.translate(x,.5,1.81); geo.merge(h);
+  });
+  car.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color:0xffffcc})));
+}
+// Taillights merged
+{
+  const geo = new THREE.Geometry();
+  [-0.6,0.6].forEach(x=>{
+    const t=new THREE.BoxGeometry(.22,.1,.04);
+    t.translate(x,.5,-1.82); geo.merge(t);
+  });
+  car.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color:0xff2200})));
+}
+// Wheels — 1 instanced
+{
+  const g = new THREE.CylinderBufferGeometry(.3,.3,.25,6);
+  const m = new THREE.MeshBasicMaterial({color:0x222222});
+  const inst = new THREE.InstancedMesh(g,m,4);
+  [[-1,.3,1.1],[1,.3,1.1],[-1,.3,-1.1],[1,.3,-1.1]].forEach((p,i)=>{
+    D.position.set(...p); D.rotation.set(0,0,Math.PI/2); D.scale.set(1,1,1);
+    D.updateMatrix(); inst.setMatrixAt(i, D.matrix);
+  });
+  car.add(inst);
+}
 scene.add(car);
 
-car.add(Object.assign(new THREE.Mesh(
-  new THREE.BoxGeometry(1.8, 0.6, 3.6),
-  new THREE.MeshBasicMaterial({ color: 0x00ccff })
-), { position: new THREE.Vector3(0, 0.5, 0) }));
-
-car.add(Object.assign(new THREE.Mesh(
-  new THREE.BoxGeometry(1.4, 0.5, 2),
-  new THREE.MeshBasicMaterial({ color: 0x003344 })
-), { position: new THREE.Vector3(0, 1.05, -0.15) }));
-
-// Underglow
-car.add(Object.assign(new THREE.Mesh(
-  new THREE.PlaneGeometry(1.8, 3.6),
-  new THREE.MeshBasicMaterial({ color: 0x00aaff, transparent: true, opacity: 0.3 })
-), { rotation: new THREE.Euler(-Math.PI/2, 0, 0), position: new THREE.Vector3(0, 0.05, 0) }));
-
-// Headlights
-[-0.5, 0.5].forEach(x => {
-  car.add(Object.assign(new THREE.Mesh(
-    new THREE.BoxGeometry(0.3, 0.15, 0.05),
-    new THREE.MeshBasicMaterial({ color: 0xffffcc })
-  ), { position: new THREE.Vector3(x, 0.5, 1.81) }));
-});
-
-// Taillights
-[-0.6, 0.6].forEach(x => {
-  car.add(Object.assign(new THREE.Mesh(
-    new THREE.BoxGeometry(0.25, 0.12, 0.04),
-    new THREE.MeshBasicMaterial({ color: 0xff2200 })
-  ), { position: new THREE.Vector3(x, 0.5, -1.82) }));
-});
-
-// Wheels — 1 InstancedMesh
-{
-  const wGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.3, 8);
-  const wMat = new THREE.MeshBasicMaterial({ color: 0x222222 });
-  const wInst = new THREE.InstancedMesh(wGeo, wMat, 4);
-  [[-1.05,.35,1.2],[1.05,.35,1.2],[-1.05,.35,-1.2],[1.05,.35,-1.2]].forEach((p, i) => {
-    dummy.position.set(...p); dummy.rotation.set(0,0,Math.PI/2); dummy.scale.set(1,1,1);
-    dummy.updateMatrix();
-    wInst.setMatrixAt(i, dummy.matrix);
-  });
-  car.add(wInst);
+// ---- TRAFFIC (1 instanced) ----
+const trafficCount = 4;
+const trafficSpeeds = [];
+const trafficInst = new THREE.InstancedMesh(
+  new THREE.BoxBufferGeometry(1.2,.45,2.5),
+  new THREE.MeshBasicMaterial({color:0xff3300}),
+  trafficCount
+);
+const tColors = [0xff3300,0xffaa00,0x00ff88,0xff00aa];
+for(let i=0;i<trafficCount;i++){
+  D.position.set(i%2===0?1.5:-1.5, .4, -40-i*25);
+  D.scale.set(1,1,1); D.rotation.set(0,0,0); D.updateMatrix();
+  trafficInst.setMatrixAt(i, D.matrix);
+  trafficInst.setColorAt(i, new THREE.Color(tColors[i]));
+  trafficSpeeds.push(.12+Math.random()*.08);
 }
-
-// Traffic — 5 simple boxes
-const traffic = [];
-[0xff3300, 0xffaa00, 0x00ff88, 0xff00aa, 0xcccccc].forEach((c, i) => {
-  const m = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 2.8), new THREE.MeshBasicMaterial({ color: c }));
-  m.position.set((i%2===0)?1.3:-1.3, 0.45, -50-i*20);
-  scene.add(m);
-  traffic.push({ mesh: m, speed: 0.15+Math.random()*0.1 });
-});
+trafficInst.instanceColor.needsUpdate = true;
+scene.add(trafficInst);
 
 // ---- INPUT ----
 const keys = {};
-window.addEventListener('keydown', e => { keys[e.code] = true; e.preventDefault(); });
-window.addEventListener('keyup', e => { keys[e.code] = false; });
-
-let camTheta = 0, camPhi = 0.55, mx0 = 0, my0 = 0, dragging = false;
-window.addEventListener('mousedown', e => { dragging = true; mx0 = e.clientX; my0 = e.clientY; });
-window.addEventListener('mouseup', () => dragging = false);
-window.addEventListener('mousemove', e => {
-  if (!dragging) return;
-  camTheta += (e.clientX-mx0)*0.006;
-  camPhi = Math.max(0.15, Math.min(1.3, camPhi-(e.clientY-my0)*0.006));
-  mx0 = e.clientX; my0 = e.clientY;
+addEventListener('keydown', e=>{keys[e.code]=true;e.preventDefault()});
+addEventListener('keyup', e=>{keys[e.code]=false});
+let cTh=0,cPh=.55,mx=0,my=0,drag=false;
+addEventListener('mousedown',e=>{drag=true;mx=e.clientX;my=e.clientY});
+addEventListener('mouseup',()=>drag=false);
+addEventListener('mousemove',e=>{
+  if(!drag)return;
+  cTh+=(e.clientX-mx)*.005; cPh=Math.max(.15,Math.min(1.3,cPh-(e.clientY-my)*.005));
+  mx=e.clientX;my=e.clientY;
 });
-window.addEventListener('touchstart', e => { dragging=true; mx0=e.touches[0].clientX; my0=e.touches[0].clientY; }, {passive:true});
-window.addEventListener('touchend', () => dragging=false);
-window.addEventListener('touchmove', e => {
-  if (!dragging) return;
-  camTheta += (e.touches[0].clientX-mx0)*0.006;
-  camPhi = Math.max(0.15, Math.min(1.3, camPhi-(e.touches[0].clientY-my0)*0.006));
-  mx0=e.touches[0].clientX; my0=e.touches[0].clientY;
-}, {passive:true});
-
-// Audio — single looping buffer, no oscillator leak
-let audioStarted = false;
-function startAudio() {
-  if (audioStarted) return; audioStarted = true;
-  const ac = new AudioContext();
-  const sr = ac.sampleRate, dur = 2, len = sr * dur;
-  const buf = ac.createBuffer(1, len, sr);
-  const data = buf.getChannelData(0);
-  const freqs = [110, 0, 138.6, 0, 110, 0, 164.8, 146.8];
-  for (let i = 0; i < len; i++) {
-    const t = i / sr;
-    let v = Math.sin(2 * Math.PI * 55 * t) * 0.05; // bass
-    const beatIdx = Math.floor(t / 0.25);
-    if (beatIdx < 8 && freqs[beatIdx]) {
-      const bt = t - beatIdx * 0.25;
-      if (bt < 0.22) v += Math.sin(2 * Math.PI * freqs[beatIdx] * t) * 0.04 * (1 - bt / 0.22);
-    }
-    data[i] = v;
-  }
-  const src = ac.createBufferSource();
-  src.buffer = buf; src.loop = true;
-  src.connect(ac.destination); src.start();
-}
-document.addEventListener('keydown', startAudio, {once:true});
-document.addEventListener('click', startAudio, {once:true});
+addEventListener('touchstart',e=>{drag=true;mx=e.touches[0].clientX;my=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',()=>drag=false);
+addEventListener('touchmove',e=>{
+  if(!drag)return;
+  cTh+=(e.touches[0].clientX-mx)*.005;cPh=Math.max(.15,Math.min(1.3,cPh-(e.touches[0].clientY-my)*.005));
+  mx=e.touches[0].clientX;my=e.touches[0].clientY;
+},{passive:true});
 
 // ---- STATE ----
-let speed = 0, dir = 0, fc = 0;
-const MAX_SPEED = 0.28, ACCEL = 0.013, BRAKE = 0.022, TURN = 0.038;
-const _camPos = new THREE.Vector3();
-const _camTarget = new THREE.Vector3();
-const clock = new THREE.Clock();
-const speedEl = document.getElementById('speed');
+let spd=0,dir=0,fc=0;
+const MS=.28,AC=.013,BR=.022,TN=.038;
+const cp=new THREE.Vector3(), ct=new THREE.Vector3();
+const speedEl=document.getElementById('speed');
+const fpsEl=document.getElementById('fps');
+let lt=performance.now(),frames=0;
 
-// ---- ULTRA-LEAN ANIMATE LOOP ----
-function animate() {
+// Temp matrix for traffic updates
+const tMat = new THREE.Matrix4();
+
+// ---- ANIMATE ----
+function animate(){
   requestAnimationFrame(animate);
-  const t = clock.getElapsedTime();
   fc++;
 
-  // Car
-  if (keys['ArrowUp']||keys['KeyW']) speed = Math.min(MAX_SPEED, speed+ACCEL);
-  else if (keys['ArrowDown']||keys['KeyS']) speed = Math.max(-MAX_SPEED*0.5, speed-ACCEL);
-  else speed *= (1-BRAKE);
-  if (Math.abs(speed)>0.002) {
-    if (keys['ArrowLeft']||keys['KeyA']) dir += TURN*Math.sign(speed);
-    if (keys['ArrowRight']||keys['KeyD']) dir -= TURN*Math.sign(speed);
+  // FPS counter
+  frames++;
+  const now=performance.now();
+  if(now-lt>=1000){fpsEl.textContent=frames+' FPS';frames=0;lt=now;}
+
+  // Car physics
+  if(keys.ArrowUp||keys.KeyW) spd=Math.min(MS,spd+AC);
+  else if(keys.ArrowDown||keys.KeyS) spd=Math.max(-MS*.5,spd-AC);
+  else spd*=(1-BR);
+  if(Math.abs(spd)>.002){
+    if(keys.ArrowLeft||keys.KeyA) dir+=TN*Math.sign(spd);
+    if(keys.ArrowRight||keys.KeyD) dir-=TN*Math.sign(spd);
   }
-  car.rotation.y = dir;
-  car.position.x += Math.sin(dir)*speed;
-  car.position.z += Math.cos(dir)*speed;
+  car.rotation.y=dir;
+  car.position.x+=Math.sin(dir)*spd;
+  car.position.z+=Math.cos(dir)*spd;
 
-  // Camera
-  _camPos.set(car.position.x-Math.sin(dir+camTheta)*15, 7+camPhi*4, car.position.z-Math.cos(dir+camTheta)*15);
-  camera.position.lerp(_camPos, 0.07);
-  _camTarget.set(car.position.x, 1.5, car.position.z);
-  camera.lookAt(_camTarget);
+  // Camera (smooth follow)
+  cp.set(car.position.x-Math.sin(dir+cTh)*14, 6+cPh*4, car.position.z-Math.cos(dir+cTh)*14);
+  cam.position.lerp(cp,.08);
+  ct.set(car.position.x,1.5,car.position.z);
+  cam.lookAt(ct);
 
-  // Traffic
-  traffic.forEach(tc => { tc.mesh.position.z += tc.speed; if (tc.mesh.position.z>30) tc.mesh.position.z=-100; });
+  // Traffic — update instanced matrices
+  for(let i=0;i<trafficCount;i++){
+    trafficInst.getMatrixAt(i, tMat);
+    const pos = new THREE.Vector3();
+    pos.setFromMatrixPosition(tMat);
+    pos.z += trafficSpeeds[i];
+    if(pos.z>40) pos.z=-100;
+    tMat.setPosition(pos);
+    trafficInst.setMatrixAt(i, tMat);
+  }
+  trafficInst.instanceMatrix.needsUpdate = true;
 
-  // Every 4th frame: rings + orbs
-  if (fc%4===0) {
-    rings.forEach((r,i) => { r.mesh.rotation.z += 0.03*(i%2===0?1:-1); r.mesh.position.y = r.baseY+Math.sin(t*0.7+r.phase)*0.8; });
-    orbs.forEach(o => { o.angle+=o.speed*0.04; o.mesh.position.set(Math.cos(o.angle)*12, 4+Math.sin(t+o.angle)*1.5, Math.sin(o.angle)*12-10); });
+  // Every 6th frame: rings
+  if(fc%6===0){
+    const t=fc*.016;
+    rings.forEach(r=>{r.m.rotation.z+=.02;r.m.position.y=r.y+Math.sin(t*.5+r.p)*.6;});
   }
 
-  // Every 8th frame: HUD only
-  if (fc%8===0) {
-    speedEl.textContent = Math.abs(Math.round(speed*200))+' KM/H';
-  }
+  // Every 10th frame: HUD
+  if(fc%10===0) speedEl.textContent=Math.abs(Math.round(spd*200))+' KM/H';
 
-  renderer.render(scene, camera);
+  R.render(scene,cam);
 }
 animate();
 
-window.addEventListener('resize', () => {
-  camera.aspect = innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-});
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight)});
 
-// Debug: log draw calls
-console.log('Scene objects:', scene.children.length);
+console.log('Draw calls target:', scene.children.length, 'objects');
 </script>
 </body>
 </html>
