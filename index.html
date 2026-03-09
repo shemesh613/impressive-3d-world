@@ -281,7 +281,21 @@ const SCENARIOS = [
 // ---- AUDIO ----
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx;
-function initAudio(){if(!audioCtx)audioCtx=new AudioCtx()}
+function initAudio(){
+  // Engine ambient sound
+  try{
+    const eng=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=eng.createOscillator();
+    const gain=eng.createGain();
+    osc.type='sawtooth';
+    osc.frequency.value=60;
+    gain.gain.value=0.02;
+    osc.connect(gain);
+    gain.connect(eng.destination);
+    osc.start();
+    window._engineAudio={ctx:eng,osc:osc,gain:gain};
+  }catch(e){}
+if(!audioCtx)audioCtx=new AudioCtx()}
 function playTone(freq,dur,type,vol){
   if(!audioCtx)return;
   const o=audioCtx.createOscillator(),g=audioCtx.createGain();
@@ -1300,6 +1314,14 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
     }
     ct.bodyInst.instanceMatrix.needsUpdate=true;
     ct.roofInst.instanceMatrix.needsUpdate=true;
+  }
+
+
+  // Engine sound pitch
+  if(window._engineAudio){
+    const ea=window._engineAudio;
+    ea.osc.frequency.value=60+spd*400;
+    ea.gain.gain.value=Math.min(0.04,spd*0.15);
   }
 
   // Update curve markers around car
