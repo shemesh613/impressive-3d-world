@@ -882,6 +882,14 @@ const beamInst=new THREE.InstancedMesh(beamGeo,beamMat,MAX_GREENS);
 scene.add(beamInst);
 window._beamInst=beamInst;
 
+// ---- COLLECTIBLE RINGS ----
+const ringGeo=new THREE.RingGeometry(1.5,2,16);
+const ringMat=new THREE.MeshBasicMaterial({color:0x55ff77,transparent:true,opacity:0.5,side:THREE.DoubleSide});
+const ringInst=new THREE.InstancedMesh(ringGeo,ringMat,MAX_GREENS);
+scene.add(ringInst);
+window._ringInst=ringInst;
+
+
 
 function spawnGreen(){
   if(greens.length>=MAX_GREENS)return;
@@ -896,6 +904,13 @@ const MAX_OBS=6;
 const obstacles=[];
 const obsInst=new THREE.InstancedMesh(new THREE.BoxGeometry(2,2,2),new THREE.MeshBasicMaterial({color:0xff2222,transparent:true,opacity:0.9}),MAX_OBS);
 scene.add(obsInst);
+
+const obsRingGeo=new THREE.RingGeometry(1.2,1.8,16);
+const obsRingMat=new THREE.MeshBasicMaterial({color:0xff4444,transparent:true,opacity:0.4,side:THREE.DoubleSide});
+const obsRingInst=new THREE.InstancedMesh(obsRingGeo,obsRingMat,MAX_OBS);
+scene.add(obsRingInst);
+window._obsRingInst=obsRingInst;
+
 
 function spawnObstacle(){
   if(obstacles.length>=MAX_OBS)return;
@@ -1199,6 +1214,8 @@ function animate(){
     // Bob greens & powerups
     for(let i=0;i<greens.length;i++){greens[i].y=3+Math.sin(fc*.05+i)*.5}
 if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i].active){dummy.position.set(greens[i].x,1.5,greens[i].z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();window._beamInst.setMatrixAt(i,dummy.matrix)}else{dummy.position.set(0,-100,0);dummy.scale.setScalar(0);dummy.updateMatrix();window._beamInst.setMatrixAt(i,dummy.matrix)}}window._beamInst.instanceMatrix.needsUpdate=true}
+    if(window._ringInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i].active){const pulse=1+Math.sin(fc*0.08+i)*0.3;dummy.position.set(greens[i].x,0.1,greens[i].z);dummy.scale.setScalar(pulse);dummy.rotation.set(-Math.PI/2,0,fc*0.02+i);dummy.updateMatrix();window._ringInst.setMatrixAt(i,dummy.matrix)}else{dummy.position.set(0,-100,0);dummy.scale.setScalar(0);dummy.updateMatrix();window._ringInst.setMatrixAt(i,dummy.matrix)}}window._ringInst.instanceMatrix.needsUpdate=true}
+    if(window._obsRingInst){for(let i=0;i<MAX_OBS;i++){if(i<obstacles.length&&obstacles[i].active){dummy.position.set(obstacles[i].x,0.1,obstacles[i].z);dummy.scale.setScalar(1+Math.sin(fc*0.1+i)*0.2);dummy.rotation.set(-Math.PI/2,0,fc*0.03);dummy.updateMatrix();window._obsRingInst.setMatrixAt(i,dummy.matrix)}else{dummy.position.set(0,-100,0);dummy.scale.setScalar(0);dummy.updateMatrix();window._obsRingInst.setMatrixAt(i,dummy.matrix)}}window._obsRingInst.instanceMatrix.needsUpdate=true}
     for(let i=0;i<powerups.length;i++){powerups[i].y=2.5+Math.sin(fc*.06+i)*.6}
 
     checkCollisions();
