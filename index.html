@@ -41,13 +41,13 @@ import * as THREE from 'three';
 
 // ---- RENDERER ----
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.setPixelRatio(1);
 renderer.setSize(innerWidth, innerHeight);
 renderer.setClearColor(0x05000f);
 document.body.prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x05000f, 0.018);
+// No fog — saves per-fragment GPU cost
 const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 300);
 camera.position.set(0, 8, 16);
 
@@ -96,8 +96,8 @@ scene.add(Object.assign(new THREE.Mesh(
 
 // Stars — single Points object
 {
-  const pos = new Float32Array(600 * 3);
-  for (let i = 0; i < 600; i++) {
+  const pos = new Float32Array(200 * 3);
+  for (let i = 0; i < 200; i++) {
     pos[i*3] = (Math.random()-0.5)*300;
     pos[i*3+1] = Math.random()*80+10;
     pos[i*3+2] = (Math.random()-0.5)*300;
@@ -247,14 +247,7 @@ for (let i=0;i<8;i++) {
   scene.add(m);
 }
 
-// Rain — just 80 particles
-{
-  const pos = new Float32Array(80*3);
-  for (let i=0;i<80;i++) { pos[i*3]=(Math.random()-0.5)*60; pos[i*3+1]=Math.random()*25; pos[i*3+2]=(Math.random()-0.5)*60; }
-  var rainGeo = new THREE.BufferGeometry();
-  rainGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  scene.add(new THREE.Points(rainGeo, new THREE.PointsMaterial({ color: 0x6699cc, size: 0.06 })));
-}
+// Rain removed — buffer uploads kill FPS
 
 // Energy orbs — 6 simple spheres
 const orbs = [];
@@ -347,25 +340,28 @@ window.addEventListener('touchmove', e => {
   mx0=e.touches[0].clientX; my0=e.touches[0].clientY;
 }, {passive:true});
 
-// Audio
+// Audio — single looping buffer, no oscillator leak
 let audioStarted = false;
 function startAudio() {
   if (audioStarted) return; audioStarted = true;
   const ac = new AudioContext();
-  function note(freq, start, dur, vol=0.04) {
-    const o = ac.createOscillator(), g = ac.createGain();
-    o.type = 'sawtooth'; o.frequency.value = freq;
-    g.gain.setValueAtTime(0, ac.currentTime+start);
-    g.gain.linearRampToValueAtTime(vol, ac.currentTime+start+0.01);
-    g.gain.linearRampToValueAtTime(0, ac.currentTime+start+dur);
-    o.connect(g); g.connect(ac.destination);
-    o.start(ac.currentTime+start); o.stop(ac.currentTime+start+dur+0.1);
+  const sr = ac.sampleRate, dur = 2, len = sr * dur;
+  const buf = ac.createBuffer(1, len, sr);
+  const data = buf.getChannelData(0);
+  const freqs = [110, 0, 138.6, 0, 110, 0, 164.8, 146.8];
+  for (let i = 0; i < len; i++) {
+    const t = i / sr;
+    let v = Math.sin(2 * Math.PI * 55 * t) * 0.05; // bass
+    const beatIdx = Math.floor(t / 0.25);
+    if (beatIdx < 8 && freqs[beatIdx]) {
+      const bt = t - beatIdx * 0.25;
+      if (bt < 0.22) v += Math.sin(2 * Math.PI * freqs[beatIdx] * t) * 0.04 * (1 - bt / 0.22);
+    }
+    data[i] = v;
   }
-  (function beat() {
-    [110,0,138.6,0,110,0,164.8,146.8].forEach((f,i) => { if(f) note(f,i*0.25,0.22); });
-    note(55,0,2,0.05); note(55,2,2,0.05);
-    setTimeout(beat, 2000);
-  })();
+  const src = ac.createBufferSource();
+  src.buffer = buf; src.loop = true;
+  src.connect(ac.destination); src.start();
 }
 document.addEventListener('keydown', startAudio, {once:true});
 document.addEventListener('click', startAudio, {once:true});
@@ -411,11 +407,8 @@ function animate() {
     orbs.forEach(o => { o.angle+=o.speed*0.04; o.mesh.position.set(Math.cos(o.angle)*12, 4+Math.sin(t+o.angle)*1.5, Math.sin(o.angle)*12-10); });
   }
 
-  // Every 6th frame: rain + HUD
-  if (fc%6===0) {
-    const rp = rainGeo.attributes.position;
-    for (let i=0;i<80;i++) { rp.array[i*3+1]-=1.8; if(rp.array[i*3+1]<0) rp.array[i*3+1]=25; }
-    rp.needsUpdate = true;
+  // Every 8th frame: HUD only
+  if (fc%8===0) {
     speedEl.textContent = Math.abs(Math.round(speed*200))+' KM/H';
   }
 
