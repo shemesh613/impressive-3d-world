@@ -463,6 +463,59 @@ scene.add((() => {
 
 
 
+
+// ---- BRIDGES ----
+{
+  const BRIDGE_N=4;
+  const bridgeDeckGeo=new THREE.BoxGeometry(14,0.4,4);
+  const bridgeDeckMat=new THREE.MeshBasicMaterial({color:0x556677});
+  const bridgeDeckInst=new THREE.InstancedMesh(bridgeDeckGeo,bridgeDeckMat,BRIDGE_N);
+  const pillarGeo=new THREE.CylinderGeometry(0.3,0.4,7,6);
+  const pillarMat=new THREE.MeshBasicMaterial({color:0x667788});
+  const pillarInst=new THREE.InstancedMesh(pillarGeo,pillarMat,BRIDGE_N*4);
+  const railGeo=new THREE.BoxGeometry(14,0.8,0.15);
+  const railMat=new THREE.MeshBasicMaterial({color:0x88aacc});
+  const railInst=new THREE.InstancedMesh(railGeo,railMat,BRIDGE_N*2);
+  const archGeo=new THREE.TorusGeometry(3.5,0.2,6,12,Math.PI);
+  const archMat=new THREE.MeshBasicMaterial({color:0x7799bb});
+  const archInst=new THREE.InstancedMesh(archGeo,archMat,BRIDGE_N*2);
+  for(let i=0;i<BRIDGE_N;i++){
+    const z=800+i*700;
+    dummy.position.set(0,6.8,z);
+    dummy.scale.setScalar(1);
+    dummy.rotation.set(0,0,0);
+    dummy.updateMatrix();
+    bridgeDeckInst.setMatrixAt(i,dummy.matrix);
+    const pillars=[[-6,z-1.5],[-6,z+1.5],[6,z-1.5],[6,z+1.5]];
+    for(let j=0;j<4;j++){
+      dummy.position.set(pillars[j][0],3.5,pillars[j][1]);
+      dummy.updateMatrix();
+      pillarInst.setMatrixAt(i*4+j,dummy.matrix);
+    }
+    dummy.position.set(0,7.2,z-1.8);
+    dummy.updateMatrix();
+    railInst.setMatrixAt(i*2,dummy.matrix);
+    dummy.position.set(0,7.2,z+1.8);
+    dummy.updateMatrix();
+    railInst.setMatrixAt(i*2+1,dummy.matrix);
+    dummy.position.set(-6,6.8,z);
+    dummy.rotation.set(0,Math.PI/2,0);
+    dummy.updateMatrix();
+    archInst.setMatrixAt(i*2,dummy.matrix);
+    dummy.position.set(6,6.8,z);
+    dummy.updateMatrix();
+    archInst.setMatrixAt(i*2+1,dummy.matrix);
+  }
+  bridgeDeckInst.instanceMatrix.needsUpdate=true;
+  pillarInst.instanceMatrix.needsUpdate=true;
+  railInst.instanceMatrix.needsUpdate=true;
+  archInst.instanceMatrix.needsUpdate=true;
+  scene.add(bridgeDeckInst);
+  scene.add(pillarInst);
+  scene.add(railInst);
+  scene.add(archInst);
+}
+
 // ---- ONCOMING TRAFFIC ----
 {
   const ONC_N=8;
