@@ -129,6 +129,7 @@
     <div class="hud-item"><span class="icon">🌊</span><div id="flowBar"><div id="flowFill"></div></div></div>
     <div class="hud-item"><span class="icon">🏆</span><span class="val" id="levelVal">1</span></div>
     <div class="hud-item"><span class="icon">🔥</span><span class="val" id="streakVal">0</span></div>
+    <div class="hud-item"><span class="icon">🛣️</span><span class="val" id="distVal">0m</span></div>
   </div>
 </div>
 
@@ -292,11 +293,12 @@ function screenFlash(cls){const el=document.getElementById("screenFlash");el.cla
 function sfxScenario(){playTone(440,.15,'triangle',.1);setTimeout(()=>playTone(554,.15,'triangle',.08),100)}
 
 // ---- RENDERER ----
+let renderer;try{
 const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance',stencil:false,alpha:false});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
 renderer.setSize(innerWidth,innerHeight);
 renderer.setClearColor(0x0a1628);
-document.body.prepend(renderer.domElement);
+document.body.prepend(renderer.domElement);}catch(e){document.getElementById('startScreen').innerHTML='<h1 style="color:#ef4444;margin:20px">😔 WebGL לא נתמך</h1><p style="color:#fff;font-size:20px;text-align:center">נסו דפדפן אחר או הפעילו האצת חומרה</p>';throw e}
 
 const scene=new THREE.Scene();
 const cam=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,1,400);
@@ -630,7 +632,7 @@ function updateHUD(){
   document.getElementById('livesVal').textContent='❤️'.repeat(Math.max(0,lives));
   document.getElementById('levelVal').textContent=level;
   document.getElementById('streakVal').textContent=streak>0?'🔥'.repeat(Math.min(streak,5)):'-';
-  document.getElementById('flowFill').style.width=flow+'%';
+  document.getElementById('flowFill').style.width=flow+'%';document.getElementById('distVal').textContent=Math.floor(car.position.z)+'m';
 }
 
 // ---- COLLISIONS ----
