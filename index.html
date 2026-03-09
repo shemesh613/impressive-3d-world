@@ -471,6 +471,29 @@ scene.add((() => {
 
 
 
+
+// ---- CROSS TRAFFIC ----
+{
+  const CT_N=6;
+  const ctGeo=new THREE.BoxGeometry(2,0.6,1.1);
+  const ctRoofGeo=new THREE.BoxGeometry(1.4,0.35,0.85);
+  const ctColors=[0xe74c3c,0xf1c40f,0x3498db,0xe67e22,0x9b59b6,0x1abc9c];
+  const ctBodyInst=new THREE.InstancedMesh(ctGeo,new THREE.MeshBasicMaterial({color:0xffffff}),CT_N);
+  ctBodyInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(CT_N*3),3);
+  const ctRoofInst=new THREE.InstancedMesh(ctRoofGeo,new THREE.MeshBasicMaterial({color:0x111111}),CT_N);
+  const _ctc=new THREE.Color();
+  const ctData=[];
+  for(let i=0;i<CT_N;i++){
+    _ctc.setHex(ctColors[i%ctColors.length]);
+    ctBodyInst.instanceColor.setXYZ(i,_ctc.r,_ctc.g,_ctc.b);
+    ctData.push({x:0,z:0,dir:1,spd:0.15+Math.random()*0.1,active:false,crossZ:0});
+  }
+  ctBodyInst.instanceColor.needsUpdate=true;
+  scene.add(ctBodyInst);
+  scene.add(ctRoofInst);
+  window._ctData={bodyInst:ctBodyInst,roofInst:ctRoofInst,data:ctData,n:CT_N};
+}
+
 // ---- CURVE MARKERS ----
 {
   const CMARK_N=100;
@@ -1228,6 +1251,56 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
 
 
+
+
+  // Cross traffic update
+  if(window._ctData){
+    const ct=window._ctData;
+    let activeCount=0;
+    for(let i=0;i<ct.n;i++){
+      const c=ct.data[i];
+      if(c.active){
+        activeCount++;
+        c.x+=c.spd*c.dir;
+        if(Math.abs(c.x)>25){c.active=false;}
+        dummy.position.set(c.x,0.4,c.crossZ);
+        dummy.scale.setScalar(1);
+        dummy.rotation.set(0,Math.PI/2,0);
+        dummy.updateMatrix();
+        ct.bodyInst.setMatrixAt(i,dummy.matrix);
+        dummy.position.set(c.x,0.75,c.crossZ);
+        dummy.updateMatrix();
+        ct.roofInst.setMatrixAt(i,dummy.matrix);
+        if(Math.abs(car.position.x-c.x)<1.8&&Math.abs(car.position.z-c.crossZ)<1.5){
+          if(shieldTimer>0){shieldTimer=0;emitParticles(c.x,1,c.crossZ,0x60a5fa,8);c.active=false;}
+          else{lives--;flow=Math.max(0,flow-15);spd*=0.1;sfxRed();screenFlash("flash-red");emitParticles(c.x,1,c.crossZ,0xff4444,12);c.active=false;}
+        }
+      } else {
+        dummy.position.set(0,-100,0);
+        dummy.scale.setScalar(0);
+        dummy.updateMatrix();
+        ct.bodyInst.setMatrixAt(i,dummy.matrix);
+        ct.roofInst.setMatrixAt(i,dummy.matrix);
+      }
+    }
+    if(fc%150===0&&activeCount<3){
+      const nextCrossZ=Math.ceil(car.position.z/80)*80+50;
+      if(Math.abs(car.position.z-nextCrossZ)<60){
+        for(let i=0;i<ct.n;i++){
+          if(!ct.data[i].active){
+            ct.data[i].active=true;
+            ct.data[i].crossZ=nextCrossZ;
+            ct.data[i].dir=Math.random()>0.5?1:-1;
+            ct.data[i].x=-20*ct.data[i].dir;
+            ct.data[i].spd=0.15+Math.random()*0.1;
+            break;
+          }
+        }
+      }
+    }
+    ct.bodyInst.instanceMatrix.needsUpdate=true;
+    ct.roofInst.instanceMatrix.needsUpdate=true;
+  }
 
   // Update curve markers around car
   if(window._cmarkData){
