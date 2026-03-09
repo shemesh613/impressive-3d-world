@@ -131,8 +131,7 @@ try {
 }
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.BasicShadowMap;
+renderer.shadowMap.enabled = false;
 renderer.setClearColor(0x05000f);
 
 const scene = new THREE.Scene();
@@ -145,12 +144,6 @@ scene.add(new THREE.AmbientLight(0x221133, 2.5));
 
 const sun = new THREE.DirectionalLight(0xffffff, 1.5);
 sun.position.set(15, 30, 15);
-sun.castShadow = true;
-sun.shadow.mapSize.set(512, 512);
-sun.shadow.camera.near = 0.1;
-sun.shadow.camera.far = 100;
-sun.shadow.camera.left = sun.shadow.camera.bottom = -30;
-sun.shadow.camera.right = sun.shadow.camera.top = 30;
 scene.add(sun);
 
 const pLights = [];
@@ -168,10 +161,9 @@ const pLights = [];
 // ---- GROUND ----
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(100, 100),
-  new THREE.MeshStandardMaterial({ color: 0x0d0d1a, roughness: 0.9 })
+  new THREE.MeshBasicMaterial({ color: 0x0d0d1a })
 );
 ground.rotation.x = -Math.PI / 2;
-ground.receiveShadow = true;
 scene.add(ground);
 
 // Ground cracks — MeshBasic (no light calc needed)
@@ -216,9 +208,9 @@ scene.add(floatParticles);
 // ---- ROAD ----
 const road = new THREE.Mesh(
   new THREE.PlaneGeometry(6, 100),
-  new THREE.MeshStandardMaterial({ color: 0x111122, roughness: 0.95 })
+  new THREE.MeshBasicMaterial({ color: 0x111122 })
 );
-road.rotation.x = -Math.PI/2; road.position.y = 0.01; road.receiveShadow = true;
+road.rotation.x = -Math.PI/2; road.position.y = 0.01;
 scene.add(road);
 
 const markMat = new THREE.MeshBasicMaterial({ color: 0xffdd00 });
@@ -414,12 +406,11 @@ scene.add(floatingSign);
 // ---- MOON: 1 light kept ----
 const moon = new THREE.Mesh(new THREE.SphereGeometry(4, 12, 12), new THREE.MeshBasicMaterial({ color: 0xddeeff }));
 moon.position.set(-40, 50, -80); scene.add(moon);
-const moonLight = new THREE.PointLight(0xaaccff, 1.5, 200);
-moonLight.position.copy(moon.position); scene.add(moonLight);
+// Moon light removed — MeshBasic moon is bright enough
 
 // ---- STREET LAMPS: emissive only, 2 shared lights (was 16) ----
 const lampBulbMat = new THREE.MeshBasicMaterial({ color: 0xffffaa });
-const lampPoleMat = new THREE.MeshStandardMaterial({ color: 0x444466, metalness: 0.9, roughness: 0.3 });
+const lampPoleMat = new THREE.MeshBasicMaterial({ color: 0x444466 });
 function makeLamp(x, z) {
   const g = new THREE.Group();
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, 5, 5), lampPoleMat);
@@ -430,29 +421,27 @@ function makeLamp(x, z) {
   bulb.position.set(Math.sign(x)*1.5, 5, 0); g.add(bulb);
   g.position.set(x, 0, z); scene.add(g);
 }
-const stL = new THREE.PointLight(0xffeeaa, 2, 40);
-stL.position.set(-4.5, 5, 0); scene.add(stL);
-const stR = new THREE.PointLight(0xffeeaa, 2, 40);
-stR.position.set(4.5, 5, 0); scene.add(stR);
+// Street lights removed — lamps are MeshBasic emissive only
 for (let z=-40;z<40;z+=10) { makeLamp(-4.5, z); makeLamp(4.5, z); }
 
-// ---- BUILDINGS: no per-building PointLight, MeshBasic windows ----
+// ---- BUILDINGS: InstancedMesh for all windows (1 draw call!) ----
+const winGeo = new THREE.PlaneGeometry(0.5, 0.5);
+const wColors = [0xffff88, 0x88ffff, 0xff88ff];
+const winInstances = {};
+wColors.forEach(c => { winInstances[c] = []; });
 function makeBuilding(x, z, w, h, d, color) {
   const mesh = new THREE.Mesh(
     new THREE.BoxGeometry(w, h, d),
-    new THREE.MeshStandardMaterial({ color, roughness: 0.5, metalness: 0.5, emissive: color, emissiveIntensity: 0.08 })
+    new THREE.MeshBasicMaterial({ color })
   );
-  mesh.position.set(x, h/2, z); mesh.castShadow = true;
+  mesh.position.set(x, h/2, z);
   scene.add(mesh);
 
-  const wColors = [0xffff88, 0x88ffff, 0xff88ff];
-  const winMat = new THREE.MeshBasicMaterial({ color: wColors[Math.floor(Math.random()*3)] });
+  const wc = wColors[Math.floor(Math.random()*3)];
   for (let iy=0;iy<Math.floor(h/2);iy++) {
     for (let ix=-1;ix<=1;ix++) {
       if (Math.random()>0.35) {
-        const win = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.5), winMat);
-        win.position.set(x+ix*0.8, iy*1.4+1.5, z+d/2+0.01);
-        scene.add(win);
+        winInstances[wc].push({ x: x+ix*0.8, y: iy*1.4+1.5, z: z+d/2+0.01 });
       }
     }
   }
@@ -520,6 +509,20 @@ const bdata = [
 ];
 bdata.forEach(d => makeBuilding(...d));
 
+// Create InstancedMesh for windows — 144 meshes → 3 draw calls
+const dummy = new THREE.Object3D();
+wColors.forEach(c => {
+  const arr = winInstances[c];
+  if (arr.length === 0) return;
+  const inst = new THREE.InstancedMesh(winGeo, new THREE.MeshBasicMaterial({ color: c }), arr.length);
+  arr.forEach((w, i) => {
+    dummy.position.set(w.x, w.y, w.z);
+    dummy.updateMatrix();
+    inst.setMatrixAt(i, dummy.matrix);
+  });
+  scene.add(inst);
+});
+
 // ---- EXHAUST: 60→25 ----
 const exhaustCount = 25;
 const exhaustGeo = new THREE.BufferGeometry();
@@ -535,30 +538,28 @@ const bodyMesh = new THREE.Mesh(
   new THREE.BoxGeometry(1.8, 0.6, 3.6),
   new THREE.MeshStandardMaterial({ color: 0x00ccff, roughness: 0.1, metalness: 0.95, emissive: 0x0088cc, emissiveIntensity: 0.8 })
 );
-bodyMesh.position.y = 0.5; bodyMesh.castShadow = true; car.add(bodyMesh);
+bodyMesh.position.y = 0.5; car.add(bodyMesh);
 
 const cabinMesh = new THREE.Mesh(
   new THREE.BoxGeometry(1.4, 0.55, 2),
-  new THREE.MeshStandardMaterial({ color: 0x001122, roughness: 0.05, metalness: 1, transparent: true, opacity: 0.85 })
+  new THREE.MeshBasicMaterial({ color: 0x001122, transparent: true, opacity: 0.85 })
 );
 cabinMesh.position.set(0, 1.07, -0.15); car.add(cabinMesh);
 
 const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.3, 10);
-const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.95 });
+const wheelMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
 const wheels = [[-1.05,.35,1.2],[1.05,.35,1.2],[-1.05,.35,-1.2],[1.05,.35,-1.2]].map(p => {
   const w = new THREE.Mesh(wheelGeo, wheelMat);
   w.position.set(...p); w.rotation.z = Math.PI/2; car.add(w); return w;
 });
 
-// Headlights — 2 SpotLights kept
+// Headlights — visual only + 1 shared PointLight (was 2 SpotLights)
 [-0.5, 0.5].forEach(x => {
   const hl = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.18,0.05), new THREE.MeshBasicMaterial({ color: 0xffffcc }));
   hl.position.set(x, 0.5, 1.81); car.add(hl);
-  const spot = new THREE.SpotLight(0xffffaa, 3, 18, Math.PI/7, 0.4);
-  spot.position.set(x, 0.5, 1.81);
-  spot.target.position.set(x*0.5, -1, 12);
-  car.add(spot); car.add(spot.target);
 });
+const headlight = new THREE.PointLight(0xffffaa, 2, 15);
+headlight.position.set(0, 0.5, 2.5); car.add(headlight);
 
 // Taillights — emissive only
 [-0.6, 0.6].forEach(x => {
@@ -570,7 +571,7 @@ const glow = new THREE.PointLight(0x00aaff, 2, 4);
 glow.position.set(0, 0.1, 0); car.add(glow);
 
 // ---- PUDDLES ----
-const puddleMat = new THREE.MeshStandardMaterial({ color: 0x112233, roughness: 0.05, metalness: 0.9 });
+const puddleMat = new THREE.MeshBasicMaterial({ color: 0x112233 });
 [[-6,-5],[-7,-14],[6,-8],[7,-20],[-5,4],[5,12]].forEach(([x,z]) => {
   const p = new THREE.Mesh(new THREE.CircleGeometry(1.2+Math.random(), 8), puddleMat);
   p.rotation.x = -Math.PI/2; p.position.set(x, 0.008, z); scene.add(p);
@@ -612,7 +613,7 @@ const traffic = [];
 function makeTrafficCar(z, lane, color) {
   const g = new THREE.Group();
   const body = new THREE.Mesh(new THREE.BoxGeometry(1.4,0.5,2.8),
-    new THREE.MeshStandardMaterial({ color, roughness:0.3, metalness:0.7, emissive:color, emissiveIntensity:0.15 }));
+    new THREE.MeshBasicMaterial({ color }));
   body.position.y = 0.45; g.add(body);
   [-0.4, 0.4].forEach(x => {
     const hl = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.12,0.04), new THREE.MeshBasicMaterial({ color: 0xffffcc }));
