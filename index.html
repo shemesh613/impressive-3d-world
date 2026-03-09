@@ -378,7 +378,6 @@ for(let z=-100;z<=2000;z+=10){
   const n=wp.length/3;const geo=new THREE.PlaneGeometry(.35,.35);const mat=new THREE.MeshBasicMaterial({color:0xaaffcc});
   const inst=new THREE.InstancedMesh(geo,mat,n);
   for(let i=0;i<n;i++){dummy.position.set(wp[i*3],wp[i*3+1],wp[i*3+2]);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix)}
-}
   inst.instanceMatrix.needsUpdate=true;scene.add(inst);
 }
 
