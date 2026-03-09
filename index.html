@@ -11,18 +11,23 @@
 
     /* Start Screen */
     #startScreen{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;
-      background:radial-gradient(ellipse at center,#1a0040 0%,#000020 70%)}
-    #startScreen h1{font-size:clamp(36px,8vw,72px);background:linear-gradient(135deg,#FFD700,#FF6B6B,#00E5FF,#76FF03);
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:pulse 2s ease-in-out infinite;margin-bottom:10px;text-align:center}
-    #startScreen .subtitle{color:#aaf;font-size:clamp(14px,3vw,22px);margin-bottom:30px;text-align:center;direction:rtl}
-    #startScreen .instructions{background:rgba(255,255,255,.08);border-radius:20px;padding:20px 30px;margin:10px;max-width:400px;text-align:center}
-    #startScreen .instructions p{color:#ddf;font-size:clamp(13px,2.5vw,18px);margin:8px 0;direction:rtl;line-height:1.6}
-    #startScreen .instructions .emoji{font-size:24px}
-    #playBtn{margin-top:25px;padding:18px 60px;font-size:clamp(20px,4vw,32px);font-weight:900;border:none;border-radius:50px;cursor:pointer;
+      background:radial-gradient(ellipse at center,#2a1060 0%,#0a0030 70%)}
+    #startScreen h1{font-size:clamp(40px,9vw,80px);color:#FFD700;
+      text-shadow:0 0 20px rgba(255,215,0,.6),0 0 40px rgba(255,100,100,.4),0 2px 8px rgba(0,0,0,.8);
+      animation:pulse 2s ease-in-out infinite;margin-bottom:10px;text-align:center;font-weight:900}
+    #startScreen .subtitle{color:#ccccff;font-size:clamp(16px,3.5vw,26px);margin-bottom:30px;text-align:center;direction:rtl;
+      text-shadow:0 0 10px rgba(100,100,255,.5)}
+    #startScreen .instructions{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:22px 30px;margin:10px;max-width:420px;text-align:center}
+    #startScreen .instructions p{color:#fff;font-size:clamp(15px,3vw,20px);margin:10px 0;direction:rtl;line-height:1.7;
+      text-shadow:0 1px 3px rgba(0,0,0,.5)}
+    #startScreen .instructions .emoji{font-size:26px}
+    #playBtn{margin-top:30px;padding:20px 65px;font-size:clamp(22px,5vw,36px);font-weight:900;border:3px solid rgba(255,255,255,.3);border-radius:50px;cursor:pointer;
       background:linear-gradient(135deg,#FFD700,#FF6B6B);color:#fff;letter-spacing:2px;
-      box-shadow:0 0 30px rgba(255,215,0,.4),0 8px 25px rgba(0,0,0,.3);transition:transform .2s,box-shadow .2s}
-    #playBtn:hover,#playBtn:active{transform:scale(1.08);box-shadow:0 0 50px rgba(255,215,0,.6),0 12px 35px rgba(0,0,0,.4)}
+      box-shadow:0 0 40px rgba(255,215,0,.5),0 8px 25px rgba(0,0,0,.4);transition:transform .2s,box-shadow .2s;
+      text-shadow:0 2px 4px rgba(0,0,0,.4);animation:btnGlow 1.5s ease-in-out infinite alternate}
+    #playBtn:hover,#playBtn:active{transform:scale(1.1);box-shadow:0 0 60px rgba(255,215,0,.7),0 12px 35px rgba(0,0,0,.5)}
     @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    @keyframes btnGlow{0%{box-shadow:0 0 30px rgba(255,215,0,.4),0 8px 20px rgba(0,0,0,.3)}100%{box-shadow:0 0 50px rgba(255,215,0,.7),0 8px 30px rgba(0,0,0,.4)}}
 
     /* HUD */
     #hud{position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;display:none;padding:10px 15px}
@@ -49,11 +54,12 @@
 
     /* Game Over */
     #gameOver{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;
-      background:rgba(0,0,0,.8);backdrop-filter:blur(8px)}
-    #gameOver h2{font-size:clamp(36px,7vw,60px);color:#FF6B6B;margin-bottom:10px}
-    #gameOver .finalScore{font-size:clamp(22px,5vw,40px);color:#FFD700;margin-bottom:20px}
-    #restartBtn{padding:15px 50px;font-size:clamp(18px,3.5vw,28px);font-weight:900;border:none;border-radius:50px;cursor:pointer;
-      background:linear-gradient(135deg,#00E5FF,#76FF03);color:#fff;box-shadow:0 0 25px rgba(0,229,255,.3)}
+      background:rgba(0,0,0,.85);backdrop-filter:blur(8px)}
+    #gameOver h2{font-size:clamp(40px,8vw,68px);color:#FF6B6B;margin-bottom:15px;text-shadow:0 0 20px rgba(255,100,100,.5)}
+    #gameOver .finalScore{font-size:clamp(24px,5vw,44px);color:#FFD700;margin-bottom:25px;text-shadow:0 0 15px rgba(255,215,0,.4)}
+    #restartBtn{padding:18px 55px;font-size:clamp(20px,4vw,32px);font-weight:900;border:2px solid rgba(255,255,255,.2);border-radius:50px;cursor:pointer;
+      background:linear-gradient(135deg,#00E5FF,#76FF03);color:#fff;box-shadow:0 0 30px rgba(0,229,255,.4);
+      text-shadow:0 2px 4px rgba(0,0,0,.3);animation:btnGlow 1.5s ease-in-out infinite alternate}
 
     /* Mobile Controls */
     #mobileControls{position:fixed;bottom:15px;left:0;right:0;z-index:30;display:none;justify-content:space-between;padding:0 15px;pointer-events:none}
@@ -73,7 +79,7 @@
 <!-- START SCREEN -->
 <div id="startScreen">
   <h1>🌟 מירוץ הכוכבים 🌟</h1>
-  <div class="subtitle">Star Racer — המשחק הכי כיפי!</div>
+  <div class="subtitle">!Star Racer — המשחק הכי כיפי</div>
   <div class="instructions">
     <p><span class="emoji">⭐</span> אספו כוכבים לצבור נקודות</p>
     <p><span class="emoji">💎</span> יהלומים שווים יותר נקודות</p>
@@ -81,7 +87,7 @@
     <p><span class="emoji">🏆</span> עברו שלבים והפכו לאלופים</p>
     <p style="margin-top:15px;color:#88f;font-size:clamp(11px,2vw,14px)">🎮 מקלדת: WASD / חצים &nbsp;|&nbsp; 📱 נייד: כפתורים על המסך</p>
   </div>
-  <button id="playBtn" onclick="startGame()">בואו נשחק! 🚀</button>
+  <button id="playBtn" onclick="startGame()">!בואו נשחק 🚀</button>
 </div>
 
 <!-- HUD -->
@@ -100,9 +106,9 @@
 
 <!-- GAME OVER -->
 <div id="gameOver">
-  <h2>המשחק נגמר! 💥</h2>
-  <div class="finalScore" id="finalScore">ניקוד: 0</div>
-  <button id="restartBtn" onclick="restartGame()">שוב? 🔄</button>
+  <h2>!המשחק נגמר 💥</h2>
+  <div class="finalScore" id="finalScore">0 :ניקוד</div>
+  <button id="restartBtn" onclick="restartGame()">🔄 ?שוב</button>
 </div>
 
 <!-- MOBILE CONTROLS -->
@@ -149,7 +155,7 @@ renderer.setClearColor(0x050015);
 document.body.prepend(renderer.domElement);
 
 const scene=new THREE.Scene();
-const cam=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,1,400);
+const cam=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,1,250);
 cam.position.set(0,10,18);
 
 const dummy=new THREE.Object3D();
@@ -159,22 +165,22 @@ const _ct=new THREE.Vector3();
 const _col=new THREE.Color();
 
 // ---- FOG ----
-scene.fog=new THREE.FogExp2(0x050015,.005);
+scene.fog=new THREE.FogExp2(0x050015,.008);
 
 // ---- GROUND ----
 {
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,2000),new THREE.MeshBasicMaterial({color:0x0c0c22}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshBasicMaterial({color:0x0c0c22}));
   m.rotation.x=-Math.PI/2;scene.add(m);
 }
 
 // ---- ROAD ----
 {
-  const road=new THREE.Mesh(new THREE.PlaneGeometry(10,2000),new THREE.MeshBasicMaterial({color:0x181830}));
+  const road=new THREE.Mesh(new THREE.PlaneGeometry(10,300),new THREE.MeshBasicMaterial({color:0x181830}));
   road.rotation.x=-Math.PI/2;road.position.y=.01;scene.add(road);
   // Edge glow lines
   const edgeMat=new THREE.MeshBasicMaterial({color:0x00ccff});
   [-5.2,5.2].forEach(x=>{
-    const e=new THREE.Mesh(new THREE.PlaneGeometry(.12,2000),edgeMat);
+    const e=new THREE.Mesh(new THREE.PlaneGeometry(.12,300),edgeMat);
     e.rotation.x=-Math.PI/2;e.position.set(x,.02,0);scene.add(e);
   });
 }
@@ -183,9 +189,9 @@ scene.fog=new THREE.FogExp2(0x050015,.005);
 {
   const g=new THREE.PlaneGeometry(.2,3);
   const m=new THREE.MeshBasicMaterial({color:0xffdd00});
-  const inst=new THREE.InstancedMesh(g,m,200);
-  for(let i=0;i<200;i++){
-    dummy.position.set(0,.03,-50+i*6);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
+  const inst=new THREE.InstancedMesh(g,m,40);
+  for(let i=0;i<40;i++){
+    dummy.position.set(0,.03,-100+i*6);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
     inst.setMatrixAt(i,dummy.matrix);
   }
   inst.instanceMatrix.needsUpdate=true;scene.add(inst);
@@ -193,7 +199,7 @@ scene.fog=new THREE.FogExp2(0x050015,.005);
 
 // ---- BUILDINGS ----
 const bdata=[];
-for(let z=-100;z<=600;z+=10){
+for(let z=-120;z<=120;z+=12){
   bdata.push([-10,z,2.5+Math.random()*2,4+Math.random()*12,2.5+Math.random()*2]);
   bdata.push([10,z,2.5+Math.random()*2,4+Math.random()*12,2.5+Math.random()*2]);
   if(Math.random()>.5)bdata.push([-16,z,2+Math.random()*2,3+Math.random()*8,2+Math.random()*2]);
@@ -231,7 +237,7 @@ for(let z=-100;z<=600;z+=10){
 }
 
 // ---- SKY DOME + STARS + MOON ----
-scene.add(new THREE.Mesh(new THREE.SphereGeometry(200,8,4),new THREE.MeshBasicMaterial({color:0x030012,side:THREE.BackSide})));
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(120,8,4),new THREE.MeshBasicMaterial({color:0x030012,side:THREE.BackSide})));
 {
   const p=new Float32Array(200*3);
   for(let i=0;i<200;i++){p[i*3]=(Math.random()-.5)*240;p[i*3+1]=Math.random()*60+10;p[i*3+2]=(Math.random()-.5)*240}
@@ -289,7 +295,7 @@ function spawnCollectible(){
   const type=Math.random()>.7?'diamond':'star';
   const t=COLLECTIBLE_TYPES[type];
   const x=(Math.random()-.5)*8;
-  const z=car.position.z+(40+Math.random()*60);
+  const z=car.position.z-(40+Math.random()*60);
   collectibles.push({type,x,z,y:1+Math.sin(Date.now()*.001)*.3,active:true,size:t.size});
   updateCollectibleMatrices();
 }
@@ -323,7 +329,7 @@ scene.add(obstacleInst);
 function spawnObstacle(){
   if(obstacles.length>=MAX_OBSTACLES)return;
   const x=(Math.random()-.5)*8;
-  const z=car.position.z+(50+Math.random()*60);
+  const z=car.position.z-(50+Math.random()*60);
   obstacles.push({x,z,y:.5,active:true});
   updateObstacleMatrices();
 }
@@ -485,8 +491,8 @@ function checkCollisions(){
         level++;starsForLevel=0;starsNeeded=Math.min(20,starsNeeded+2);
         sfxLevelUp();
         const lu=document.getElementById('levelUp');
-        document.getElementById('levelUpText').textContent='שלב '+level+' 🎉';
-        document.getElementById('levelUpSub').textContent='תיזהרו - קשה יותר!';
+        document.getElementById('levelUpText').textContent='🎉 '+level+' בלש';
+        document.getElementById('levelUpSub').textContent='!רתוי השק - ורהזית';
         lu.style.display='flex';
         setTimeout(()=>{lu.style.display='none'},1500);
         // More obstacles
@@ -513,7 +519,7 @@ function checkCollisions(){
         obstacles.splice(i,1);
         if(lives<=0){
           gameActive=false;
-          document.getElementById('finalScore').textContent='ניקוד סופי: '+score;
+          document.getElementById('finalScore').textContent=score+' :ניקוד סופי';
           document.getElementById('gameOver').style.display='flex';
           return;
         }
@@ -565,10 +571,10 @@ function animate(){
 
     // Clean distant items
     for(let i=collectibles.length-1;i>=0;i--){
-      if(collectibles[i].z<car.position.z-30)collectibles.splice(i,1);
+      if(collectibles[i].z>car.position.z+30)collectibles.splice(i,1);
     }
     for(let i=obstacles.length-1;i>=0;i--){
-      if(obstacles[i].z<car.position.z-30)obstacles.splice(i,1);
+      if(obstacles[i].z>car.position.z+30)obstacles.splice(i,1);
     }
 
     // Animate collectibles bobbing
