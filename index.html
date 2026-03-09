@@ -31,6 +31,12 @@
     @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
     @keyframes btnGlow{0%{box-shadow:0 0 30px rgba(34,197,94,.3)}100%{box-shadow:0 0 50px rgba(34,197,94,.6)}}
 
+
+    #minimap{position:fixed;bottom:15px;left:15px;width:120px;height:120px;z-index:25;
+      background:rgba(0,10,20,.8);border:2px solid rgba(74,222,128,.3);border-radius:12px;
+      overflow:hidden;pointer-events:none}
+    #minimap canvas{width:100%;height:100%}
+
     /* HUD */
     #hud{position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;display:none;padding:10px 15px}
     .hud-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
@@ -1442,6 +1448,55 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
   _cv.set(car.position.x-Math.sin(dir+cTh)*14,7+cPh*4,car.position.z-Math.cos(dir+cTh)*14);
   cam.position.lerp(_cv,.08);
   _ct.set(car.position.x+Math.sin(dir)*8,1.5,car.position.z+Math.cos(dir)*8);cam.lookAt(_ct);
+
+
+  // Minimap render
+  if(gameActive){
+    const mc=document.getElementById('minimapCanvas');
+    if(mc){
+      const ctx=mc.getContext('2d');
+      ctx.fillStyle='rgba(10,22,40,0.9)';
+      ctx.fillRect(0,0,120,120);
+      const scale=0.8;
+      const cx=60,cy=90;
+      // Road
+      ctx.fillStyle='#2a3545';
+      ctx.fillRect(50,0,20,120);
+      // Car (center bottom)
+      ctx.fillStyle='#22c55e';
+      ctx.fillRect(cx-3,cy-4,6,8);
+      // Greens
+      ctx.fillStyle='#55ff77';
+      for(let i=0;i<greens.length;i++){
+        const g=greens[i];if(!g.active)continue;
+        const dx=(g.x-car.position.x)*scale;
+        const dz=(g.z-car.position.z)*scale;
+        if(Math.abs(dz)<60&&Math.abs(dx)<60){
+          ctx.beginPath();ctx.arc(cx+dx,cy-dz,3,0,Math.PI*2);ctx.fill();
+        }
+      }
+      // Obstacles
+      ctx.fillStyle='#ff4444';
+      for(let i=0;i<obstacles.length;i++){
+        const o=obstacles[i];if(!o.active)continue;
+        const dx=(o.x-car.position.x)*scale;
+        const dz=(o.z-car.position.z)*scale;
+        if(Math.abs(dz)<60&&Math.abs(dx)<60){
+          ctx.fillRect(cx+dx-3,cy-dz-3,6,6);
+        }
+      }
+      // Powerups
+      ctx.fillStyle='#fbbf24';
+      for(let i=0;i<powerups.length;i++){
+        const p=powerups[i];if(!p.active)continue;
+        const dx=(p.x-car.position.x)*scale;
+        const dz=(p.z-car.position.z)*scale;
+        if(Math.abs(dz)<60&&Math.abs(dx)<60){
+          ctx.beginPath();ctx.moveTo(cx+dx,cy-dz-4);ctx.lineTo(cx+dx+3,cy-dz);ctx.lineTo(cx+dx,cy-dz+4);ctx.lineTo(cx+dx-3,cy-dz);ctx.fill();
+        }
+      }
+    }
+  }
 
   renderer.render(scene,cam);
 }
