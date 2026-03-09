@@ -339,7 +339,7 @@ const _ct=new THREE.Vector3();
 const _col=new THREE.Color();
 
 // ---- ROAD CURVE FUNCTION ----
-function roadX(z){return Math.sin(z*.007)*5+Math.sin(z*.019)*2.5+Math.cos(z*.012)*3}
+function roadX(z){return Math.sin(z*.006)*4+Math.sin(z*.017)*2+Math.cos(z*.01)*2.5}
 
 // ---- GROUND ----
 scene.add((() => {
@@ -778,13 +778,13 @@ scene.add((() => {
 // ---- ONCOMING TRAFFIC ----
 {
   const ONC_N=8;
-  const oncBodyGeo=new THREE.BoxGeometry(1.2,0.6,2.2);
-  const oncRoofGeo=new THREE.BoxGeometry(0.9,0.4,1.2);
+  const oncBodyGeo=new THREE.BoxGeometry(1.8,0.9,3);
+  const oncRoofGeo=new THREE.BoxGeometry(1.3,0.5,1.6);
   const oncColors=[0xe74c3c,0x3498db,0xf39c12,0x9b59b6,0x1abc9c,0xe67e22,0x2ecc71,0xecf0f1];
   const oncBodyInst=new THREE.InstancedMesh(oncBodyGeo,new THREE.MeshBasicMaterial({color:0xffffff}),ONC_N);
   oncBodyInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(ONC_N*3),3);
   const oncRoofInst=new THREE.InstancedMesh(oncRoofGeo,new THREE.MeshBasicMaterial({color:0x222222}),ONC_N);
-  const oncLightInst=new THREE.InstancedMesh(new THREE.SphereGeometry(0.15,4,4),new THREE.MeshBasicMaterial({color:0xff4444}),ONC_N*2);
+  const oncLightInst=new THREE.InstancedMesh(new THREE.SphereGeometry(0.4,6,6),new THREE.MeshBasicMaterial({color:0xffff44}),ONC_N*2);
   const _oc=new THREE.Color();
   const oncData=[];
   for(let i=0;i<ONC_N;i++){
@@ -942,7 +942,7 @@ window._ringInst=ringInst;
 
 function spawnGreen(){
   if(greens.length>=MAX_GREENS)return;
-  const z=car.position.z+(35+Math.random()*50);const rx=roadX(z);
+  const z=car.position.z+(25+Math.random()*35);const rx=roadX(z);
   const x=rx+(Math.random()-.5)*8;
   greens.push({x,z,y:3,active:true});
 }
@@ -964,7 +964,7 @@ window._obsRingInst=obsRingInst;
 
 function spawnObstacle(){
   if(obstacles.length>=MAX_OBS)return;
-  const z=car.position.z+(45+Math.random()*50);const rx=roadX(z);
+  const z=car.position.z+(25+Math.random()*40);const rx=roadX(z);
   const x=rx+(Math.random()-.5)*8;
   obstacles.push({x,z,y:2,active:true});
 }
@@ -1258,9 +1258,9 @@ function animate(){
     if(fc%30===0){spawnGreen();if(Math.random()<.2+level*.03)spawnObstacle();if(Math.random()<.08)spawnPowerup()}
 
     // Clean
-    for(let i=greens.length-1;i>=0;i--){if(greens[i].z<car.position.z-30)greens.splice(i,1)}
-    for(let i=obstacles.length-1;i>=0;i--){if(obstacles[i].z<car.position.z-30)obstacles.splice(i,1)}
-    for(let i=powerups.length-1;i>=0;i--){if(powerups[i].z<car.position.z-30)powerups.splice(i,1)}
+    for(let i=greens.length-1;i>=0;i--){if(greens[i].z<car.position.z-50)greens.splice(i,1)}
+    for(let i=obstacles.length-1;i>=0;i--){if(obstacles[i].z<car.position.z-50)obstacles.splice(i,1)}
+    for(let i=powerups.length-1;i>=0;i--){if(powerups[i].z<car.position.z-50)powerups.splice(i,1)}
 
     // Bob greens & powerups
     for(let i=0;i<greens.length;i++){greens[i].y=3+Math.sin(fc*.05+i)*.5}
@@ -1307,12 +1307,13 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
         activeCount++;
         o.z-=o.spd;
         if(o.z<car.position.z-40){o.active=false;}
-        dummy.position.set(o.x,0.4,o.z);dummy.scale.setScalar(1);dummy.rotation.set(0,Math.PI,0);dummy.updateMatrix();
+        dummy.position.set(o.x,0.6,o.z);dummy.scale.setScalar(1);dummy.rotation.set(0,Math.PI,0);dummy.updateMatrix();
         od.bodyInst.setMatrixAt(i,dummy.matrix);
-        dummy.position.set(o.x,0.8,o.z);dummy.updateMatrix();od.roofInst.setMatrixAt(i,dummy.matrix);
-        dummy.position.set(o.x-0.4,0.3,o.z+1.2);dummy.scale.setScalar(0.8);dummy.updateMatrix();od.lightInst.setMatrixAt(i*2,dummy.matrix);
-        dummy.position.set(o.x+0.4,0.3,o.z+1.2);dummy.updateMatrix();od.lightInst.setMatrixAt(i*2+1,dummy.matrix);
-        if(Math.abs(car.position.x-o.x)<1.5&&Math.abs(car.position.z-o.z)<2){
+        dummy.position.set(o.x,1.15,o.z);dummy.updateMatrix();od.roofInst.setMatrixAt(i,dummy.matrix);
+        dummy.position.set(o.x-0.5,0.6,o.z+1.6);dummy.scale.setScalar(1.2);dummy.updateMatrix();od.lightInst.setMatrixAt(i*2,dummy.matrix);
+        dummy.position.set(o.x+0.5,0.6,o.z+1.6);dummy.updateMatrix();od.lightInst.setMatrixAt(i*2+1,dummy.matrix);
+        if(o.z-car.position.z<25&&o.z>car.position.z){const _pr=_v.set(o.x,2,o.z).project(cam);if(_pr.z<1)showPopup('⚠️',((_pr.x*.5+.5)*innerWidth),((-_pr.y*.5+.5)*innerHeight),'#ffcc00')}
+        if(Math.abs(car.position.x-o.x)<1.8&&Math.abs(car.position.z-o.z)<2.5){
           if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,1,o.z,0x60a5fa,8);o.active=false;}
           else{lives--;flow=Math.max(0,flow-15);spd*=0.1;sfxRed();screenFlash("flash-red");emitParticles(o.x,1,o.z,0xff4444,12);o.active=false;
             if(lives<=0){gameActive=false;document.getElementById('finalScore').textContent=score;document.getElementById('finalGreen').textContent=greenCount;document.getElementById('finalRed').textContent=redCount;document.getElementById('finalStreak').textContent=bestStreak;document.getElementById('finalMsg').textContent='התנגשת במכונית!';document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';document.getElementById('gameOver').style.display='flex';return;}
@@ -1325,7 +1326,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
       }
     }
     if(fc%90===0&&activeCount<4){
-      for(let i=0;i<od.n;i++){if(!od.data[i].active){od.data[i].active=true;od.data[i].z=car.position.z+80+Math.random()*40;od.data[i].x=roadX(od.data[i].z)-3.5+Math.random()*1.5;od.data[i].spd=0.12+Math.random()*0.15;break;}}
+      for(let i=0;i<od.n;i++){if(!od.data[i].active){od.data[i].active=true;od.data[i].z=car.position.z+60+Math.random()*30;od.data[i].x=roadX(od.data[i].z)-3.5+Math.random()*1.5;od.data[i].spd=0.08+Math.random()*0.1;break;}}
     }
     od.bodyInst.instanceMatrix.needsUpdate=true;od.roofInst.instanceMatrix.needsUpdate=true;od.lightInst.instanceMatrix.needsUpdate=true;
   }
