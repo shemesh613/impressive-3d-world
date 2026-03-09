@@ -139,24 +139,9 @@ scene.fog = new THREE.FogExp2(0x05000f, 0.025);
 const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 300);
 camera.position.set(0, 8, 16);
 
-// ---- LIGHTS: ~12 total (was ~60+) ----
-scene.add(new THREE.AmbientLight(0x221133, 2.5));
-
-const sun = new THREE.DirectionalLight(0xffffff, 1.5);
-sun.position.set(15, 30, 15);
-scene.add(sun);
-
-const pLights = [];
-[
-  { color: 0x00f5ff, pos: new THREE.Vector3(-10, 5, 0) },
-  { color: 0xff00ff, pos: new THREE.Vector3(10, 5, 0) },
-  { color: 0xffff00, pos: new THREE.Vector3(0, 5, -10) },
-].forEach(d => {
-  const l = new THREE.PointLight(d.color, 3, 25);
-  l.position.copy(d.pos);
-  scene.add(l);
-  pLights.push({ light: l, origin: d.pos.clone() });
-});
+// ---- LIGHTS: 0 dynamic lights! Everything is MeshBasic ----
+// No lights needed — all materials are MeshBasicMaterial (unlit)
+// The neon city look comes from bright colored MeshBasic materials
 
 // ---- GROUND ----
 const ground = new THREE.Mesh(
@@ -166,16 +151,20 @@ const ground = new THREE.Mesh(
 ground.rotation.x = -Math.PI / 2;
 scene.add(ground);
 
-// Ground cracks — MeshBasic (no light calc needed)
-const crackMat = new THREE.MeshBasicMaterial({ color: 0x00f5ff });
-[[-15,-8],[15,-8],[-20,5],[20,5],[-10,-20],[10,-20],[-25,-15],[25,15]].forEach(([x,z]) => {
-  const len = Math.random()*4+2;
-  const crack = new THREE.Mesh(new THREE.PlaneGeometry(0.06, len), crackMat);
-  crack.rotation.x = -Math.PI/2;
-  crack.rotation.z = Math.random()*Math.PI;
-  crack.position.set(x + (Math.random()-0.5)*5, 0.005, z + (Math.random()-0.5)*5);
-  scene.add(crack);
-});
+// Ground cracks — InstancedMesh (8 meshes → 1)
+{
+  const crackData = [[-15,-8],[15,-8],[-20,5],[20,5],[-10,-20],[10,-20],[-25,-15],[25,15]];
+  const crackInst = new THREE.InstancedMesh(
+    new THREE.PlaneGeometry(0.06, 4), new THREE.MeshBasicMaterial({ color: 0x00f5ff }), crackData.length);
+  const d = new THREE.Object3D();
+  crackData.forEach(([x,z], i) => {
+    d.position.set(x+(Math.random()-0.5)*5, 0.005, z+(Math.random()-0.5)*5);
+    d.rotation.set(-Math.PI/2, 0, Math.random()*Math.PI);
+    d.updateMatrix();
+    crackInst.setMatrixAt(i, d.matrix);
+  });
+  scene.add(crackInst);
+}
 
 const grid = new THREE.GridHelper(100, 50, 0x00f5ff, 0x220055);
 grid.material.opacity = 0.4;
@@ -213,11 +202,19 @@ const road = new THREE.Mesh(
 road.rotation.x = -Math.PI/2; road.position.y = 0.01;
 scene.add(road);
 
-const markMat = new THREE.MeshBasicMaterial({ color: 0xffdd00 });
-for (let z = -45; z < 45; z += 6) {
-  const mark = new THREE.Mesh(new THREE.PlaneGeometry(0.25, 3), markMat);
-  mark.rotation.x = -Math.PI/2; mark.position.set(0, 0.02, z);
-  scene.add(mark);
+// Road marks — InstancedMesh (15 meshes → 1)
+{
+  const markGeo = new THREE.PlaneGeometry(0.25, 3);
+  const markMat = new THREE.MeshBasicMaterial({ color: 0xffdd00 });
+  const markCount = Math.ceil(90/6);
+  const markInst = new THREE.InstancedMesh(markGeo, markMat, markCount);
+  const d = new THREE.Object3D();
+  let idx = 0;
+  for (let z=-45; z<45; z+=6) {
+    d.position.set(0, 0.02, z); d.rotation.set(-Math.PI/2,0,0); d.updateMatrix();
+    markInst.setMatrixAt(idx++, d.matrix);
+  }
+  scene.add(markInst);
 }
 
 // ---- SHOOTING STARS: pooled, max 5 ----
@@ -408,21 +405,26 @@ const moon = new THREE.Mesh(new THREE.SphereGeometry(4, 12, 12), new THREE.MeshB
 moon.position.set(-40, 50, -80); scene.add(moon);
 // Moon light removed — MeshBasic moon is bright enough
 
-// ---- STREET LAMPS: emissive only, 2 shared lights (was 16) ----
-const lampBulbMat = new THREE.MeshBasicMaterial({ color: 0xffffaa });
-const lampPoleMat = new THREE.MeshBasicMaterial({ color: 0x444466 });
-function makeLamp(x, z) {
-  const g = new THREE.Group();
-  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, 5, 5), lampPoleMat);
-  pole.position.y = 2.5; g.add(pole);
-  const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 5), lampPoleMat);
-  arm.rotation.z = Math.PI/2; arm.position.set(Math.sign(x)*0.75, 5, 0); g.add(arm);
-  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.2, 6, 6), lampBulbMat);
-  bulb.position.set(Math.sign(x)*1.5, 5, 0); g.add(bulb);
-  g.position.set(x, 0, z); scene.add(g);
+// ---- STREET LAMPS: InstancedMesh (48 meshes → 3 draw calls) ----
+{
+  const lampPositions = [];
+  for (let z=-40;z<40;z+=10) { lampPositions.push([-4.5, z]); lampPositions.push([4.5, z]); }
+  const d = new THREE.Object3D();
+
+  const poleInst = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.07,0.1,5,5), new THREE.MeshBasicMaterial({ color: 0x444466 }), lampPositions.length);
+  const armInst = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05,0.05,1.5,5), new THREE.MeshBasicMaterial({ color: 0x444466 }), lampPositions.length);
+  const bulbInst = new THREE.InstancedMesh(new THREE.SphereGeometry(0.2, 6, 6), new THREE.MeshBasicMaterial({ color: 0xffffaa }), lampPositions.length);
+
+  lampPositions.forEach(([x, z], i) => {
+    d.position.set(x, 2.5, z); d.rotation.set(0,0,0); d.updateMatrix();
+    poleInst.setMatrixAt(i, d.matrix);
+    d.position.set(x+Math.sign(x)*0.75, 5, z); d.rotation.set(0,0,Math.PI/2); d.updateMatrix();
+    armInst.setMatrixAt(i, d.matrix);
+    d.position.set(x+Math.sign(x)*1.5, 5, z); d.rotation.set(0,0,0); d.updateMatrix();
+    bulbInst.setMatrixAt(i, d.matrix);
+  });
+  scene.add(poleInst); scene.add(armInst); scene.add(bulbInst);
 }
-// Street lights removed — lamps are MeshBasic emissive only
-for (let z=-40;z<40;z+=10) { makeLamp(-4.5, z); makeLamp(4.5, z); }
 
 // ---- BUILDINGS: InstancedMesh for all windows (1 draw call!) ----
 const winGeo = new THREE.PlaneGeometry(0.5, 0.5);
@@ -488,16 +490,7 @@ makeTextSign('CLUB 3D', 9.5, 9, -19, '#ff6600', Math.PI);
 makeTextSign('FUTURE', -9.5, 11, 7, '#00ff88', 0);
 makeTextSign('DRIVE ▶', 9.5, 8, 9, '#ff0088', Math.PI);
 
-// ---- NEON SIGNS: no PointLight per sign ----
-function makeSign(x, y, z, color, w, h) {
-  const frame = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.1), new THREE.MeshBasicMaterial({ color }));
-  frame.position.set(x, y, z); scene.add(frame);
-  const inner = new THREE.Mesh(new THREE.BoxGeometry(w*0.7, h*0.5, 0.05), new THREE.MeshBasicMaterial({ color: 0x000000 }));
-  inner.position.set(x, y, z+0.08); scene.add(inner);
-}
-makeSign(-9.5, 7, -8, 0x00ffff, 2.5, 1); makeSign(9.5, 9, -10, 0xff00ff, 3, 1.2);
-makeSign(-9.5, 5, -16, 0xffff00, 2, 0.8); makeSign(9.5, 6, -18, 0x00ff88, 2.8, 1);
-makeSign(-9.5, 8, 6, 0xff6600, 2.2, 0.9); makeSign(9.5, 7, 8, 0x8800ff, 2.5, 1);
+// Neon signs removed — text signs with canvas textures are enough
 
 const bdata = [
   [-8,-6,3,9,3,0xff00ff],[8,-6,3,11,3,0x00f5ff],
@@ -536,7 +529,7 @@ scene.add(car);
 
 const bodyMesh = new THREE.Mesh(
   new THREE.BoxGeometry(1.8, 0.6, 3.6),
-  new THREE.MeshStandardMaterial({ color: 0x00ccff, roughness: 0.1, metalness: 0.95, emissive: 0x0088cc, emissiveIntensity: 0.8 })
+  new THREE.MeshBasicMaterial({ color: 0x00ccff })
 );
 bodyMesh.position.y = 0.5; car.add(bodyMesh);
 
@@ -558,8 +551,6 @@ const wheels = [[-1.05,.35,1.2],[1.05,.35,1.2],[-1.05,.35,-1.2],[1.05,.35,-1.2]]
   const hl = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.18,0.05), new THREE.MeshBasicMaterial({ color: 0xffffcc }));
   hl.position.set(x, 0.5, 1.81); car.add(hl);
 });
-const headlight = new THREE.PointLight(0xffffaa, 2, 15);
-headlight.position.set(0, 0.5, 2.5); car.add(headlight);
 
 // Taillights — emissive only
 [-0.6, 0.6].forEach(x => {
@@ -567,15 +558,15 @@ headlight.position.set(0, 0.5, 2.5); car.add(headlight);
   tl.position.set(x, 0.5, -1.82); car.add(tl);
 });
 
-const glow = new THREE.PointLight(0x00aaff, 2, 4);
-glow.position.set(0, 0.1, 0); car.add(glow);
+// Underglow visual (no light, just a glowing plane)
+const glowPlane = new THREE.Mesh(
+  new THREE.PlaneGeometry(1.8, 3.6),
+  new THREE.MeshBasicMaterial({ color: 0x00aaff, transparent: true, opacity: 0.3 })
+);
+glowPlane.rotation.x = -Math.PI/2; glowPlane.position.y = 0.05;
+car.add(glowPlane);
 
-// ---- PUDDLES ----
-const puddleMat = new THREE.MeshBasicMaterial({ color: 0x112233 });
-[[-6,-5],[-7,-14],[6,-8],[7,-20],[-5,4],[5,12]].forEach(([x,z]) => {
-  const p = new THREE.Mesh(new THREE.CircleGeometry(1.2+Math.random(), 8), puddleMat);
-  p.rotation.x = -Math.PI/2; p.position.set(x, 0.008, z); scene.add(p);
-});
+// Puddles removed — minimal visual impact, 6 draw calls saved
 
 // ---- AUDIO ----
 let audioStarted = false;
@@ -685,7 +676,6 @@ function animate() {
   car.position.z += Math.cos(dir)*speed;
   car.position.y = Math.abs(speed)>0.01 ? Math.sin(t*20)*0.015 : 0;
   wheels.forEach(w => { w.rotation.x += speed*4.5; });
-  glow.intensity = 1.5+Math.sin(t*4)*0.5;
 
   // Camera — pre-allocated vector, no GC
   _camPos.set(car.position.x-Math.sin(dir+camTheta)*15, car.position.y+7+camPhi*4, car.position.z-Math.cos(dir+camTheta)*15);
@@ -693,14 +683,6 @@ function animate() {
   camTarget.lerp(car.position, 0.1);
   camTarget.y = car.position.y+1.5;
   camera.lookAt(camTarget);
-
-  // Moving lights
-  pLights.forEach((pl, i) => {
-    const a = t*0.4+i*2.1;
-    pl.light.position.x = Math.sin(a)*14;
-    pl.light.position.z = Math.cos(a)*14;
-    pl.light.intensity = 2.5+Math.sin(t*2+i)*0.8;
-  });
 
   // Traffic
   traffic.forEach(tc => { tc.group.position.z += tc.speed; if (tc.group.position.z>30) tc.group.position.z=-100; });
