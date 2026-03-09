@@ -711,7 +711,7 @@ function checkCollisions(){
   const cx=car.position.x,cz=car.position.z;
   for(let i=greens.length-1;i>=0;i--){
     const g=greens[i];if(!g.active)continue;
-    if((cx-g.x)**2+(cz-g.z)**2<3){
+    if((cx-g.x)**2+(cz-g.z)**2<5){
       g.active=false;score+=5;flow=Math.min(100,flow+3);
       sfxCollect();emitParticles(g.x,g.y,g.z,0x22c55e,6);
       const proj=_v.set(g.x,g.y+1,g.z).project(cam);
@@ -723,7 +723,7 @@ function checkCollisions(){
   for(let i=powerups.length-1;i>=0;i--){    const p=powerups[i];if(!p.active)continue;    if((cx-p.x)**2+(cz-p.z)**2<3){      p.active=false;screenFlash("flash-gold");      sfxBoost();emitParticles(p.x,p.y,p.z,0xfbbf24,10);      const proj=_v.set(p.x,p.y+1,p.z).project(cam);      if(p.type==="shield"){shieldTimer=300;showPopup("🛡️ מגן!",(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,"#60a5fa")}      else{turboTimer=180;showPopup("⚡ טורבו!",(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,"#fbbf24")}      powerups.splice(i,1);    }  }
   for(let i=obstacles.length-1;i>=0;i--){
     const o=obstacles[i];if(!o.active)continue;
-    if((cx-o.x)**2+(cz-o.z)**2<2.5){
+    if((cx-o.x)**2+(cz-o.z)**2<4){
       o.active=false;if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,o.y,o.z,0x60a5fa,8);sfxCollect();obstacles.splice(i,1);continue}lives--;flow=Math.max(0,flow-10);spd*=.3;
       sfxRed();screenFlash("flash-red");emitParticles(o.x,o.y,o.z,0xef4444,10);
       const proj=_v.set(o.x,o.y+1,o.z).project(cam);
@@ -788,8 +788,8 @@ function animate(){
     for(let i=powerups.length-1;i>=0;i--){if(powerups[i].z<car.position.z-30)powerups.splice(i,1)}
 
     // Bob greens & powerups
-    for(let i=0;i<greens.length;i++){greens[i].y=1.5+Math.sin(fc*.05+i)*.2}
-    for(let i=0;i<powerups.length;i++){powerups[i].y=1.5+Math.sin(fc*.06+i)*.4}
+    for(let i=0;i<greens.length;i++){greens[i].y=3+Math.sin(fc*.05+i)*.5}
+    for(let i=0;i<powerups.length;i++){powerups[i].y=2.5+Math.sin(fc*.06+i)*.6}
 
     checkCollisions();
 
