@@ -468,6 +468,39 @@ scene.add((() => {
 
 
 
+
+// ---- PARKED CARS ----
+{
+  const PARKED_N=30;
+  const pCarBodyGeo=new THREE.BoxGeometry(1.1,0.55,2);
+  const pCarRoofGeo=new THREE.BoxGeometry(0.85,0.35,1.1);
+  const pCarColors=[0x2c3e50,0x7f8c8d,0xbdc3c7,0x34495e,0x95a5a6,0xc0392b,0x2980b9,0x27ae60,0xf1c40f,0x8e44ad];
+  const pCarBodyInst=new THREE.InstancedMesh(pCarBodyGeo,new THREE.MeshBasicMaterial({color:0xffffff}),PARKED_N);
+  pCarBodyInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(PARKED_N*3),3);
+  const pCarRoofInst=new THREE.InstancedMesh(pCarRoofGeo,new THREE.MeshBasicMaterial({color:0x111111}),PARKED_N);
+  const _pc=new THREE.Color();
+  for(let i=0;i<PARKED_N;i++){
+    const side=i%2===0?-5.8:5.8;
+    const z=30+i*100+Math.random()*40;
+    const angle=i%2===0?0.05:-0.05;
+    _pc.setHex(pCarColors[i%pCarColors.length]);
+    pCarBodyInst.instanceColor.setXYZ(i,_pc.r,_pc.g,_pc.b);
+    dummy.position.set(side,0.35,z);
+    dummy.scale.setScalar(1);
+    dummy.rotation.set(0,angle,0);
+    dummy.updateMatrix();
+    pCarBodyInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(side,0.7,z-0.1);
+    dummy.updateMatrix();
+    pCarRoofInst.setMatrixAt(i,dummy.matrix);
+  }
+  pCarBodyInst.instanceMatrix.needsUpdate=true;
+  pCarBodyInst.instanceColor.needsUpdate=true;
+  pCarRoofInst.instanceMatrix.needsUpdate=true;
+  scene.add(pCarBodyInst);
+  scene.add(pCarRoofInst);
+}
+
 // ---- COLORFUL SHOPS ----
 {
   const SHOP_N=20;
