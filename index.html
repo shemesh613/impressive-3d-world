@@ -471,7 +471,7 @@ function updateParticles(){
 
 // ---- GAME STATE ----
 let score=0,lives=3,level=1,flow=50,greenCount=0,redCount=0,streak=0,bestStreak=0,shieldTimer=0,turboTimer=0;
-let gameActive=false,spd=0,dir=0,fc=0,boostTimer=0;
+let gameActive=false,spd=0,dir=0,fc=0,boostTimer=0,lastMilestone=0;
 let scenarioActive=false,scenarioTimer=0,scenarioTimeout=null,usedScenarios=[];
 let nextScenarioAt=0,scenariosAnswered=0;
 
@@ -619,11 +619,11 @@ function startGame(){
   document.getElementById('hud').style.display='block';
   document.getElementById('followers').style.display='block';
   gameActive=true;
-  score=0;lives=3;level=1;flow=50;greenCount=0;redCount=0;
-  spd=0;dir=0;boostTimer=0;scenarioActive=false;scenariosAnswered=0;
+  score=0;lives=3;level=1;flow=50;greenCount=0;redCount=0;streak=0;bestStreak=0;
+  spd=0;dir=0;boostTimer=0;shieldTimer=0;turboTimer=0;lastMilestone=0;scenarioActive=false;scenariosAnswered=0;
   usedScenarios=[];nextScenarioAt=50;
   car.position.set(0,0,0);
-  greens.length=0;obstacles.length=0;particles.length=0;
+  greens.length=0;obstacles.length=0;powerups.length=0;particles.length=0;
   for(let i=0;i<FOLLOWER_N;i++){followerPos[i].x=0;followerPos[i].z=-(i+1)*6}
   for(let i=0;i<5;i++)spawnGreen();
   for(let i=0;i<2;i++)spawnObstacle();
@@ -685,7 +685,7 @@ function animate(){
     const maxSpd=turboTimer>0?.5:boostTimer>0?.4:.28;
     if(keys.ArrowUp||keys.KeyW)spd=Math.min(maxSpd,spd+.014);
     else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.12,spd-.012);
-    else spd*=.975;
+    else{spd*=.975;if(spd<.04)spd=.04}
 
     if(Math.abs(spd)>.003){
       if(keys.ArrowLeft||keys.KeyA)dir+=.04*Math.sign(spd);
@@ -726,6 +726,11 @@ function animate(){
     for(let i=0;i<powerups.length;i++){powerups[i].y=1.5+Math.sin(fc*.06+i)*.4}
 
     checkCollisions();
+
+    // Milestone celebration every 100m
+    const dist=Math.floor(car.position.z);
+    const milestone=Math.floor(dist/100)*100;
+    if(milestone>0&&milestone>lastMilestone){lastMilestone=milestone;score+=10;sfxLevelUp();showPopup("🎉 "+milestone+"m!",innerWidth/2,innerHeight/2,"#fbbf24");emitParticles(car.position.x,3,car.position.z,0xfbbf24,15)}
 
     // Trigger scenario
     if(car.position.z>=nextScenarioAt)triggerScenario();
