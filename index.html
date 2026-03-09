@@ -156,11 +156,11 @@ function sfxLevelUp(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(
 const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance',stencil:false,alpha:false});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
 renderer.setSize(innerWidth,innerHeight);
-renderer.setClearColor(0x050015);
+renderer.setClearColor(0x100828);
 document.body.prepend(renderer.domElement);
 
 const scene=new THREE.Scene();
-const cam=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,1,250);
+const cam=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,1,400);
 cam.position.set(0,10,18);
 
 const dummy=new THREE.Object3D();
@@ -170,11 +170,11 @@ const _ct=new THREE.Vector3();
 const _col=new THREE.Color();
 
 // ---- FOG ----
-scene.fog=new THREE.FogExp2(0x050015,.008);
+scene.fog=new THREE.FogExp2(0x100828,.003);
 
 // ---- GROUND ----
 {
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshBasicMaterial({color:0x0c0c22}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,2000),new THREE.MeshBasicMaterial({color:0x1a1a3a}));
   m.rotation.x=-Math.PI/2;scene.add(m);
 }
 
@@ -189,12 +189,12 @@ scene.fog=new THREE.FogExp2(0x050015,.008);
 
 // ---- ROAD ----
 {
-  const road=new THREE.Mesh(new THREE.PlaneGeometry(10,300),new THREE.MeshBasicMaterial({color:0x181830}));
+  const road=new THREE.Mesh(new THREE.PlaneGeometry(10,2000),new THREE.MeshBasicMaterial({color:0x2a2a55}));
   road.rotation.x=-Math.PI/2;road.position.y=.01;scene.add(road);
   // Edge glow lines
   const edgeMat=new THREE.MeshBasicMaterial({color:0x00ccff});
   [-5.2,5.2].forEach(x=>{
-    const e=new THREE.Mesh(new THREE.PlaneGeometry(.12,300),edgeMat);
+    const e=new THREE.Mesh(new THREE.PlaneGeometry(.2,2000),edgeMat);
     e.rotation.x=-Math.PI/2;e.position.set(x,.02,0);scene.add(e);
   });
 }
@@ -251,7 +251,7 @@ for(let z=-120;z<=120;z+=12){
 }
 
 // ---- SKY DOME + STARS + MOON ----
-scene.add(new THREE.Mesh(new THREE.SphereGeometry(120,8,4),new THREE.MeshBasicMaterial({color:0x030012,side:THREE.BackSide})));
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(120,8,4),new THREE.MeshBasicMaterial({color:0x0a0520,side:THREE.BackSide})));
 {
   const p=new Float32Array(200*3);
   for(let i=0;i<200;i++){p[i*3]=(Math.random()-.5)*240;p[i*3+1]=Math.random()*60+10;p[i*3+2]=(Math.random()-.5)*240}
