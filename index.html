@@ -338,27 +338,37 @@ const _cv=new THREE.Vector3();
 const _ct=new THREE.Vector3();
 const _col=new THREE.Color();
 
+// ---- ROAD CURVE FUNCTION ----
+function roadX(z){return Math.sin(z*.007)*5+Math.sin(z*.019)*2.5+Math.cos(z*.012)*3}
+
 // ---- GROUND ----
 scene.add((() => {
   const m=new THREE.Mesh(new THREE.PlaneGeometry(400,6000),new THREE.MeshBasicMaterial({color:0x0d1a2d}));
   m.rotation.x=-Math.PI/2;return m;
 })());
 
-// ---- ROAD ----
+// ---- CURVED ROAD ----
 {
-  const road=new THREE.Mesh(new THREE.PlaneGeometry(10,6000),new THREE.MeshBasicMaterial({color:0x2a3050}));
-  road.rotation.x=-Math.PI/2;road.position.y=.01;scene.add(road);
+  const RSEGS=500,SLEN=6;
+  const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(11,SLEN),new THREE.MeshBasicMaterial({color:0x2a3050}),RSEGS);
   const edgeMat=new THREE.MeshBasicMaterial({color:0x22c55e});window._edgeMat=edgeMat;
-  [-5.2,5.2].forEach(x=>{
-    const e=new THREE.Mesh(new THREE.PlaneGeometry(.2,6000),edgeMat);
-    e.rotation.x=-Math.PI/2;e.position.set(x,.02,0);scene.add(e);
-  });
-  // Side glow
+  const edgeGeo=new THREE.PlaneGeometry(.3,SLEN);
+  const edgeL=new THREE.InstancedMesh(edgeGeo,edgeMat,RSEGS);
+  const edgeR=new THREE.InstancedMesh(edgeGeo,edgeMat,RSEGS);
   const glowMat=new THREE.MeshBasicMaterial({color:0x0d3320});
-  [-6.5,6.5].forEach(x=>{
-    const s=new THREE.Mesh(new THREE.PlaneGeometry(2,6000),glowMat);
-    s.rotation.x=-Math.PI/2;s.position.set(x,.005,0);scene.add(s);
-  });
+  const glowGeo=new THREE.PlaneGeometry(2.5,SLEN);
+  const glowL=new THREE.InstancedMesh(glowGeo,glowMat,RSEGS);
+  const glowR=new THREE.InstancedMesh(glowGeo,glowMat,RSEGS);
+  for(let i=0;i<RSEGS;i++){
+    const z=-50+i*SLEN,x=roadX(z+SLEN/2);
+    dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);
+    dummy.position.set(x,.01,z+SLEN/2);dummy.updateMatrix();roadInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x-5.2,.02,z+SLEN/2);dummy.updateMatrix();edgeL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x+5.2,.02,z+SLEN/2);dummy.updateMatrix();edgeR.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x-6.8,.005,z+SLEN/2);dummy.updateMatrix();glowL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x+6.8,.005,z+SLEN/2);dummy.updateMatrix();glowR.setMatrixAt(i,dummy.matrix);
+  }
+  [roadInst,edgeL,edgeR,glowL,glowR].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});
 }
 
 // ---- ROAD MARKS ----
@@ -366,7 +376,7 @@ scene.add((() => {
   const g=new THREE.PlaneGeometry(.2,3);const m=new THREE.MeshBasicMaterial({color:0xfbbf24});
   const inst=new THREE.InstancedMesh(g,m,600);
   for(let i=0;i<600;i++){
-    dummy.position.set(0,.03,-50+i*6);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
+    const _z=-50+i*6;dummy.position.set(roadX(_z),.03,_z);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
     inst.setMatrixAt(i,dummy.matrix);
   }
   inst.instanceMatrix.needsUpdate=true;scene.add(inst);
@@ -380,8 +390,8 @@ scene.add((() => {
   const parkN=30;
   const parkInst=new THREE.InstancedMesh(parkGeo,parkMat,parkN);
   for(let i=0;i<parkN;i++){
-    const side=i%2===0?-14:14;
-    dummy.position.set(side,.02,i*60+30);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
+    const _pz=i*60+30;const side=i%2===0?roadX(_pz)-14:roadX(_pz)+14;
+    dummy.position.set(side,.02,_pz);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
     parkInst.setMatrixAt(i,dummy.matrix);
   }
   parkInst.instanceMatrix.needsUpdate=true;scene.add(parkInst);
@@ -394,8 +404,8 @@ scene.add((() => {
   const benchN=30;
   const benchInst=new THREE.InstancedMesh(benchGeo,benchMat,benchN);
   for(let i=0;i<benchN;i++){
-    const side=i%2===0?-13:13;
-    dummy.position.set(side,.25,i*60+32);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    const _bz=i*60+32;const side=i%2===0?roadX(_bz)-13:roadX(_bz)+13;
+    dummy.position.set(side,.25,_bz);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
     benchInst.setMatrixAt(i,dummy.matrix);
   }
   benchInst.instanceMatrix.needsUpdate=true;scene.add(benchInst);
@@ -403,10 +413,15 @@ scene.add((() => {
 // ---- SIDEWALKS ----
 {
   const swMat=new THREE.MeshBasicMaterial({color:0x2a6a4e});
-  [-5.8,5.8].forEach(x=>{
-    const sw=new THREE.Mesh(new THREE.BoxGeometry(1.2,.15,6000),swMat);
-    sw.position.set(x,.08,0);scene.add(sw);
-  });
+  const SW_SEGS=400,SW_LEN=7.5;
+  const swL=new THREE.InstancedMesh(new THREE.BoxGeometry(1.2,.15,SW_LEN),swMat,SW_SEGS);
+  const swR=new THREE.InstancedMesh(new THREE.BoxGeometry(1.2,.15,SW_LEN),swMat,SW_SEGS);
+  for(let i=0;i<SW_SEGS;i++){
+    const z=-50+i*SW_LEN,rx=roadX(z+SW_LEN/2);
+    dummy.position.set(rx-5.8,.08,z+SW_LEN/2);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();swL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(rx+5.8,.08,z+SW_LEN/2);dummy.updateMatrix();swR.setMatrixAt(i,dummy.matrix);
+  }
+  swL.instanceMatrix.needsUpdate=true;swR.instanceMatrix.needsUpdate=true;scene.add(swL);scene.add(swR);
 }
 
 // ---- ROAD SIGNS ----
@@ -444,7 +459,7 @@ scene.add((() => {
   const barrierData=[];
   for(let i=0;i<BARRIER_N;i++){
     const z=150+i*120;
-    const side=i%3===0?-3:(i%3===1?3:0);
+    const _brx=roadX(z);const side=_brx+(i%3===0?-3:(i%3===1?3:0));
     const width=i%3===2?1.5:3;
     barrierData.push({x:side,z:z,w:width});
     dummy.position.set(side,.4,z);dummy.scale.set(width/3,1,1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
@@ -462,7 +477,7 @@ scene.add((() => {
   for(let i=0;i<ARROW_N;i++){
     const z=130+i*120;
     const side=i%3===0?1:(i%3===1?-1:0);
-    dummy.position.set(side*2,2.5,z);dummy.rotation.set(0,0,side*Math.PI/2);dummy.scale.setScalar(1);dummy.updateMatrix();
+    dummy.position.set(roadX(z)+side*2,2.5,z);dummy.rotation.set(0,0,side*Math.PI/2);dummy.scale.setScalar(1);dummy.updateMatrix();
     arrowInst.setMatrixAt(i,dummy.matrix);
   }
   arrowInst.instanceMatrix.needsUpdate=true;scene.add(arrowInst);
@@ -474,14 +489,41 @@ scene.add((() => {
   const bumpMat=new THREE.MeshBasicMaterial({color:0xffdd00});
   const bumpInst=new THREE.InstancedMesh(bumpGeo,bumpMat,BUMP_N);
   for(let i=0;i<BUMP_N;i++){
-    dummy.position.set(0,.15,200+i*150);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    dummy.position.set(roadX(200+i*150),.15,200+i*150);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
     bumpInst.setMatrixAt(i,dummy.matrix);
   }
   bumpInst.instanceMatrix.needsUpdate=true;scene.add(bumpInst);
 }
 
-// ---- CROSS STREETS ----
-{  const crossGeo=new THREE.PlaneGeometry(30,.15);  const crossMat=new THREE.MeshBasicMaterial({color:0x334455});  const crossN=40;  const crossInst=new THREE.InstancedMesh(crossGeo,crossMat,crossN);  for(let i=0;i<crossN;i++){    dummy.position.set(0,.015,i*80+50);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();    crossInst.setMatrixAt(i,dummy.matrix);  }  crossInst.instanceMatrix.needsUpdate=true;scene.add(crossInst);}
+// ---- CROSS STREETS (intersections) ----
+{
+  const crossN=25;
+  const crossGeo=new THREE.PlaneGeometry(40,5);
+  const crossMat=new THREE.MeshBasicMaterial({color:0x394860});
+  const crossInst=new THREE.InstancedMesh(crossGeo,crossMat,crossN);
+  const zebraGeo=new THREE.PlaneGeometry(1.2,.4);
+  const zebraMat=new THREE.MeshBasicMaterial({color:0xffffff});
+  const zebraInst=new THREE.InstancedMesh(zebraGeo,zebraMat,crossN*10);
+  const sideRoadGeo=new THREE.PlaneGeometry(8,30);
+  const sideRoadMat=new THREE.MeshBasicMaterial({color:0x2a3050});
+  const sideRoadL=new THREE.InstancedMesh(sideRoadGeo,sideRoadMat,crossN);
+  const sideRoadR=new THREE.InstancedMesh(sideRoadGeo,sideRoadMat,crossN);
+  for(let i=0;i<crossN;i++){
+    const z=70+i*80,x=roadX(z);
+    dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);
+    dummy.position.set(x,.013,z);dummy.updateMatrix();crossInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x-12,.011,z);dummy.rotation.set(-Math.PI/2,0,Math.PI/2);dummy.updateMatrix();sideRoadL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x+12,.011,z);dummy.updateMatrix();sideRoadR.setMatrixAt(i,dummy.matrix);
+    for(let j=0;j<10;j++){
+      dummy.rotation.set(-Math.PI/2,0,0);
+      dummy.position.set(x-4.5+j*1,.025,z);dummy.updateMatrix();
+      zebraInst.setMatrixAt(i*10+j,dummy.matrix);
+    }
+  }
+  crossInst.instanceMatrix.needsUpdate=true;zebraInst.instanceMatrix.needsUpdate=true;
+  sideRoadL.instanceMatrix.needsUpdate=true;sideRoadR.instanceMatrix.needsUpdate=true;
+  scene.add(crossInst);scene.add(zebraInst);scene.add(sideRoadL);scene.add(sideRoadR);
+}
 
 
 
@@ -524,13 +566,13 @@ scene.add((() => {
   const cmarkRInst=new THREE.InstancedMesh(cmarkGeo,cmarkMatR,CMARK_N);
   for(let i=0;i<CMARK_N;i++){
     const z=i*30;
-    const curve=Math.sin(z*0.003)*3;
-    dummy.position.set(-4.8+curve,0.02,z);
+    const curve=roadX(z);
+    dummy.position.set(-5+curve,0.02,z);
     dummy.scale.setScalar(1);
     dummy.rotation.set(-Math.PI/2,0,0);
     dummy.updateMatrix();
     cmarkLInst.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(4.8+curve,0.02,z);
+    dummy.position.set(5+curve,0.02,z);
     dummy.updateMatrix();
     cmarkRInst.setMatrixAt(i,dummy.matrix);
   }
@@ -553,8 +595,8 @@ scene.add((() => {
   const _pedc=new THREE.Color();
   const pedData=[];
   for(let i=0;i<PED_N;i++){
-    const side=i%2===0?-7:7;
     const z=Math.random()*2500;
+    const side=i%2===0?roadX(z)-7:roadX(z)+7;
     const dir=Math.random()>0.5?1:-1;
     const spd=0.005+Math.random()*0.01;
     pedData.push({x:side+Math.random()*1.5-0.75,z:z,dir:dir,spd:spd,phase:Math.random()*Math.PI*2});
@@ -588,8 +630,8 @@ scene.add((() => {
   const pCarRoofInst=new THREE.InstancedMesh(pCarRoofGeo,new THREE.MeshBasicMaterial({color:0x111111}),PARKED_N);
   const _pc=new THREE.Color();
   for(let i=0;i<PARKED_N;i++){
-    const side=i%2===0?-5.8:5.8;
     const z=30+i*100+Math.random()*40;
+    const side=i%2===0?roadX(z)-5.8:roadX(z)+5.8;
     const angle=i%2===0?0.05:-0.05;
     _pc.setHex(pCarColors[i%pCarColors.length]);
     pCarBodyInst.instanceColor.setXYZ(i,_pc.r,_pc.g,_pc.b);
@@ -626,8 +668,8 @@ scene.add((() => {
   shopLightInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(SHOP_N*3),3);
   const _sc=new THREE.Color();
   for(let i=0;i<SHOP_N;i++){
-    const side=i%2===0?-8.5:8.5;
     const z=50+i*140;
+    const side=i%2===0?roadX(z)-8.5:roadX(z)+8.5;
     _sc.setHex(shopColors[i%shopColors.length]);
     awningInst.instanceColor.setXYZ(i,_sc.r,_sc.g,_sc.b);
     shopLightInst.instanceColor.setXYZ(i,_sc.r,_sc.g,_sc.b);
@@ -697,29 +739,29 @@ scene.add((() => {
   const archMat=new THREE.MeshBasicMaterial({color:0x7799bb});
   const archInst=new THREE.InstancedMesh(archGeo,archMat,BRIDGE_N*2);
   for(let i=0;i<BRIDGE_N;i++){
-    const z=800+i*700;
-    dummy.position.set(0,6.8,z);
+    const z=800+i*700;const _brx=roadX(z);
+    dummy.position.set(_brx,6.8,z);
     dummy.scale.setScalar(1);
     dummy.rotation.set(0,0,0);
     dummy.updateMatrix();
     bridgeDeckInst.setMatrixAt(i,dummy.matrix);
-    const pillars=[[-6,z-1.5],[-6,z+1.5],[6,z-1.5],[6,z+1.5]];
+    const pillars=[[_brx-6,z-1.5],[_brx-6,z+1.5],[_brx+6,z-1.5],[_brx+6,z+1.5]];
     for(let j=0;j<4;j++){
       dummy.position.set(pillars[j][0],3.5,pillars[j][1]);
       dummy.updateMatrix();
       pillarInst.setMatrixAt(i*4+j,dummy.matrix);
     }
-    dummy.position.set(0,7.2,z-1.8);
+    dummy.position.set(_brx,7.2,z-1.8);
     dummy.updateMatrix();
     railInst.setMatrixAt(i*2,dummy.matrix);
-    dummy.position.set(0,7.2,z+1.8);
+    dummy.position.set(_brx,7.2,z+1.8);
     dummy.updateMatrix();
     railInst.setMatrixAt(i*2+1,dummy.matrix);
-    dummy.position.set(-6,6.8,z);
+    dummy.position.set(_brx-6,6.8,z);
     dummy.rotation.set(0,Math.PI/2,0);
     dummy.updateMatrix();
     archInst.setMatrixAt(i*2,dummy.matrix);
-    dummy.position.set(6,6.8,z);
+    dummy.position.set(_brx+6,6.8,z);
     dummy.updateMatrix();
     archInst.setMatrixAt(i*2+1,dummy.matrix);
   }
@@ -772,20 +814,20 @@ scene.add((() => {
   const tunnelPositions=[];
   for(let i=0;i<TUNNEL_N;i++){
     const z=400+i*600;
-    tunnelPositions.push(z);
-    dummy.position.set(-6,2.5,z);
+    tunnelPositions.push(z);const _trx=roadX(z);
+    dummy.position.set(_trx-6,2.5,z);
     dummy.scale.setScalar(1);
     dummy.rotation.set(0,0,0);
     dummy.updateMatrix();
     tunnelLWall.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(6,2.5,z);
+    dummy.position.set(_trx+6,2.5,z);
     dummy.updateMatrix();
     tunnelRWall.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(0,5,z);
+    dummy.position.set(_trx,5,z);
     dummy.updateMatrix();
     tunnelRoof.setMatrixAt(i,dummy.matrix);
     for(let j=0;j<LIGHTS_PER_TUNNEL;j++){
-      dummy.position.set(0,4.7,z-8+j*5.3);
+      dummy.position.set(_trx,4.7,z-8+j*5.3);
       dummy.scale.setScalar(1);
       dummy.updateMatrix();
       tunnelLightInst.setMatrixAt(i*LIGHTS_PER_TUNNEL+j,dummy.matrix);
@@ -805,10 +847,11 @@ scene.add((() => {
 // ---- BUILDINGS (city-like) ----
 const bdata=[];
 for(let z=-100;z<=2000;z+=10){
-  bdata.push([-10,z,2.5+Math.random()*2,4+Math.random()*12,2.5+Math.random()*2]);
-  bdata.push([10,z,2.5+Math.random()*2,4+Math.random()*12,2.5+Math.random()*2]);
-  if(Math.random()>.5)bdata.push([-16,z,2+Math.random()*2,3+Math.random()*8,2+Math.random()*2]);
-  if(Math.random()>.5)bdata.push([16,z,2+Math.random()*2,3+Math.random()*8,2+Math.random()*2]);
+  const _rx=roadX(z);
+  bdata.push([_rx-11,z,2.5+Math.random()*2,4+Math.random()*12,2.5+Math.random()*2]);
+  bdata.push([_rx+11,z,2.5+Math.random()*2,4+Math.random()*12,2.5+Math.random()*2]);
+  if(Math.random()>.5)bdata.push([_rx-17,z,2+Math.random()*2,3+Math.random()*8,2+Math.random()*2]);
+  if(Math.random()>.5)bdata.push([_rx+17,z,2+Math.random()*2,3+Math.random()*8,2+Math.random()*2]);
 }
 {
   const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshBasicMaterial();
@@ -832,7 +875,7 @@ for(let z=-100;z<=2000;z+=10){
 }
 
 // ---- TREES (lollipop style) ----
-{  const trunkGeo=new THREE.CylinderGeometry(.15,.2,2,5);  const trunkMat=new THREE.MeshBasicMaterial({color:0x5c4033});  const leafGeo=new THREE.SphereGeometry(1.2,6,5);  const leafColors=[0x16a34a,0x22c55e,0x15803d,0x4ade80,0x86efac];  const treePositions=[];  for(let z=-80;z<=2000;z+=15){    if(Math.random()>.35)treePositions.push([-7.5+(Math.random()-.5)*2,z]);    if(Math.random()>.35)treePositions.push([7.5+(Math.random()-.5)*2,z]);  }  const trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,treePositions.length);  const leafInst=new THREE.InstancedMesh(leafGeo,new THREE.MeshBasicMaterial(),treePositions.length);  treePositions.forEach(([x,z],i)=>{    dummy.position.set(x,1,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    trunkInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,3+Math.random()*.5,z);dummy.scale.setScalar(.7+Math.random()*.5);dummy.updateMatrix();    leafInst.setMatrixAt(i,dummy.matrix);leafInst.setColorAt(i,_col.setHex(leafColors[i%leafColors.length]));  });  trunkInst.instanceMatrix.needsUpdate=true;leafInst.instanceMatrix.needsUpdate=true;  if(leafInst.instanceColor)leafInst.instanceColor.needsUpdate=true;  scene.add(trunkInst);scene.add(leafInst);}// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=2000;z+=20){lampPositions.push([-6,z],[6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshBasicMaterial({color:0x888888});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.25,4,4);  const glowMat2=new THREE.MeshBasicMaterial({color:0xffffaa});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
+{  const trunkGeo=new THREE.CylinderGeometry(.15,.2,2,5);  const trunkMat=new THREE.MeshBasicMaterial({color:0x5c4033});  const leafGeo=new THREE.SphereGeometry(1.2,6,5);  const leafColors=[0x16a34a,0x22c55e,0x15803d,0x4ade80,0x86efac];  const treePositions=[];  for(let z=-80;z<=2000;z+=15){    const _trx=roadX(z);if(Math.random()>.35)treePositions.push([_trx-8+(Math.random()-.5)*2,z]);    if(Math.random()>.35)treePositions.push([_trx+8+(Math.random()-.5)*2,z]);  }  const trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,treePositions.length);  const leafInst=new THREE.InstancedMesh(leafGeo,new THREE.MeshBasicMaterial(),treePositions.length);  treePositions.forEach(([x,z],i)=>{    dummy.position.set(x,1,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    trunkInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,3+Math.random()*.5,z);dummy.scale.setScalar(.7+Math.random()*.5);dummy.updateMatrix();    leafInst.setMatrixAt(i,dummy.matrix);leafInst.setColorAt(i,_col.setHex(leafColors[i%leafColors.length]));  });  trunkInst.instanceMatrix.needsUpdate=true;leafInst.instanceMatrix.needsUpdate=true;  if(leafInst.instanceColor)leafInst.instanceColor.needsUpdate=true;  scene.add(trunkInst);scene.add(leafInst);}// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=2000;z+=20){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshBasicMaterial({color:0x888888});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.25,4,4);  const glowMat2=new THREE.MeshBasicMaterial({color:0xffffaa});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
 // Sky + Stars + Moon
 // ---- CLOUDS ----
 const cloudGeo=new THREE.SphereGeometry(1,6,4);const cloudMat=new THREE.MeshBasicMaterial({color:0x1a3a2a,transparent:true,opacity:.4});const CLOUD_N=20;const cloudInst=new THREE.InstancedMesh(cloudGeo,cloudMat,CLOUD_N);const cloudData=[];for(let i=0;i<CLOUD_N;i++){cloudData.push({x:(Math.random()-.5)*80,y:18+Math.random()*12,z:Math.random()*400-50,sx:2+Math.random()*3,sy:.5+Math.random()*.3,sz:1+Math.random()*1.5,spd:.002+Math.random()*.003})}function updateClouds(){cloudData.forEach((c,i)=>{c.x+=c.spd;if(c.x>50)c.x=-50;dummy.position.set(c.x,c.y,c.z);dummy.scale.set(c.sx,c.sy,c.sz);dummy.rotation.set(0,0,0);dummy.updateMatrix();cloudInst.setMatrixAt(i,dummy.matrix)});cloudInst.instanceMatrix.needsUpdate=true}updateClouds();scene.add(cloudInst);
@@ -899,12 +942,13 @@ window._ringInst=ringInst;
 
 function spawnGreen(){
   if(greens.length>=MAX_GREENS)return;
-  const x=(Math.random()-.5)*8;const z=car.position.z+(35+Math.random()*50);
+  const z=car.position.z+(35+Math.random()*50);const rx=roadX(z);
+  const x=rx+(Math.random()-.5)*8;
   greens.push({x,z,y:3,active:true});
 }
 
 // ---- POWER-UPS (golden diamonds) ----
-const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.8,1),new THREE.MeshBasicMaterial({color:0xfbbf24}),MAX_POWERUPS);scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const x=(Math.random()-.5)*7;const z=car.position.z+(60+Math.random()*40);  powerups.push({x,z,y:2.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
+const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.8,1),new THREE.MeshBasicMaterial({color:0xfbbf24}),MAX_POWERUPS);scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const z=car.position.z+(60+Math.random()*40);const rx=roadX(z);const x=rx+(Math.random()-.5)*7;  powerups.push({x,z,y:2.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
 // ---- OBSTACLES (red) ----
 const MAX_OBS=6;
 const obstacles=[];
@@ -920,7 +964,8 @@ window._obsRingInst=obsRingInst;
 
 function spawnObstacle(){
   if(obstacles.length>=MAX_OBS)return;
-  const x=(Math.random()-.5)*8;const z=car.position.z+(45+Math.random()*50);
+  const z=car.position.z+(45+Math.random()*50);const rx=roadX(z);
+  const x=rx+(Math.random()-.5)*8;
   obstacles.push({x,z,y:2,active:true});
 }
 
@@ -1176,7 +1221,7 @@ function animate(){
     car.position.x+=Math.sin(dir)*spd;
     car.position.z+=Math.cos(dir)*spd;
 
-    const roadCurve=Math.sin(car.position.z*0.003)*3;
+    const roadCurve=roadX(car.position.z);
     const leftEdge=-4.5+roadCurve;
     const rightEdge=4.5+roadCurve;
     if(car.position.x<leftEdge)car.position.x+=(leftEdge-car.position.x)*.05+.05;
@@ -1280,7 +1325,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
       }
     }
     if(fc%90===0&&activeCount<4){
-      for(let i=0;i<od.n;i++){if(!od.data[i].active){od.data[i].active=true;od.data[i].z=car.position.z+80+Math.random()*40;od.data[i].x=-3.5+Math.random()*1.5;od.data[i].spd=0.12+Math.random()*0.15;break;}}
+      for(let i=0;i<od.n;i++){if(!od.data[i].active){od.data[i].active=true;od.data[i].z=car.position.z+80+Math.random()*40;od.data[i].x=roadX(od.data[i].z)-3.5+Math.random()*1.5;od.data[i].spd=0.12+Math.random()*0.15;break;}}
     }
     od.bodyInst.instanceMatrix.needsUpdate=true;od.roofInst.instanceMatrix.needsUpdate=true;od.lightInst.instanceMatrix.needsUpdate=true;
   }
@@ -1353,13 +1398,13 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
     const baseZ=Math.floor(car.position.z/30)*30-30*10;
     for(let i=0;i<cm.n;i++){
       const z=baseZ+i*30;
-      const curve=Math.sin(z*0.003)*3;
-      dummy.position.set(-4.8+curve,0.02,z);
+      const curve=roadX(z);
+      dummy.position.set(-5+curve,0.02,z);
       dummy.scale.setScalar(1);
       dummy.rotation.set(-Math.PI/2,0,0);
       dummy.updateMatrix();
       cm.lInst.setMatrixAt(i,dummy.matrix);
-      dummy.position.set(4.8+curve,0.02,z);
+      dummy.position.set(5+curve,0.02,z);
       dummy.updateMatrix();
       cm.rInst.setMatrixAt(i,dummy.matrix);
     }
