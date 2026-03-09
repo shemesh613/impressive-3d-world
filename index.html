@@ -1014,6 +1014,35 @@ let nextScenarioAt=0,scenariosAnswered=0;
 const keys={};
 addEventListener('keydown',e=>{keys[e.code]=true;if(scenarioActive){if(e.code==='Digit1'||e.code==='ArrowRight')choose('green');if(e.code==='Digit2'||e.code==='ArrowLeft')choose('red')}e.preventDefault()});
 addEventListener('keyup',e=>{keys[e.code]=false});
+window._gkeys=keys;window._gcar=()=>typeof car!=='undefined'?car:null;
+
+// Screenshot mode: expose globals and auto-drive when ?auto=1
+if(location.search.includes('auto=1')){
+  window._autoMode=true;
+  setTimeout(()=>{
+    // Click start button
+    document.querySelectorAll('button').forEach(b=>{if(b.textContent.includes('בואו'))b.click()});
+    // Start driving after 1s
+    setTimeout(()=>{keys['ArrowUp']=true},1000);
+    // Capture at various distances
+    let captured=0;
+    setInterval(()=>{
+      if(car&&car.position.z>100&&captured<5){
+        captured++;
+        const c=document.querySelector('canvas');
+        if(c){
+          const link=document.createElement('a');
+          link.download='curve_'+Math.floor(car.position.z)+'m.png';
+          // Store dataURL for Puppeteer
+          window._lastCapture=c.toDataURL('image/png');
+          window._captureReady=true;
+          window._captureDist=Math.floor(car.position.z);
+        }
+      }
+    },3000);
+  },2000);
+}
+
 
 const isMobile='ontouchstart'in window||navigator.maxTouchPoints>0;
 if(isMobile){
