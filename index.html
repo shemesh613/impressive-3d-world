@@ -467,6 +467,54 @@ scene.add((() => {
 
 
 
+
+// ---- COLORFUL SHOPS ----
+{
+  const SHOP_N=20;
+  const shopColors=[0xff3366,0x33ccff,0xffcc00,0x66ff33,0xff6600,0xcc33ff,0x00ffcc,0xff3399];
+  const awningGeo=new THREE.BoxGeometry(2.5,0.2,1.5);
+  const awningMat=new THREE.MeshBasicMaterial({color:0xffffff});
+  const awningInst=new THREE.InstancedMesh(awningGeo,awningMat,SHOP_N);
+  awningInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(SHOP_N*3),3);
+  const shopFrontGeo=new THREE.BoxGeometry(2.5,2,0.1);
+  const shopFrontMat=new THREE.MeshBasicMaterial({color:0xffeedd,transparent:true,opacity:0.3});
+  const shopFrontInst=new THREE.InstancedMesh(shopFrontGeo,shopFrontMat,SHOP_N);
+  const shopLightGeo=new THREE.SphereGeometry(0.2,4,4);
+  const shopLightMat=new THREE.MeshBasicMaterial({color:0xffffff});
+  const shopLightInst=new THREE.InstancedMesh(shopLightGeo,shopLightMat,SHOP_N);
+  shopLightInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(SHOP_N*3),3);
+  const _sc=new THREE.Color();
+  for(let i=0;i<SHOP_N;i++){
+    const side=i%2===0?-8.5:8.5;
+    const z=50+i*140;
+    _sc.setHex(shopColors[i%shopColors.length]);
+    awningInst.instanceColor.setXYZ(i,_sc.r,_sc.g,_sc.b);
+    shopLightInst.instanceColor.setXYZ(i,_sc.r,_sc.g,_sc.b);
+    dummy.position.set(side,3.2,z);
+    dummy.scale.setScalar(1);
+    dummy.rotation.set(0.15*(i%2===0?1:-1),0,0);
+    dummy.updateMatrix();
+    awningInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(side,2,z);
+    dummy.rotation.set(0,0,0);
+    dummy.updateMatrix();
+    shopFrontInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(side,3.5,z);
+    dummy.scale.setScalar(1);
+    dummy.updateMatrix();
+    shopLightInst.setMatrixAt(i,dummy.matrix);
+  }
+  awningInst.instanceMatrix.needsUpdate=true;
+  awningInst.instanceColor.needsUpdate=true;
+  shopFrontInst.instanceMatrix.needsUpdate=true;
+  shopLightInst.instanceMatrix.needsUpdate=true;
+  shopLightInst.instanceColor.needsUpdate=true;
+  scene.add(awningInst);
+  scene.add(shopFrontInst);
+  scene.add(shopLightInst);
+  window._shopData={lightInst:shopLightInst,n:SHOP_N};
+}
+
 // ---- TWINKLING STARS ----
 {
   const STAR_N=80;
@@ -1076,6 +1124,23 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
     od.bodyInst.instanceMatrix.needsUpdate=true;od.roofInst.instanceMatrix.needsUpdate=true;od.lightInst.instanceMatrix.needsUpdate=true;
   }
 
+
+
+  // Shop lights pulse
+  if(window._shopData){
+    const shd=window._shopData;
+    for(let i=0;i<shd.n;i++){
+      const side=i%2===0?-8.5:8.5;
+      const z=50+i*140;
+      const pulse=0.6+Math.sin(fc*0.03+i*1.7)*0.4;
+      dummy.position.set(side,3.5,z);
+      dummy.scale.setScalar(pulse);
+      dummy.rotation.set(0,0,0);
+      dummy.updateMatrix();
+      shd.lightInst.setMatrixAt(i,dummy.matrix);
+    }
+    shd.lightInst.instanceMatrix.needsUpdate=true;
+  }
 
   // Star twinkling
   if(window._starData){
