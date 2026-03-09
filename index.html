@@ -6,7 +6,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-    #c { display: block; width: 100vw; height: 100vh; filter: contrast(1.05) saturate(1.2); }
+    #c { display: block; width: 100vw; height: 100vh; }
     #ui {
       position: fixed; top: 30px; left: 0; right: 0;
       text-align: center; z-index: 10; pointer-events: none;
@@ -17,8 +17,21 @@
       background: linear-gradient(90deg, #00f5ff, #ff00ff, #ffff00);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
+      text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(255,0,255,0.4);
+      animation: titlePulse 2s ease-in-out infinite;
     }
-    #ui p { color: rgba(255,255,255,0.4); letter-spacing: 5px; margin-top: 8px; font-size: 13px; }
+    @keyframes titlePulse {
+      0%,100% { text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(255,0,255,0.4); }
+      50% { text-shadow: 0 0 50px rgba(0,245,255,1), 0 0 100px rgba(255,0,255,0.8), 0 0 150px rgba(255,255,0,0.3); }
+    }
+    #ui p {
+      color: rgba(255,255,255,0.4); letter-spacing: 5px; margin-top: 8px; font-size: 13px;
+      animation: subtitleGlow 3s ease-in-out infinite;
+    }
+    @keyframes subtitleGlow {
+      0%,100% { color: rgba(0,245,255,0.4); text-shadow: none; }
+      50% { color: rgba(0,245,255,0.8); text-shadow: 0 0 20px rgba(0,245,255,0.6); }
+    }
     #hint { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
       color: rgba(0,245,255,0.6); font-size: 13px; letter-spacing: 4px; z-index: 10;
       pointer-events: none; animation: hintFade 3s ease-in-out forwards; }
@@ -49,11 +62,11 @@
       position: fixed; inset: 0; z-index: 7; pointer-events: none;
       background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
     }
-    #minimap { border-color: rgba(0,245,255,0.6); box-shadow: 0 0 10px rgba(0,245,255,0.3); }
     #minimap {
       position: fixed; bottom: 55px; left: 20px; z-index: 10;
       width: 100px; height: 100px; border: 1px solid rgba(0,245,255,0.4);
       background: rgba(0,0,0,0.5); border-radius: 4px; pointer-events: none;
+      border-color: rgba(0,245,255,0.6); box-shadow: 0 0 10px rgba(0,245,255,0.3);
     }
     #minimap canvas { width: 100%; height: 100%; }
     #speedlines {
@@ -69,25 +82,11 @@
       position: fixed; inset: 0; z-index: 9; pointer-events: none;
       background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
     }
-    #ui h1 {
-      text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(255,0,255,0.4);
-      animation: titlePulse 2s ease-in-out infinite;
-    }
-    @keyframes titlePulse {
-      0%,100% { text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(255,0,255,0.4); }
-      50% { text-shadow: 0 0 50px rgba(0,245,255,1), 0 0 100px rgba(255,0,255,0.8), 0 0 150px rgba(255,255,0,0.3); }
-    }
-    #c { filter: contrast(1.08) saturate(1.3) brightness(1.05); }
     #chromatic {
       position: fixed; inset: 0; z-index: 6; pointer-events: none;
       mix-blend-mode: screen; opacity: 0.04;
       background: radial-gradient(ellipse at 48% 50%, transparent 60%, rgba(255,0,100,0.5) 100%),
                   radial-gradient(ellipse at 52% 50%, transparent 60%, rgba(0,100,255,0.5) 100%);
-    }
-    #ui p { animation: subtitleGlow 3s ease-in-out infinite; }
-    @keyframes subtitleGlow {
-      0%,100% { color: rgba(0,245,255,0.4); text-shadow: none; }
-      50% { color: rgba(0,245,255,0.8); text-shadow: 0 0 20px rgba(0,245,255,0.6); }
     }
   </style>
 </head>
@@ -113,44 +112,45 @@
 
 <script src="three.min.js"></script>
 <script>
-// WebGL check
+// === PERFORMANCE-OPTIMIZED VERSION ===
+// Changes: ~60 lights → ~12, no scene.traverse per frame, throttled HUD,
+// reduced particles, pooled objects, no CSS filters, cached DOM, no GC allocs
+
 if (!window.WebGLRenderingContext) {
   document.getElementById('err').style.display = 'flex';
   throw new Error('No WebGL');
 }
 
-// ---- RENDERER ----
 const canvas = document.getElementById('c');
 let renderer;
 try {
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
 } catch(e) {
   document.getElementById('err').style.display = 'flex';
   throw e;
 }
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.BasicShadowMap;
 renderer.setClearColor(0x05000f);
 
-// ---- SCENE & CAMERA ----
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x05000f, 0.025);
-
 const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 300);
 camera.position.set(0, 8, 16);
 
-// ---- LIGHTS ----
-scene.add(new THREE.AmbientLight(0x221133, 2));
+// ---- LIGHTS: ~12 total (was ~60+) ----
+scene.add(new THREE.AmbientLight(0x221133, 2.5));
 
 const sun = new THREE.DirectionalLight(0xffffff, 1.5);
 sun.position.set(15, 30, 15);
 sun.castShadow = true;
-sun.shadow.mapSize.set(1024, 1024);
+sun.shadow.mapSize.set(512, 512);
 sun.shadow.camera.near = 0.1;
-sun.shadow.camera.far = 150;
-sun.shadow.camera.left = sun.shadow.camera.bottom = -40;
-sun.shadow.camera.right = sun.shadow.camera.top = 40;
+sun.shadow.camera.far = 100;
+sun.shadow.camera.left = sun.shadow.camera.bottom = -30;
+sun.shadow.camera.right = sun.shadow.camera.top = 30;
 scene.add(sun);
 
 const pLights = [];
@@ -174,8 +174,8 @@ ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-// ---- GROUND CRACKS ----
-const crackMat = new THREE.MeshStandardMaterial({ color: 0x00f5ff, emissive: 0x00f5ff, emissiveIntensity: 1.5 });
+// Ground cracks — MeshBasic (no light calc needed)
+const crackMat = new THREE.MeshBasicMaterial({ color: 0x00f5ff });
 [[-15,-8],[15,-8],[-20,5],[20,5],[-10,-20],[10,-20],[-25,-15],[25,15]].forEach(([x,z]) => {
   const len = Math.random()*4+2;
   const crack = new THREE.Mesh(new THREE.PlaneGeometry(0.06, len), crackMat);
@@ -185,39 +185,32 @@ const crackMat = new THREE.MeshStandardMaterial({ color: 0x00f5ff, emissive: 0x0
   scene.add(crack);
 });
 
-// Grid - brighter
 const grid = new THREE.GridHelper(100, 50, 0x00f5ff, 0x220055);
 grid.material.opacity = 0.4;
 grid.material.transparent = true;
 scene.add(grid);
 
-// ---- NEBULA SKY ----
+// ---- NEBULA SKY (reduced to 3) ----
 function makeNebula(color, x, y, z, size, opacity) {
-  const geo = new THREE.PlaneGeometry(size, size);
-  const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity, side: THREE.DoubleSide, depthWrite: false });
-  const m = new THREE.Mesh(geo, mat);
-  m.position.set(x, y, z);
-  m.lookAt(0, y, 0);
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(size, size),
+    new THREE.MeshBasicMaterial({ color, transparent: true, opacity, side: THREE.DoubleSide, depthWrite: false })
+  );
+  m.position.set(x, y, z); m.lookAt(0, y, 0);
   scene.add(m);
 }
 makeNebula(0x220066, -60, 40, -80, 120, 0.15);
 makeNebula(0x660033, 60, 50, -80, 100, 0.12);
 makeNebula(0x003355, 0, 60, -100, 150, 0.1);
-makeNebula(0x440066, -30, 30, -60, 80, 0.08);
 
-// ---- FLOATING PARTICLES ----
+// ---- FLOATING PARTICLES: 500→200 ----
 const floatPositions = [];
-for (let i = 0; i < 500; i++) {
-  floatPositions.push(
-    (Math.random() - 0.5) * 60,
-    Math.random() * 15 + 1,
-    (Math.random() - 0.5) * 60
-  );
+for (let i = 0; i < 200; i++) {
+  floatPositions.push((Math.random()-0.5)*60, Math.random()*15+1, (Math.random()-0.5)*60);
 }
 const floatGeo = new THREE.BufferGeometry();
 floatGeo.setAttribute('position', new THREE.Float32BufferAttribute(floatPositions, 3));
-const floatMat = new THREE.PointsMaterial({ color: 0x88ddff, size: 0.12, transparent: true, opacity: 0.6 });
-const floatParticles = new THREE.Points(floatGeo, floatMat);
+const floatParticles = new THREE.Points(floatGeo, new THREE.PointsMaterial({ color: 0x88ddff, size: 0.12, transparent: true, opacity: 0.6 }));
 scene.add(floatParticles);
 
 // ---- ROAD ----
@@ -225,83 +218,63 @@ const road = new THREE.Mesh(
   new THREE.PlaneGeometry(6, 100),
   new THREE.MeshStandardMaterial({ color: 0x111122, roughness: 0.95 })
 );
-road.rotation.x = -Math.PI / 2;
-road.position.y = 0.01;
-road.receiveShadow = true;
+road.rotation.x = -Math.PI/2; road.position.y = 0.01; road.receiveShadow = true;
 scene.add(road);
 
+const markMat = new THREE.MeshBasicMaterial({ color: 0xffdd00 });
 for (let z = -45; z < 45; z += 6) {
-  const mark = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.25, 3),
-    new THREE.MeshStandardMaterial({ color: 0xffdd00, emissive: 0xffaa00, emissiveIntensity: 0.8 })
-  );
-  mark.rotation.x = -Math.PI / 2;
-  mark.position.set(0, 0.02, z);
+  const mark = new THREE.Mesh(new THREE.PlaneGeometry(0.25, 3), markMat);
+  mark.rotation.x = -Math.PI/2; mark.position.set(0, 0.02, z);
   scene.add(mark);
 }
 
-// ---- SHOOTING STARS ----
+// ---- SHOOTING STARS: pooled, max 5 ----
 const shootingStars = [];
 function spawnShootingStar() {
-  const geo = new THREE.BufferGeometry();
+  if (shootingStars.length >= 5) return;
   const pts = new Float32Array(6);
   pts[0] = (Math.random()-0.5)*200; pts[1] = 40+Math.random()*40; pts[2] = -50-Math.random()*80;
   pts[3] = pts[0]+10; pts[4] = pts[1]-5; pts[5] = pts[2]+10;
+  const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
   const mat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 });
   const line = new THREE.Line(geo, mat);
   scene.add(line);
   shootingStars.push({ line, life: 1.0, vx: 0.8, vy: -0.4, vz: 0.8 });
 }
-setInterval(spawnShootingStar, 3000);
+setInterval(spawnShootingStar, 4000);
 
-// ---- STARS ----
+// ---- STARS: 2000→800 ----
 const starPositions = [];
-for (let i = 0; i < 2000; i++) {
-  starPositions.push(
-    (Math.random() - 0.5) * 300,
-    Math.random() * 80 + 10,
-    (Math.random() - 0.5) * 300
-  );
+for (let i = 0; i < 800; i++) {
+  starPositions.push((Math.random()-0.5)*300, Math.random()*80+10, (Math.random()-0.5)*300);
 }
 const starGeo = new THREE.BufferGeometry();
 starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
 scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.2, transparent: true, opacity: 0.7 })));
 
-// ---- NEON ARCHES ----
+// ---- NEON ARCHES: no PointLight per arch ----
 function makeArch(z, color) {
-  const archGroup = new THREE.Group();
-  // left post
-  const postMat = new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 2 });
+  const g = new THREE.Group();
+  const mat = new THREE.MeshBasicMaterial({ color });
   [-3.5, 3.5].forEach(x => {
-    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 5, 8), postMat);
-    post.position.set(x, 2.5, 0);
-    archGroup.add(post);
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 5, 6), mat);
+    post.position.set(x, 2.5, 0); g.add(post);
   });
-  // top bar
-  const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 7.2, 8), postMat);
-  bar.rotation.z = Math.PI / 2;
-  bar.position.set(0, 5.1, 0);
-  archGroup.add(bar);
-  // glow
-  const pl = new THREE.PointLight(color, 1.5, 10);
-  pl.position.set(0, 5, 0);
-  archGroup.add(pl);
-  archGroup.position.z = z;
-  scene.add(archGroup);
+  const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 7.2, 6), mat);
+  bar.rotation.z = Math.PI/2; bar.position.set(0, 5.1, 0); g.add(bar);
+  g.position.z = z;
+  scene.add(g);
 }
-makeArch(-12, 0x00f5ff);
-makeArch(-22, 0xff00ff);
-makeArch(-32, 0xffff00);
-makeArch(-42, 0x00ff88);
-makeArch(-52, 0xff6600);
+makeArch(-12, 0x00f5ff); makeArch(-22, 0xff00ff); makeArch(-32, 0xffff00);
+makeArch(-42, 0x00ff88); makeArch(-52, 0xff6600);
 
 // ---- NEON CLOUDS ----
 const cloudGroup = new THREE.Group();
 [[0x440066,0,45,-60],[0x003344,-30,50,-80],[0x220033,30,42,-70]].forEach(([c,x,y,z]) => {
-  for(let i=0;i<5;i++){
+  for(let i=0;i<4;i++){
     const sphere = new THREE.Mesh(
-      new THREE.SphereGeometry(4+Math.random()*4, 7, 5),
+      new THREE.SphereGeometry(4+Math.random()*4, 6, 4),
       new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.12, depthWrite: false })
     );
     sphere.position.set(x+i*5-10, y+Math.random()*3, z+Math.random()*8);
@@ -310,49 +283,37 @@ const cloudGroup = new THREE.Group();
 });
 scene.add(cloudGroup);
 
-// ---- CLICK SPARKS ----
+// ---- CLICK SPARKS: pooled, max 30 ----
 const sparkParticles = [];
+const sparkGeo = new THREE.SphereGeometry(0.06, 3, 3);
 function spawnSparks(x, y, z, color) {
-  for(let i=0;i<15;i++){
-    const spark = new THREE.Mesh(
-      new THREE.SphereGeometry(0.06, 4, 4),
-      new THREE.MeshBasicMaterial({ color: color || 0xffff00 })
-    );
+  const count = Math.min(8, 30 - sparkParticles.length);
+  for(let i=0;i<count;i++){
+    const spark = new THREE.Mesh(sparkGeo, new THREE.MeshBasicMaterial({ color: color||0xffff00, transparent: true }));
     spark.position.set(x,y,z);
-    const vel = new THREE.Vector3((Math.random()-0.5)*0.3, Math.random()*0.4+0.1, (Math.random()-0.5)*0.3);
     scene.add(spark);
-    sparkParticles.push({ mesh: spark, vel, life: 1.0 });
+    sparkParticles.push({ mesh: spark, vel: new THREE.Vector3((Math.random()-0.5)*0.3, Math.random()*0.4+0.1, (Math.random()-0.5)*0.3), life: 1.0 });
   }
 }
-renderer.domElement.addEventListener('click', (e) => {
+renderer.domElement.addEventListener('click', () => {
   const colors = [0x00f5ff, 0xff00ff, 0xffff00, 0x00ff88, 0xff6600];
-  spawnSparks(car.position.x+(Math.random()-0.5)*4, 0.5, car.position.z+(Math.random()-0.5)*4,
-    colors[Math.floor(Math.random()*colors.length)]);
+  spawnSparks(car.position.x+(Math.random()-0.5)*4, 0.5, car.position.z+(Math.random()-0.5)*4, colors[Math.floor(Math.random()*colors.length)]);
 });
 
-// ---- RAIN ----
-const rainCount = 800;
-const rainPos = new Float32Array(rainCount * 3);
-for (let i = 0; i < rainCount; i++) {
-  rainPos[i*3]   = (Math.random()-0.5)*80;
-  rainPos[i*3+1] = Math.random()*30;
-  rainPos[i*3+2] = (Math.random()-0.5)*80;
-}
+// ---- RAIN: 800→300 ----
+const rainCount = 300;
+const rainPos = new Float32Array(rainCount*3);
+for (let i=0;i<rainCount;i++) { rainPos[i*3]=(Math.random()-0.5)*80; rainPos[i*3+1]=Math.random()*30; rainPos[i*3+2]=(Math.random()-0.5)*80; }
 const rainGeo = new THREE.BufferGeometry();
 rainGeo.setAttribute('position', new THREE.Float32BufferAttribute(rainPos, 3));
-const rainMat = new THREE.PointsMaterial({ color: 0x99ccff, size: 0.08, transparent: true, opacity: 0.4 });
-const rain = new THREE.Points(rainGeo, rainMat);
+const rain = new THREE.Points(rainGeo, new THREE.PointsMaterial({ color: 0x99ccff, size: 0.08, transparent: true, opacity: 0.4 }));
 scene.add(rain);
 
-// ---- SKY DOME ----
-const skyDome = new THREE.Mesh(
-  new THREE.SphereGeometry(150, 32, 16),
-  new THREE.MeshBasicMaterial({
-    color: 0x05001a,
-    side: THREE.BackSide,
-  })
-);
-scene.add(skyDome);
+// ---- SKY DOME: lower poly ----
+scene.add(new THREE.Mesh(
+  new THREE.SphereGeometry(150, 16, 8),
+  new THREE.MeshBasicMaterial({ color: 0x05001a, side: THREE.BackSide })
+));
 
 // Sky gradient bands
 [[0x110033, 0, -60, 80, 15], [0x220011, -20, -60, 80, 10], [0x001133, 20, -60, 80, 10]].forEach(([c,x,z,w,h]) => {
@@ -364,251 +325,172 @@ scene.add(skyDome);
   scene.add(m);
 });
 
-// ---- ENERGY ORBS ----
+// ---- ENERGY ORBS: no PointLight per orb ----
 const orbColors = [0x00f5ff, 0xff00ff, 0xffff00, 0x00ff88, 0xff6600, 0x8800ff];
 const orbs = [];
 orbColors.forEach((c, i) => {
   const orb = new THREE.Mesh(
-    new THREE.SphereGeometry(0.4, 12, 12),
-    new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 3 })
+    new THREE.SphereGeometry(0.4, 8, 8),
+    new THREE.MeshBasicMaterial({ color: c })
   );
-  const angle = (i / orbColors.length) * Math.PI * 2;
-  orb.position.set(Math.cos(angle) * 12, 4 + Math.sin(angle) * 2, Math.sin(angle) * 12 - 10);
+  const angle = (i/orbColors.length)*Math.PI*2;
+  orb.position.set(Math.cos(angle)*12, 4+Math.sin(angle)*2, Math.sin(angle)*12-10);
   scene.add(orb);
-  const pl = new THREE.PointLight(c, 2, 10);
-  orb.add(pl);
-  orbs.push({ mesh: orb, angle, speed: 0.3 + Math.random() * 0.3 });
+  orbs.push({ mesh: orb, angle, speed: 0.3+Math.random()*0.3 });
 });
 
 // ---- AURORA ----
-const auroraColors = [0x00ff88, 0x0088ff, 0xff00ff, 0x00ffff];
 const auroraPlanes = [];
-auroraColors.forEach((c, i) => {
-  const geo = new THREE.PlaneGeometry(180, 25);
-  const mat = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.06, side: THREE.DoubleSide, depthWrite: false });
-  const m = new THREE.Mesh(geo, mat);
-  m.position.set(0, 35 + i * 8, -70);
-  m.rotation.x = -0.3 + i * 0.1;
+[0x00ff88, 0x0088ff, 0xff00ff, 0x00ffff].forEach((c, i) => {
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(180, 25),
+    new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.06, side: THREE.DoubleSide, depthWrite: false })
+  );
+  m.position.set(0, 35+i*8, -70); m.rotation.x = -0.3+i*0.1;
   scene.add(m);
   auroraPlanes.push(m);
 });
 
-// ---- MOUNTAIN SILHOUETTES ----
-function makeMountain(x, z, w, h, color) {
+// ---- MOUNTAINS ----
+function makeMountain(x, z, w, h) {
   const shape = new THREE.Shape();
-  shape.moveTo(-w/2, 0);
-  shape.lineTo(-w*0.35, h*0.55);
-  shape.lineTo(-w*0.1, h*0.82);
-  shape.lineTo(0, h);
-  shape.lineTo(w*0.15, h*0.75);
-  shape.lineTo(w*0.3, h*0.6);
-  shape.lineTo(w/2, 0);
-  shape.closePath();
-  const geo = new THREE.ShapeGeometry(shape);
-  const mat = new THREE.MeshBasicMaterial({ color: color || 0x07001a, side: THREE.DoubleSide, depthWrite: false });
-  const m = new THREE.Mesh(geo, mat);
+  shape.moveTo(-w/2, 0); shape.lineTo(-w*0.35, h*0.55); shape.lineTo(-w*0.1, h*0.82);
+  shape.lineTo(0, h); shape.lineTo(w*0.15, h*0.75); shape.lineTo(w*0.3, h*0.6);
+  shape.lineTo(w/2, 0); shape.closePath();
+  const m = new THREE.Mesh(new THREE.ShapeGeometry(shape),
+    new THREE.MeshBasicMaterial({ color: 0x07001a, side: THREE.DoubleSide, depthWrite: false }));
   m.position.set(x, 0, z);
   scene.add(m);
-  // glow strip on mountain peak
-  const glowMat = new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false });
-  const glowGeo = new THREE.PlaneGeometry(w * 0.6, 1.5);
-  const glowM = new THREE.Mesh(glowGeo, glowMat);
-  glowM.position.set(x, h * 0.97, z + 0.5);
+  const glowM = new THREE.Mesh(new THREE.PlaneGeometry(w*0.6, 1.5),
+    new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false }));
+  glowM.position.set(x, h*0.97, z+0.5);
   scene.add(glowM);
 }
-for (let i = 0; i < 10; i++) {
-  const xi = (i - 5) * 22;
-  makeMountain(xi, -88, 18 + Math.random() * 12, 18 + Math.random() * 22);
-}
+for (let i=0;i<10;i++) makeMountain((i-5)*22, -88, 18+Math.random()*12, 18+Math.random()*22);
 
-// ---- HOLOGRAPHIC RINGS ----
+// ---- HOLOGRAPHIC RINGS: no PointLight per ring ----
 const rings = [];
 [{z:-5,c:0x00f5ff},{z:-25,c:0xff00ff},{z:-45,c:0xffff00},{z:-65,c:0x00ff88}].forEach(({z,c},i) => {
-  const geo = new THREE.TorusGeometry(4.5, 0.09, 16, 80);
-  const mat = new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 4 });
-  const ring = new THREE.Mesh(geo, mat);
-  ring.position.set(0, 5, z);
-  ring.rotation.x = Math.PI / 2;
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.09, 8, 40), new THREE.MeshBasicMaterial({ color: c }));
+  ring.position.set(0, 5, z); ring.rotation.x = Math.PI/2;
   scene.add(ring);
-  const pl = new THREE.PointLight(c, 2.5, 18);
-  pl.position.copy(ring.position);
-  scene.add(pl);
-  rings.push({ mesh: ring, pl, baseY: 5, phase: i * Math.PI / 2 });
-  // inner ring
-  const geo2 = new THREE.TorusGeometry(3.2, 0.04, 8, 60);
-  const mat2 = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.4 });
-  const ring2 = new THREE.Mesh(geo2, mat2);
-  ring2.position.copy(ring.position);
-  ring2.rotation.x = Math.PI / 2;
+  rings.push({ mesh: ring, baseY: 5, phase: i*Math.PI/2 });
+  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.04, 6, 30),
+    new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.4 }));
+  ring2.position.copy(ring.position); ring2.rotation.x = Math.PI/2;
   scene.add(ring2);
-  rings.push({ mesh: ring2, pl: null, baseY: 5, phase: i * Math.PI / 2 + 0.5 });
+  rings.push({ mesh: ring2, baseY: 5, phase: i*Math.PI/2+0.5 });
 });
 
-// ---- LIGHT BEAMS (searchlights from buildings) ----
+// ---- LIGHT BEAMS ----
 const beams = [];
 [[-8,-6,0x00f5ff],[8,-6,0xff00ff],[-12,-12,0xffff00],[12,-12,0x00ff88]].forEach(([x,z,c],i) => {
-  const geo = new THREE.CylinderGeometry(0.05, 1.2, 60, 8, 1, true);
-  const mat = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.04, side: THREE.DoubleSide, depthWrite: false });
-  const beam = new THREE.Mesh(geo, mat);
+  const beam = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.05, 1.2, 60, 6, 1, true),
+    new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.04, side: THREE.DoubleSide, depthWrite: false })
+  );
   beam.position.set(x, 30, z);
   scene.add(beam);
-  beams.push({ mesh: beam, phase: i * Math.PI / 2 });
+  beams.push({ mesh: beam, phase: i*Math.PI/2 });
 });
 
-// ---- FLOATING CYBER CITY SIGN ----
+// ---- FLOATING SIGN ----
 const signCv = document.createElement('canvas');
 signCv.width = 512; signCv.height = 128;
 const sctx = signCv.getContext('2d');
-sctx.clearRect(0, 0, 512, 128);
-sctx.font = 'bold 56px Arial';
-sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
-for (let gi = 6; gi >= 0; gi--) {
-  sctx.shadowBlur = gi * 18;
-  sctx.shadowColor = '#00f5ff';
-  sctx.fillStyle = gi === 0 ? '#ffffff' : `rgba(0,${200+gi*8},255,${0.5+gi*0.08})`;
+sctx.font = 'bold 56px Arial'; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+for (let gi=6;gi>=0;gi--) {
+  sctx.shadowBlur = gi*18; sctx.shadowColor = '#00f5ff';
+  sctx.fillStyle = gi===0?'#ffffff':`rgba(0,${200+gi*8},255,${0.5+gi*0.08})`;
   sctx.fillText('✦ CYBER CITY 2084 ✦', 256, 64);
 }
-const signTex = new THREE.CanvasTexture(signCv);
 const floatingSign = new THREE.Mesh(
   new THREE.PlaneGeometry(22, 5.5),
-  new THREE.MeshBasicMaterial({ map: signTex, transparent: true, depthWrite: false, side: THREE.DoubleSide })
+  new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(signCv), transparent: true, depthWrite: false, side: THREE.DoubleSide })
 );
 floatingSign.position.set(0, 24, -38);
 scene.add(floatingSign);
 
-// ---- NEON MOON ----
-const moon = new THREE.Mesh(
-  new THREE.SphereGeometry(4, 16, 16),
-  new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xaaccff, emissiveIntensity: 1.5 })
-);
-moon.position.set(-40, 50, -80);
-scene.add(moon);
+// ---- MOON: 1 light kept ----
+const moon = new THREE.Mesh(new THREE.SphereGeometry(4, 12, 12), new THREE.MeshBasicMaterial({ color: 0xddeeff }));
+moon.position.set(-40, 50, -80); scene.add(moon);
 const moonLight = new THREE.PointLight(0xaaccff, 1.5, 200);
-moonLight.position.copy(moon.position);
-scene.add(moonLight);
+moonLight.position.copy(moon.position); scene.add(moonLight);
 
-// ---- STREET LAMPS ----
+// ---- STREET LAMPS: emissive only, 2 shared lights (was 16) ----
+const lampBulbMat = new THREE.MeshBasicMaterial({ color: 0xffffaa });
+const lampPoleMat = new THREE.MeshStandardMaterial({ color: 0x444466, metalness: 0.9, roughness: 0.3 });
 function makeLamp(x, z) {
   const g = new THREE.Group();
-  // pole
-  const pole = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.07, 0.1, 5, 6),
-    new THREE.MeshStandardMaterial({ color: 0x444466, metalness: 0.9, roughness: 0.3 })
-  );
-  pole.position.y = 2.5;
-  g.add(pole);
-  // arm
-  const arm = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.05, 0.05, 1.5, 6),
-    new THREE.MeshStandardMaterial({ color: 0x444466, metalness: 0.9 })
-  );
-  arm.rotation.z = Math.PI / 2;
-  arm.position.set(Math.sign(x) * 0.75, 5, 0);
-  g.add(arm);
-  // bulb
-  const bulb = new THREE.Mesh(
-    new THREE.SphereGeometry(0.2, 8, 8),
-    new THREE.MeshStandardMaterial({ color: 0xffffaa, emissive: 0xffffaa, emissiveIntensity: 5 })
-  );
-  bulb.position.set(Math.sign(x) * 1.5, 5, 0);
-  g.add(bulb);
-  // light
-  const pl = new THREE.PointLight(0xffeeaa, 2.5, 12);
-  pl.position.copy(bulb.position);
-  g.add(pl);
-
-  g.position.set(x, 0, z);
-  scene.add(g);
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, 5, 5), lampPoleMat);
+  pole.position.y = 2.5; g.add(pole);
+  const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 5), lampPoleMat);
+  arm.rotation.z = Math.PI/2; arm.position.set(Math.sign(x)*0.75, 5, 0); g.add(arm);
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.2, 6, 6), lampBulbMat);
+  bulb.position.set(Math.sign(x)*1.5, 5, 0); g.add(bulb);
+  g.position.set(x, 0, z); scene.add(g);
 }
-for (let z = -40; z < 40; z += 10) {
-  makeLamp(-4.5, z);
-  makeLamp(4.5, z);
-}
+const stL = new THREE.PointLight(0xffeeaa, 2, 40);
+stL.position.set(-4.5, 5, 0); scene.add(stL);
+const stR = new THREE.PointLight(0xffeeaa, 2, 40);
+stR.position.set(4.5, 5, 0); scene.add(stR);
+for (let z=-40;z<40;z+=10) { makeLamp(-4.5, z); makeLamp(4.5, z); }
 
-// ---- BUILDINGS ----
+// ---- BUILDINGS: no per-building PointLight, MeshBasic windows ----
 function makeBuilding(x, z, w, h, d, color) {
   const mesh = new THREE.Mesh(
     new THREE.BoxGeometry(w, h, d),
     new THREE.MeshStandardMaterial({ color, roughness: 0.5, metalness: 0.5, emissive: color, emissiveIntensity: 0.08 })
   );
-  mesh.position.set(x, h / 2, z);
-  mesh.castShadow = mesh.receiveShadow = true;
+  mesh.position.set(x, h/2, z); mesh.castShadow = true;
   scene.add(mesh);
 
-  // windows
   const wColors = [0xffff88, 0x88ffff, 0xff88ff];
-  const wc = wColors[Math.floor(Math.random() * 3)];
-  for (let iy = 0; iy < Math.floor(h / 2); iy++) {
-    for (let ix = -1; ix <= 1; ix++) {
-      if (Math.random() > 0.35) {
-        const win = new THREE.Mesh(
-          new THREE.PlaneGeometry(0.5, 0.5),
-          new THREE.MeshStandardMaterial({ color: wc, emissive: wc, emissiveIntensity: Math.random() * 2 + 0.5 })
-        );
-        win.position.set(x + ix * 0.8, iy * 1.4 + 1.5, z + d / 2 + 0.01);
+  const winMat = new THREE.MeshBasicMaterial({ color: wColors[Math.floor(Math.random()*3)] });
+  for (let iy=0;iy<Math.floor(h/2);iy++) {
+    for (let ix=-1;ix<=1;ix++) {
+      if (Math.random()>0.35) {
+        const win = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.5), winMat);
+        win.position.set(x+ix*0.8, iy*1.4+1.5, z+d/2+0.01);
         scene.add(win);
       }
     }
   }
 }
 
-// ---- ROAD EDGE STRIPS ----
+// ---- ROAD EDGE STRIPS: cached refs (no traverse!) ----
+const roadEdgeStrips = [];
 [-3.2, 3.2].forEach(x => {
   const strip = new THREE.Mesh(
     new THREE.PlaneGeometry(0.15, 100),
-    new THREE.MeshStandardMaterial({ color: 0x00f5ff, emissive: 0x00f5ff, emissiveIntensity: 2 })
+    new THREE.MeshBasicMaterial({ color: 0x00f5ff, transparent: true, opacity: 1 })
   );
-  strip.rotation.x = -Math.PI / 2;
-  strip.position.set(x, 0.015, 0);
+  strip.rotation.x = -Math.PI/2; strip.position.set(x, 0.015, 0);
   scene.add(strip);
-  const glow = new THREE.PointLight(0x00f5ff, 0.5, 8);
-  glow.position.set(x, 0.5, 0);
-  scene.add(glow);
+  roadEdgeStrips.push(strip);
 });
 
-// ---- HORIZON GLOW ----
-const horizonGeo = new THREE.PlaneGeometry(200, 20);
-const horizonMat = new THREE.MeshBasicMaterial({ color: 0x220044, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
-const horizon = new THREE.Mesh(horizonGeo, horizonMat);
-horizon.position.set(0, 10, -90);
-scene.add(horizon);
+// Horizon
+const horizon = new THREE.Mesh(new THREE.PlaneGeometry(200, 20),
+  new THREE.MeshBasicMaterial({ color: 0x220044, transparent: true, opacity: 0.6, side: THREE.DoubleSide }));
+horizon.position.set(0, 10, -90); scene.add(horizon);
+const hband = new THREE.Mesh(new THREE.PlaneGeometry(200, 3),
+  new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.2, side: THREE.DoubleSide }));
+hband.position.set(0, 8, -89); scene.add(hband);
 
-// Horizon light band - raised high so it doesn't block view
-const hband = new THREE.Mesh(
-  new THREE.PlaneGeometry(200, 3),
-  new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.2, side: THREE.DoubleSide })
-);
-hband.position.set(0, 8, -89);
-scene.add(hband);
-
-// ---- CANVAS TEXT SIGNS ----
+// ---- TEXT SIGNS: no PointLight per sign ----
 function makeTextSign(text, x, y, z, color, rotY) {
-  const cv = document.createElement('canvas');
-  cv.width = 256; cv.height = 80;
+  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 80;
   const cx = cv.getContext('2d');
-  cx.fillStyle = 'rgba(0,0,0,0.85)';
-  cx.fillRect(0, 0, 256, 80);
-  cx.strokeStyle = color;
-  cx.lineWidth = 3;
-  cx.strokeRect(3, 3, 250, 74);
-  cx.fillStyle = color;
-  cx.shadowColor = color;
-  cx.shadowBlur = 18;
-  cx.font = 'bold 32px Arial';
-  cx.textAlign = 'center';
-  cx.textBaseline = 'middle';
+  cx.fillStyle = 'rgba(0,0,0,0.85)'; cx.fillRect(0,0,256,80);
+  cx.strokeStyle = color; cx.lineWidth = 3; cx.strokeRect(3,3,250,74);
+  cx.fillStyle = color; cx.shadowColor = color; cx.shadowBlur = 18;
+  cx.font = 'bold 32px Arial'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
   cx.fillText(text, 128, 42);
-  const tex = new THREE.CanvasTexture(cv);
-  const mesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(3.5, 1.1),
-    new THREE.MeshBasicMaterial({ map: tex, transparent: true })
-  );
-  mesh.position.set(x, y, z);
-  mesh.rotation.y = rotY || 0;
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 1.1),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true }));
+  mesh.position.set(x, y, z); mesh.rotation.y = rotY||0;
   scene.add(mesh);
-  const pl = new THREE.PointLight(new THREE.Color(color), 1, 6);
-  pl.position.set(x, y, z + 0.5);
-  scene.add(pl);
 }
 makeTextSign('NEON CITY', -9.5, 10, -7, '#00ffff', 0);
 makeTextSign('HOTEL ✦', 9.5, 12, -9, '#ff00ff', Math.PI);
@@ -617,170 +499,99 @@ makeTextSign('CLUB 3D', 9.5, 9, -19, '#ff6600', Math.PI);
 makeTextSign('FUTURE', -9.5, 11, 7, '#00ff88', 0);
 makeTextSign('DRIVE ▶', 9.5, 8, 9, '#ff0088', Math.PI);
 
-// ---- NEON SIGNS ----
+// ---- NEON SIGNS: no PointLight per sign ----
 function makeSign(x, y, z, color, w, h) {
-  const frame = new THREE.Mesh(
-    new THREE.BoxGeometry(w, h, 0.1),
-    new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 3, wireframe: false })
-  );
-  frame.position.set(x, y, z);
-  scene.add(frame);
-  const inner = new THREE.Mesh(
-    new THREE.BoxGeometry(w*0.7, h*0.5, 0.05),
-    new THREE.MeshStandardMaterial({ color: 0x000000 })
-  );
-  inner.position.set(x, y, z+0.08);
-  scene.add(inner);
-  const pl = new THREE.PointLight(color, 1.5, 8);
-  pl.position.set(x, y, z+1);
-  scene.add(pl);
+  const frame = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.1), new THREE.MeshBasicMaterial({ color }));
+  frame.position.set(x, y, z); scene.add(frame);
+  const inner = new THREE.Mesh(new THREE.BoxGeometry(w*0.7, h*0.5, 0.05), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+  inner.position.set(x, y, z+0.08); scene.add(inner);
 }
-makeSign(-9.5, 7, -8, 0x00ffff, 2.5, 1);
-makeSign(9.5, 9, -10, 0xff00ff, 3, 1.2);
-makeSign(-9.5, 5, -16, 0xffff00, 2, 0.8);
-makeSign(9.5, 6, -18, 0x00ff88, 2.8, 1);
-makeSign(-9.5, 8, 6, 0xff6600, 2.2, 0.9);
-makeSign(9.5, 7, 8, 0x8800ff, 2.5, 1);
-
-// building base pools of light
-[[-8,-6,0xff00ff],[8,-6,0x00f5ff],[-12,-12,0x00f5ff],[12,-12,0xff6600],
- [-8,-18,0xffff00],[8,-18,0x00ff88],[-8,6,0x00ff88],[8,6,0xff00ff]].forEach(([x,z,c]) => {
-  const pool = new THREE.PointLight(c, 1.5, 10);
-  pool.position.set(x, 0.5, z);
-  scene.add(pool);
-});
+makeSign(-9.5, 7, -8, 0x00ffff, 2.5, 1); makeSign(9.5, 9, -10, 0xff00ff, 3, 1.2);
+makeSign(-9.5, 5, -16, 0xffff00, 2, 0.8); makeSign(9.5, 6, -18, 0x00ff88, 2.8, 1);
+makeSign(-9.5, 8, 6, 0xff6600, 2.2, 0.9); makeSign(9.5, 7, 8, 0x8800ff, 2.5, 1);
 
 const bdata = [
-  [-8, -6, 3, 9, 3, 0xff00ff],  [8, -6, 3, 11, 3, 0x00f5ff],
-  [-12, -12, 2.5, 13, 2.5, 0x00f5ff], [12, -12, 2.5, 8, 2.5, 0xff6600],
-  [-8, -18, 3, 7, 3, 0xffff00], [8, -18, 3, 15, 3, 0x00ff88],
-  [-12, -24, 2, 10, 2, 0xff00ff], [12, -24, 2, 12, 2, 0xffff00],
-  [-8, 6, 3, 8, 3, 0x00ff88],   [8, 6, 3, 10, 3, 0xff00ff],
-  [-12, 12, 2.5, 12, 2.5, 0xffff00], [12, 12, 2.5, 7, 2.5, 0x00f5ff],
+  [-8,-6,3,9,3,0xff00ff],[8,-6,3,11,3,0x00f5ff],
+  [-12,-12,2.5,13,2.5,0x00f5ff],[12,-12,2.5,8,2.5,0xff6600],
+  [-8,-18,3,7,3,0xffff00],[8,-18,3,15,3,0x00ff88],
+  [-12,-24,2,10,2,0xff00ff],[12,-24,2,12,2,0xffff00],
+  [-8,6,3,8,3,0x00ff88],[8,6,3,10,3,0xff00ff],
+  [-12,12,2.5,12,2.5,0xffff00],[12,12,2.5,7,2.5,0x00f5ff],
 ];
 bdata.forEach(d => makeBuilding(...d));
 
-// ---- EXHAUST PARTICLES ----
-const exhaustCount = 60;
-const exhaustPos = new Float32Array(exhaustCount * 3);
+// ---- EXHAUST: 60→25 ----
+const exhaustCount = 25;
 const exhaustGeo = new THREE.BufferGeometry();
-exhaustGeo.setAttribute('position', new THREE.Float32BufferAttribute(exhaustPos, 3));
+exhaustGeo.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(exhaustCount*3), 3));
 const exhaustMat = new THREE.PointsMaterial({ color: 0x4466ff, size: 0.25, transparent: true, opacity: 0.7 });
-const exhaustParticles = new THREE.Points(exhaustGeo, exhaustMat);
-scene.add(exhaustParticles);
+scene.add(new THREE.Points(exhaustGeo, exhaustMat));
 
 // ---- CAR ----
 const car = new THREE.Group();
 scene.add(car);
 
-// body
 const bodyMesh = new THREE.Mesh(
   new THREE.BoxGeometry(1.8, 0.6, 3.6),
   new THREE.MeshStandardMaterial({ color: 0x00ccff, roughness: 0.1, metalness: 0.95, emissive: 0x0088cc, emissiveIntensity: 0.8 })
 );
-bodyMesh.position.y = 0.5;
-bodyMesh.castShadow = true;
-car.add(bodyMesh);
+bodyMesh.position.y = 0.5; bodyMesh.castShadow = true; car.add(bodyMesh);
 
-// cabin
 const cabinMesh = new THREE.Mesh(
   new THREE.BoxGeometry(1.4, 0.55, 2),
   new THREE.MeshStandardMaterial({ color: 0x001122, roughness: 0.05, metalness: 1, transparent: true, opacity: 0.85 })
 );
-cabinMesh.position.set(0, 1.07, -0.15);
-cabinMesh.castShadow = true;
-car.add(cabinMesh);
+cabinMesh.position.set(0, 1.07, -0.15); car.add(cabinMesh);
 
-// wheels
-const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.3, 16);
+const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.3, 10);
 const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.95 });
-const wheelPos = [[-1.05, 0.35, 1.2], [1.05, 0.35, 1.2], [-1.05, 0.35, -1.2], [1.05, 0.35, -1.2]];
-const wheels = wheelPos.map(p => {
+const wheels = [[-1.05,.35,1.2],[1.05,.35,1.2],[-1.05,.35,-1.2],[1.05,.35,-1.2]].map(p => {
   const w = new THREE.Mesh(wheelGeo, wheelMat);
-  w.position.set(...p);
-  w.rotation.z = Math.PI / 2;
-  w.castShadow = true;
-  car.add(w);
-  return w;
+  w.position.set(...p); w.rotation.z = Math.PI/2; car.add(w); return w;
 });
 
-// hubcaps
-wheels.forEach(w => {
-  const hub = new THREE.Mesh(
-    new THREE.CircleGeometry(0.2, 8),
-    new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 1, roughness: 0.2 })
-  );
-  hub.position.x = 0.16;
-  w.add(hub);
-});
-
-// headlights
+// Headlights — 2 SpotLights kept
 [-0.5, 0.5].forEach(x => {
-  const hl = new THREE.Mesh(
-    new THREE.BoxGeometry(0.3, 0.18, 0.05),
-    new THREE.MeshStandardMaterial({ color: 0xffffcc, emissive: 0xffffcc, emissiveIntensity: 4 })
-  );
-  hl.position.set(x, 0.5, 1.81);
-  car.add(hl);
-
-  const spot = new THREE.SpotLight(0xffffaa, 3, 18, Math.PI / 7, 0.4);
+  const hl = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.18,0.05), new THREE.MeshBasicMaterial({ color: 0xffffcc }));
+  hl.position.set(x, 0.5, 1.81); car.add(hl);
+  const spot = new THREE.SpotLight(0xffffaa, 3, 18, Math.PI/7, 0.4);
   spot.position.set(x, 0.5, 1.81);
-  spot.target.position.set(x * 0.5, -1, 12);
-  car.add(spot);
-  car.add(spot.target);
+  spot.target.position.set(x*0.5, -1, 12);
+  car.add(spot); car.add(spot.target);
 });
 
-// taillights
+// Taillights — emissive only
 [-0.6, 0.6].forEach(x => {
-  const tl = new THREE.Mesh(
-    new THREE.BoxGeometry(0.25, 0.15, 0.04),
-    new THREE.MeshStandardMaterial({ color: 0xff2200, emissive: 0xff2200, emissiveIntensity: 3 })
-  );
-  tl.position.set(x, 0.5, -1.82);
-  car.add(tl);
+  const tl = new THREE.Mesh(new THREE.BoxGeometry(0.25,0.15,0.04), new THREE.MeshBasicMaterial({ color: 0xff2200 }));
+  tl.position.set(x, 0.5, -1.82); car.add(tl);
 });
 
-// underflow glow
 const glow = new THREE.PointLight(0x00aaff, 2, 4);
-glow.position.set(0, 0.1, 0);
-car.add(glow);
-
-// Collect window meshes for flickering
-const windowMeshes = [];
-scene.traverse(obj => {
-  if (obj.isMesh && obj.material.emissiveIntensity > 0.4 && obj.material.emissiveIntensity < 3 &&
-      obj.geometry.type === 'PlaneGeometry' && obj.position.y > 1 && obj.position.y < 20) {
-    windowMeshes.push({ mesh: obj, base: obj.material.emissiveIntensity });
-  }
-});
+glow.position.set(0, 0.1, 0); car.add(glow);
 
 // ---- PUDDLES ----
-const puddleMat = new THREE.MeshStandardMaterial({ color: 0x112233, roughness: 0.05, metalness: 0.9, envMapIntensity: 1 });
+const puddleMat = new THREE.MeshStandardMaterial({ color: 0x112233, roughness: 0.05, metalness: 0.9 });
 [[-6,-5],[-7,-14],[6,-8],[7,-20],[-5,4],[5,12]].forEach(([x,z]) => {
-  const p = new THREE.Mesh(new THREE.CircleGeometry(1.2+Math.random(), 12), puddleMat);
-  p.rotation.x = -Math.PI/2;
-  p.position.set(x, 0.008, z);
-  scene.add(p);
+  const p = new THREE.Mesh(new THREE.CircleGeometry(1.2+Math.random(), 8), puddleMat);
+  p.rotation.x = -Math.PI/2; p.position.set(x, 0.008, z); scene.add(p);
 });
 
-// ---- SYNTHWAVE AUDIO (user-triggered) ----
+// ---- AUDIO ----
 let audioStarted = false;
 function startAudio() {
-  if (audioStarted) return;
-  audioStarted = true;
+  if (audioStarted) return; audioStarted = true;
   const ac = new AudioContext();
   function note(freq, start, dur, vol=0.06) {
     const o = ac.createOscillator(), g = ac.createGain();
     o.type = 'sawtooth'; o.frequency.value = freq;
-    g.gain.setValueAtTime(0, ac.currentTime + start);
-    g.gain.linearRampToValueAtTime(vol, ac.currentTime + start + 0.01);
-    g.gain.linearRampToValueAtTime(0, ac.currentTime + start + dur);
+    g.gain.setValueAtTime(0, ac.currentTime+start);
+    g.gain.linearRampToValueAtTime(vol, ac.currentTime+start+0.01);
+    g.gain.linearRampToValueAtTime(0, ac.currentTime+start+dur);
     o.connect(g); g.connect(ac.destination);
-    o.start(ac.currentTime + start); o.stop(ac.currentTime + start + dur + 0.1);
+    o.start(ac.currentTime+start); o.stop(ac.currentTime+start+dur+0.1);
   }
   function beat() {
-    const seq = [110,0,138.6,0,110,0,164.8,146.8];
-    seq.forEach((f,i) => { if(f) note(f, i*0.25, 0.22, 0.04); });
+    [110,0,138.6,0,110,0,164.8,146.8].forEach((f,i) => { if(f) note(f, i*0.25, 0.22, 0.04); });
     note(55, 0, 2, 0.05); note(55, 2, 2, 0.05);
   }
   beat(); setInterval(beat, 2000);
@@ -793,299 +604,218 @@ const reflGround = new THREE.Mesh(
   new THREE.PlaneGeometry(100, 100),
   new THREE.MeshBasicMaterial({ color: 0x112244, transparent: true, opacity: 0.18 })
 );
-reflGround.rotation.x = -Math.PI / 2;
-reflGround.position.y = 0.003;
+reflGround.rotation.x = -Math.PI/2; reflGround.position.y = 0.003;
 scene.add(reflGround);
 
 // ---- TRAFFIC CARS ----
-const trafficColors = [0xff3300, 0xffaa00, 0x00ff88, 0xff00aa, 0xffffff];
 const traffic = [];
 function makeTrafficCar(z, lane, color) {
   const g = new THREE.Group();
-  const body = new THREE.Mesh(
-    new THREE.BoxGeometry(1.4, 0.5, 2.8),
-    new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.7, emissive: color, emissiveIntensity: 0.15 })
-  );
-  body.position.y = 0.45;
-  g.add(body);
-  // headlights
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.4,0.5,2.8),
+    new THREE.MeshStandardMaterial({ color, roughness:0.3, metalness:0.7, emissive:color, emissiveIntensity:0.15 }));
+  body.position.y = 0.45; g.add(body);
   [-0.4, 0.4].forEach(x => {
-    const hl = new THREE.Mesh(
-      new THREE.BoxGeometry(0.2, 0.12, 0.04),
-      new THREE.MeshStandardMaterial({ emissive: 0xffffcc, emissiveIntensity: 5, color: 0xffffcc })
-    );
-    hl.position.set(x, 0.45, -1.42);
-    g.add(hl);
+    const hl = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.12,0.04), new THREE.MeshBasicMaterial({ color: 0xffffcc }));
+    hl.position.set(x, 0.45, -1.42); g.add(hl);
+    const tl = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.1,0.04), new THREE.MeshBasicMaterial({ color: 0xff2200 }));
+    tl.position.set(x, 0.45, 1.42); g.add(tl);
   });
-  // taillights
-  [-0.4, 0.4].forEach(x => {
-    const tl = new THREE.Mesh(
-      new THREE.BoxGeometry(0.2, 0.1, 0.04),
-      new THREE.MeshStandardMaterial({ emissive: 0xff2200, emissiveIntensity: 4, color: 0xff2200 })
-    );
-    tl.position.set(x, 0.45, 1.42);
-    g.add(tl);
-  });
-  g.position.set(lane, 0, z);
-  scene.add(g);
-  traffic.push({ group: g, speed: 0.15 + Math.random() * 0.1, lane });
-  return g;
+  g.position.set(lane, 0, z); scene.add(g);
+  traffic.push({ group: g, speed: 0.15+Math.random()*0.1 });
 }
-[-50,-30,-70,-15,-90].forEach((z,i) => makeTrafficCar(z, (i%2===0) ? 1.3 : -1.3, trafficColors[i]));
+[-50,-30,-70,-15,-90].forEach((z,i) => makeTrafficCar(z, (i%2===0)?1.3:-1.3, [0xff3300,0xffaa00,0x00ff88,0xff00aa,0xffffff][i]));
 
 // ---- INPUT ----
 const keys = {};
 window.addEventListener('keydown', e => { keys[e.code] = true; e.preventDefault(); });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
 
-// ---- MOUSE CAM ----
 let camTheta = 0, camPhi = 0.55, mx0 = 0, my0 = 0, dragging = false;
 window.addEventListener('mousedown', e => { dragging = true; mx0 = e.clientX; my0 = e.clientY; });
 window.addEventListener('mouseup', () => dragging = false);
 window.addEventListener('mousemove', e => {
   if (!dragging) return;
-  camTheta += (e.clientX - mx0) * 0.006;
-  camPhi = Math.max(0.15, Math.min(1.3, camPhi - (e.clientY - my0) * 0.006));
+  camTheta += (e.clientX-mx0)*0.006;
+  camPhi = Math.max(0.15, Math.min(1.3, camPhi-(e.clientY-my0)*0.006));
   mx0 = e.clientX; my0 = e.clientY;
 });
-
-// touch
 window.addEventListener('touchstart', e => { dragging = true; mx0 = e.touches[0].clientX; my0 = e.touches[0].clientY; }, { passive: true });
 window.addEventListener('touchend', () => dragging = false);
 window.addEventListener('touchmove', e => {
   if (!dragging) return;
-  camTheta += (e.touches[0].clientX - mx0) * 0.006;
-  camPhi = Math.max(0.15, Math.min(1.3, camPhi - (e.touches[0].clientY - my0) * 0.006));
+  camTheta += (e.touches[0].clientX-mx0)*0.006;
+  camPhi = Math.max(0.15, Math.min(1.3, camPhi-(e.touches[0].clientY-my0)*0.006));
   mx0 = e.touches[0].clientX; my0 = e.touches[0].clientY;
 }, { passive: true });
 
-// ---- CAR STATE ----
+// ---- STATE ----
 let speed = 0, dir = 0;
 const MAX_SPEED = 0.28, ACCEL = 0.013, BRAKE = 0.022, TURN = 0.038;
 const camTarget = new THREE.Vector3();
+const _camPos = new THREE.Vector3();
 const clock = new THREE.Clock();
+let frameCount = 0;
+
+// Cache DOM refs
+const gctx = document.getElementById('gauge').getContext('2d');
+const mmCtx = document.getElementById('mmCanvas').getContext('2d');
+const speedlinesEl = document.getElementById('speedlines');
+const speednumEl = document.getElementById('speednum');
+const speedfillEl = document.getElementById('speedfill');
 
 // ---- ANIMATE ----
 function animate() {
   requestAnimationFrame(animate);
   const t = clock.getElapsedTime();
+  frameCount++;
 
-  // car controls
-  if (keys['ArrowUp'] || keys['KeyW']) speed = Math.min(MAX_SPEED, speed + ACCEL);
-  else if (keys['ArrowDown'] || keys['KeyS']) speed = Math.max(-MAX_SPEED * 0.5, speed - ACCEL);
-  else speed *= (1 - BRAKE);
+  // Car controls
+  if (keys['ArrowUp']||keys['KeyW']) speed = Math.min(MAX_SPEED, speed+ACCEL);
+  else if (keys['ArrowDown']||keys['KeyS']) speed = Math.max(-MAX_SPEED*0.5, speed-ACCEL);
+  else speed *= (1-BRAKE);
 
-  if (Math.abs(speed) > 0.002) {
-    if (keys['ArrowLeft'] || keys['KeyA']) dir += TURN * Math.sign(speed);
-    if (keys['ArrowRight'] || keys['KeyD']) dir -= TURN * Math.sign(speed);
+  if (Math.abs(speed)>0.002) {
+    if (keys['ArrowLeft']||keys['KeyA']) dir += TURN*Math.sign(speed);
+    if (keys['ArrowRight']||keys['KeyD']) dir -= TURN*Math.sign(speed);
   }
 
   car.rotation.y = dir;
-  car.position.x += Math.sin(dir) * speed;
-  car.position.z += Math.cos(dir) * speed;
-  car.position.y = Math.abs(speed) > 0.01 ? Math.sin(t * 20) * 0.015 : 0;
+  car.position.x += Math.sin(dir)*speed;
+  car.position.z += Math.cos(dir)*speed;
+  car.position.y = Math.abs(speed)>0.01 ? Math.sin(t*20)*0.015 : 0;
+  wheels.forEach(w => { w.rotation.x += speed*4.5; });
+  glow.intensity = 1.5+Math.sin(t*4)*0.5;
 
-  wheels.forEach(w => { w.rotation.x += speed * 4.5; });
-  glow.intensity = 1.5 + Math.sin(t * 4) * 0.5;
-
-  // camera
-  const dist = 15, height = 7 + camPhi * 4;
-  const cx = car.position.x - Math.sin(dir + camTheta) * dist;
-  const cz = car.position.z - Math.cos(dir + camTheta) * dist;
-  camera.position.lerp(new THREE.Vector3(cx, car.position.y + height, cz), 0.07);
-  camTarget.lerp(new THREE.Vector3(car.position.x, car.position.y + 1.5, car.position.z), 0.1);
+  // Camera — pre-allocated vector, no GC
+  _camPos.set(car.position.x-Math.sin(dir+camTheta)*15, car.position.y+7+camPhi*4, car.position.z-Math.cos(dir+camTheta)*15);
+  camera.position.lerp(_camPos, 0.07);
+  camTarget.lerp(car.position, 0.1);
+  camTarget.y = car.position.y+1.5;
   camera.lookAt(camTarget);
 
-  // animate point lights
+  // Moving lights
   pLights.forEach((pl, i) => {
-    const a = t * 0.4 + i * 2.1;
-    pl.light.position.x = Math.sin(a) * 14;
-    pl.light.position.z = Math.cos(a) * 14;
-    pl.light.intensity = 2.5 + Math.sin(t * 2 + i) * 0.8;
+    const a = t*0.4+i*2.1;
+    pl.light.position.x = Math.sin(a)*14;
+    pl.light.position.z = Math.cos(a)*14;
+    pl.light.intensity = 2.5+Math.sin(t*2+i)*0.8;
   });
 
-  // Traffic cars
-  traffic.forEach(tc => {
-    tc.group.position.z += tc.speed;
-    if (tc.group.position.z > 30) tc.group.position.z = -100;
-  });
+  // Traffic
+  traffic.forEach(tc => { tc.group.position.z += tc.speed; if (tc.group.position.z>30) tc.group.position.z=-100; });
 
-  // Draw gauge
-  const gc = document.getElementById('gauge');
-  const gctx = gc.getContext('2d');
-  const gcx = 45, gcy = 50, gr = 38;
-  const kmhVal = Math.abs(speed) / MAX_SPEED;
-  gctx.clearRect(0,0,90,90);
-  // bg circle
-  gctx.beginPath(); gctx.arc(gcx,gcy,gr,0,Math.PI*2);
-  gctx.fillStyle='rgba(0,0,0,0.6)'; gctx.fill();
-  gctx.strokeStyle='rgba(0,245,255,0.3)'; gctx.lineWidth=2; gctx.stroke();
-  // track
-  gctx.beginPath(); gctx.arc(gcx,gcy,gr-6, Math.PI*0.75, Math.PI*2.25);
-  gctx.strokeStyle='rgba(255,255,255,0.1)'; gctx.lineWidth=6; gctx.stroke();
-  // speed arc
-  const endAngle = Math.PI*0.75 + kmhVal * Math.PI*1.5;
-  const grad = gctx.createLinearGradient(0,0,90,0);
-  grad.addColorStop(0,'#00f5ff'); grad.addColorStop(1,'#ff00ff');
-  gctx.beginPath(); gctx.arc(gcx,gcy,gr-6, Math.PI*0.75, endAngle);
-  gctx.strokeStyle=grad; gctx.lineWidth=6; gctx.stroke();
-  // needle dot
-  const needleA = Math.PI*0.75 + kmhVal*Math.PI*1.5;
-  gctx.beginPath(); gctx.arc(gcx + Math.cos(needleA)*(gr-6), gcy + Math.sin(needleA)*(gr-6), 4, 0, Math.PI*2);
-  gctx.fillStyle='#fff'; gctx.fill();
-  // speed text
-  gctx.fillStyle='#00f5ff'; gctx.font='bold 16px monospace';
-  gctx.textAlign='center'; gctx.textBaseline='middle';
-  gctx.fillText(Math.abs(Math.round(speed*200)), gcx, gcy-4);
-  gctx.font='8px monospace'; gctx.fillStyle='rgba(255,255,255,0.5)';
-  gctx.fillText('KM/H', gcx, gcy+10);
+  // Gauge + minimap: every 3rd frame only
+  if (frameCount%3===0) {
+    const kmhVal = Math.abs(speed)/MAX_SPEED;
+    gctx.clearRect(0,0,90,90);
+    gctx.beginPath(); gctx.arc(45,50,38,0,Math.PI*2);
+    gctx.fillStyle='rgba(0,0,0,0.6)'; gctx.fill();
+    gctx.strokeStyle='rgba(0,245,255,0.3)'; gctx.lineWidth=2; gctx.stroke();
+    gctx.beginPath(); gctx.arc(45,50,32, Math.PI*0.75, Math.PI*2.25);
+    gctx.strokeStyle='rgba(255,255,255,0.1)'; gctx.lineWidth=6; gctx.stroke();
+    const endA = Math.PI*0.75+kmhVal*Math.PI*1.5;
+    const grad = gctx.createLinearGradient(0,0,90,0);
+    grad.addColorStop(0,'#00f5ff'); grad.addColorStop(1,'#ff00ff');
+    gctx.beginPath(); gctx.arc(45,50,32, Math.PI*0.75, endA);
+    gctx.strokeStyle=grad; gctx.lineWidth=6; gctx.stroke();
+    gctx.beginPath(); gctx.arc(45+Math.cos(endA)*32, 50+Math.sin(endA)*32, 4, 0, Math.PI*2);
+    gctx.fillStyle='#fff'; gctx.fill();
+    gctx.fillStyle='#00f5ff'; gctx.font='bold 16px monospace'; gctx.textAlign='center'; gctx.textBaseline='middle';
+    gctx.fillText(Math.abs(Math.round(speed*200)), 45, 46);
+    gctx.font='8px monospace'; gctx.fillStyle='rgba(255,255,255,0.5)'; gctx.fillText('KM/H', 45, 60);
 
-  // Animate rings
-  rings.forEach((r, i) => {
-    r.mesh.rotation.z += 0.008 * (i % 2 === 0 ? 1 : -1);
-    r.mesh.position.y = r.baseY + Math.sin(t * 0.7 + r.phase) * 0.8;
-    if (r.pl) {
-      r.pl.position.y = r.mesh.position.y;
-      r.pl.intensity = 2 + Math.sin(t * 1.5 + r.phase) * 1;
-    }
-  });
+    mmCtx.fillStyle='rgba(0,0,0,0.8)'; mmCtx.fillRect(0,0,100,100);
+    mmCtx.strokeStyle='rgba(0,245,255,0.15)'; mmCtx.lineWidth=0.5;
+    for(let i=0;i<100;i+=10){mmCtx.beginPath();mmCtx.moveTo(i,0);mmCtx.lineTo(i,100);mmCtx.stroke();mmCtx.beginPath();mmCtx.moveTo(0,i);mmCtx.lineTo(100,i);mmCtx.stroke();}
+    bdata.forEach(d => { mmCtx.fillStyle='#'+d[5].toString(16).padStart(6,'0'); mmCtx.fillRect(50+d[0]*1.2-2, 50+d[2]*1.2-2, 4, 6); });
+    mmCtx.fillStyle='#00f5ff'; mmCtx.beginPath(); mmCtx.arc(50+car.position.x*1.2, 50+car.position.z*1.2, 3, 0, Math.PI*2); mmCtx.fill();
+    mmCtx.strokeStyle='rgba(0,245,255,0.5)'; mmCtx.lineWidth=1; mmCtx.strokeRect(0,0,100,100);
 
-  // Animate light beams
-  beams.forEach((b, i) => {
-    b.mesh.material.opacity = 0.025 + 0.035 * Math.abs(Math.sin(t * 0.4 + b.phase));
-    b.mesh.rotation.y = t * 0.2 + b.phase;
-  });
-
-  // Animate floating sign
-  floatingSign.position.y = 24 + Math.sin(t * 0.25) * 1.5;
-  floatingSign.rotation.y = Math.sin(t * 0.08) * 0.08;
-  floatingSign.material.opacity = 0.7 + Math.sin(t * 0.5) * 0.3;
-
-  // Animate clouds
-  cloudGroup.position.x = Math.sin(t * 0.05) * 5;
-
-  // Animate sparks
-  for(let i = sparkParticles.length-1; i>=0; i--) {
-    const s = sparkParticles[i];
-    s.mesh.position.add(s.vel);
-    s.vel.y -= 0.012;
-    s.life -= 0.04;
-    s.mesh.material.opacity = s.life;
-    s.mesh.material.transparent = true;
-    if(s.life <= 0) { scene.remove(s.mesh); sparkParticles.splice(i,1); }
+    const kmh = Math.abs(Math.round(speed*200));
+    speednumEl.textContent = kmh+' KM/H';
+    speedfillEl.style.width = (kmh/56*100)+'%';
   }
 
-  // Pulse sky color
-  const skyHue = (Math.sin(t*0.05)*0.05+0.75);
-  renderer.setClearColor(new THREE.Color().setHSL(skyHue, 0.8, 0.02));
+  // Rings
+  rings.forEach((r, i) => {
+    r.mesh.rotation.z += 0.008*(i%2===0?1:-1);
+    r.mesh.position.y = r.baseY+Math.sin(t*0.7+r.phase)*0.8;
+  });
 
-  // Animate shooting stars
-  for (let i = shootingStars.length-1; i >= 0; i--) {
+  // Beams
+  beams.forEach(b => { b.mesh.material.opacity = 0.025+0.035*Math.abs(Math.sin(t*0.4+b.phase)); b.mesh.rotation.y = t*0.2+b.phase; });
+
+  // Sign + clouds
+  floatingSign.position.y = 24+Math.sin(t*0.25)*1.5;
+  floatingSign.rotation.y = Math.sin(t*0.08)*0.08;
+  floatingSign.material.opacity = 0.7+Math.sin(t*0.5)*0.3;
+  cloudGroup.position.x = Math.sin(t*0.05)*5;
+
+  // Sparks
+  for(let i=sparkParticles.length-1;i>=0;i--) {
+    const s = sparkParticles[i];
+    s.mesh.position.add(s.vel); s.vel.y -= 0.012;
+    s.life -= 0.04; s.mesh.material.opacity = s.life;
+    if(s.life<=0) { scene.remove(s.mesh); sparkParticles.splice(i,1); }
+  }
+
+  // Shooting stars + dispose
+  for (let i=shootingStars.length-1;i>=0;i--) {
     const s = shootingStars[i];
     const pos = s.line.geometry.attributes.position;
-    for (let j = 0; j < 2; j++) {
-      pos.array[j*3] += s.vx; pos.array[j*3+1] += s.vy; pos.array[j*3+2] += s.vz;
-    }
+    for (let j=0;j<2;j++) { pos.array[j*3]+=s.vx; pos.array[j*3+1]+=s.vy; pos.array[j*3+2]+=s.vz; }
     pos.needsUpdate = true;
-    s.life -= 0.015;
-    s.line.material.opacity = s.life;
-    if (s.life <= 0) { scene.remove(s.line); shootingStars.splice(i,1); }
+    s.life -= 0.015; s.line.material.opacity = s.life;
+    if (s.life<=0) { scene.remove(s.line); s.line.geometry.dispose(); s.line.material.dispose(); shootingStars.splice(i,1); }
   }
 
-  // Flicker windows (randomly)
-  if (Math.floor(t*10) % 3 === 0) {
-    windowMeshes.forEach(w => {
-      if (Math.random() > 0.97) w.mesh.material.emissiveIntensity = Math.random() * 3;
-      else w.mesh.material.emissiveIntensity += (w.base - w.mesh.material.emissiveIntensity) * 0.1;
-    });
-  }
-
-  // Animate orbs
+  // Orbs
   orbs.forEach(o => {
-    o.angle += o.speed * 0.01;
-    o.mesh.position.x = Math.cos(o.angle) * 12;
-    o.mesh.position.z = Math.sin(o.angle) * 12 - 10;
-    o.mesh.position.y = 4 + Math.sin(t * 1.5 + o.angle) * 1.5;
-    o.mesh.material.emissiveIntensity = 2 + Math.sin(t * 3 + o.angle) * 1;
+    o.angle += o.speed*0.01;
+    o.mesh.position.set(Math.cos(o.angle)*12, 4+Math.sin(t*1.5+o.angle)*1.5, Math.sin(o.angle)*12-10);
   });
 
-  // Animate aurora
-  auroraPlanes.forEach((a, i) => {
-    a.material.opacity = 0.04 + 0.04 * Math.sin(t * 0.5 + i * 1.5);
-    a.position.x = Math.sin(t * 0.2 + i) * 20;
-  });
+  // Aurora — every 2nd frame
+  if (frameCount%2===0) {
+    auroraPlanes.forEach((a,i) => { a.material.opacity = 0.04+0.04*Math.sin(t*0.5+i*1.5); a.position.x = Math.sin(t*0.2+i)*20; });
+  }
 
-  // Animate exhaust
+  // Exhaust
   const ep = exhaustGeo.attributes.position;
-  for (let i = 0; i < exhaustCount; i++) {
-    ep.array[i*3]   = car.position.x + (Math.random()-0.5)*0.4 - Math.sin(car.rotation.y)*1.8;
-    ep.array[i*3+1] = car.position.y + 0.3 + Math.random()*0.3;
-    ep.array[i*3+2] = car.position.z + (Math.random()-0.5)*0.4 - Math.cos(car.rotation.y)*1.8;
+  for (let i=0;i<exhaustCount;i++) {
+    ep.array[i*3] = car.position.x+(Math.random()-0.5)*0.4-Math.sin(car.rotation.y)*1.8;
+    ep.array[i*3+1] = car.position.y+0.3+Math.random()*0.3;
+    ep.array[i*3+2] = car.position.z+(Math.random()-0.5)*0.4-Math.cos(car.rotation.y)*1.8;
   }
   ep.needsUpdate = true;
-  exhaustMat.opacity = Math.abs(speed) > 0.05 ? 0.6 : 0.1;
+  exhaustMat.opacity = Math.abs(speed)>0.05 ? 0.6 : 0.1;
 
-  // Pulse road edge strips
-  scene.traverse(obj => {
-    if (obj.isMesh && obj.material.emissive && obj.material.emissive.getHex() === 0x00f5ff && obj.geometry.type === 'PlaneGeometry') {
-      obj.material.emissiveIntensity = 1.5 + Math.sin(t * 3) * 0.5;
-    }
-  });
+  // Road edge pulse — direct ref, NO traverse!
+  const pulseVal = 0.7+Math.sin(t*3)*0.3;
+  roadEdgeStrips[0].material.opacity = pulseVal;
+  roadEdgeStrips[1].material.opacity = pulseVal;
 
-  // Animate rain
+  // Rain
   const rp = rainGeo.attributes.position;
-  for (let i = 0; i < rainCount; i++) {
-    rp.array[i*3+1] -= 0.3;
-    if (rp.array[i*3+1] < 0) rp.array[i*3+1] = 30;
-  }
+  for (let i=0;i<rainCount;i++) { rp.array[i*3+1]-=0.3; if(rp.array[i*3+1]<0) rp.array[i*3+1]=30; }
   rp.needsUpdate = true;
 
-  // Animate floating particles
-  floatParticles.rotation.y = t * 0.03;
-  const fp = floatGeo.attributes.position;
-  for (let i = 1; i < fp.count * 3; i += 3) {
-    fp.array[i] += Math.sin(t + i) * 0.002;
+  // Float particles — every 2nd frame
+  if (frameCount%2===0) {
+    floatParticles.rotation.y = t*0.03;
+    const fp = floatGeo.attributes.position;
+    for (let i=1;i<fp.count*3;i+=3) fp.array[i] += Math.sin(t+i)*0.002;
+    fp.needsUpdate = true;
   }
-  fp.needsUpdate = true;
 
-  // Speed lines
-  const kmh2 = Math.abs(speed) / MAX_SPEED;
-  document.getElementById('speedlines').style.opacity = kmh2 > 0.5 ? (kmh2 - 0.5) * 2 : 0;
-
-  // Mini-map
-  const mmc = document.getElementById('mmCanvas');
-  const mmCtx = mmc.getContext('2d');
-  mmCtx.fillStyle = 'rgba(0,0,0,0.8)';
-  mmCtx.fillRect(0,0,100,100);
-  // grid lines
-  mmCtx.strokeStyle = 'rgba(0,245,255,0.15)';
-  mmCtx.lineWidth = 0.5;
-  for(let i=0;i<100;i+=10){mmCtx.beginPath();mmCtx.moveTo(i,0);mmCtx.lineTo(i,100);mmCtx.stroke();mmCtx.beginPath();mmCtx.moveTo(0,i);mmCtx.lineTo(100,i);mmCtx.stroke();}
-  // buildings dots
-  bdata.forEach(d => {
-    const mx = 50 + d[0]*1.2, mz = 50 + d[2]*1.2;
-    mmCtx.fillStyle = '#' + d[5].toString(16).padStart(6,'0');
-    mmCtx.fillRect(mx-2, mz-2, 4, 6);
-  });
-  // car dot
-  const cx2 = 50 + car.position.x*1.2, cz2 = 50 + car.position.z*1.2;
-  mmCtx.fillStyle = '#00f5ff';
-  mmCtx.beginPath(); mmCtx.arc(cx2, cz2, 3, 0, Math.PI*2); mmCtx.fill();
-  // border
-  mmCtx.strokeStyle = 'rgba(0,245,255,0.5)'; mmCtx.lineWidth=1;
-  mmCtx.strokeRect(0,0,100,100);
-
-  // HUD speed
-  const kmh = Math.abs(Math.round(speed * 200));
-  document.getElementById('speednum').textContent = kmh + ' KM/H';
-  document.getElementById('speedfill').style.width = (kmh / 56 * 100) + '%';
+  speedlinesEl.style.opacity = Math.abs(speed)/MAX_SPEED>0.5 ? (Math.abs(speed)/MAX_SPEED-0.5)*2 : 0;
 
   renderer.render(scene, camera);
 }
 animate();
 
 window.addEventListener('resize', () => {
-  camera.aspect = innerWidth / innerHeight;
+  camera.aspect = innerWidth/innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 });
