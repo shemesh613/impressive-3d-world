@@ -426,13 +426,13 @@ for(let i=0;i<FOLLOWER_N;i++)followerPos.push({x:0,z:-(i+1)*6,y:.4});
 // ---- GREEN COLLECTIBLES ----
 const MAX_GREENS=10;
 const greens=[];
-const greenInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.3,0),new THREE.MeshBasicMaterial({color:0x22c55e}),MAX_GREENS);
+const greenInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.7,0),new THREE.MeshBasicMaterial({color:0x22c55e}),MAX_GREENS);
 scene.add(greenInst);
 
 function spawnGreen(){
   if(greens.length>=MAX_GREENS)return;
   const x=(Math.random()-.5)*8;const z=car.position.z+(35+Math.random()*50);
-  greens.push({x,z,y:1,active:true});
+  greens.push({x,z,y:1.5,active:true});
 }
 
 // ---- POWER-UPS (golden diamonds) ----
@@ -440,13 +440,13 @@ const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh
 // ---- OBSTACLES (red) ----
 const MAX_OBS=6;
 const obstacles=[];
-const obsInst=new THREE.InstancedMesh(new THREE.BoxGeometry(.8,.8,.8),new THREE.MeshBasicMaterial({color:0xef4444}),MAX_OBS);
+const obsInst=new THREE.InstancedMesh(new THREE.BoxGeometry(1.2,1.2,1.2),new THREE.MeshBasicMaterial({color:0xef4444}),MAX_OBS);
 scene.add(obsInst);
 
 function spawnObstacle(){
   if(obstacles.length>=MAX_OBS)return;
   const x=(Math.random()-.5)*8;const z=car.position.z+(45+Math.random()*50);
-  obstacles.push({x,z,y:.5,active:true});
+  obstacles.push({x,z,y:1,active:true});
 }
 
 function updateInstances(arr,inst,max,rotSpeed){
@@ -726,7 +726,7 @@ function animate(){
     for(let i=powerups.length-1;i>=0;i--){if(powerups[i].z<car.position.z-30)powerups.splice(i,1)}
 
     // Bob greens & powerups
-    for(let i=0;i<greens.length;i++){greens[i].y=1.2+Math.sin(fc*.05+i)*.2}
+    for(let i=0;i<greens.length;i++){greens[i].y=1.5+Math.sin(fc*.05+i)*.2}
     for(let i=0;i<powerups.length;i++){powerups[i].y=1.5+Math.sin(fc*.06+i)*.4}
 
     checkCollisions();
