@@ -360,13 +360,15 @@ scene.add((() => {
   const glowL=new THREE.InstancedMesh(glowGeo,glowMat,RSEGS);
   const glowR=new THREE.InstancedMesh(glowGeo,glowMat,RSEGS);
   for(let i=0;i<RSEGS;i++){
-    const z=-50+i*SLEN,x=roadX(z+SLEN/2);
-    dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);
-    dummy.position.set(x,.01,z+SLEN/2);dummy.updateMatrix();roadInst.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(x-5.2,.02,z+SLEN/2);dummy.updateMatrix();edgeL.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(x+5.2,.02,z+SLEN/2);dummy.updateMatrix();edgeR.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(x-6.8,.005,z+SLEN/2);dummy.updateMatrix();glowL.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(x+6.8,.005,z+SLEN/2);dummy.updateMatrix();glowR.setMatrixAt(i,dummy.matrix);
+    const z=-50+i*SLEN,zc=z+SLEN/2,x=roadX(zc);
+    const ca=Math.atan2(roadX(zc+1)-roadX(zc-1),2);
+    const cosA=Math.cos(ca),sinA=Math.sin(ca);
+    dummy.rotation.set(-Math.PI/2,ca,0);dummy.scale.setScalar(1);
+    dummy.position.set(x,.01,zc);dummy.updateMatrix();roadInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x-5.2*cosA,.02,zc+5.2*sinA);dummy.updateMatrix();edgeL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x+5.2*cosA,.02,zc-5.2*sinA);dummy.updateMatrix();edgeR.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x-6.8*cosA,.005,zc+6.8*sinA);dummy.updateMatrix();glowL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x+6.8*cosA,.005,zc-6.8*sinA);dummy.updateMatrix();glowR.setMatrixAt(i,dummy.matrix);
   }
   [roadInst,edgeL,edgeR,glowL,glowR].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});
 }
@@ -499,13 +501,13 @@ scene.add((() => {
 {
   const crossN=35;
   const crossGeo=new THREE.PlaneGeometry(40,5);
-  const crossMat=new THREE.MeshBasicMaterial({color:0x394860});
+  const crossMat=new THREE.MeshBasicMaterial({color:0x4a5a70});
   const crossInst=new THREE.InstancedMesh(crossGeo,crossMat,crossN);
-  const zebraGeo=new THREE.PlaneGeometry(1.2,.4);
-  const zebraMat=new THREE.MeshBasicMaterial({color:0xffffff});
+  const zebraGeo=new THREE.PlaneGeometry(1.4,.6);
+  const zebraMat=new THREE.MeshBasicMaterial({color:0xffffcc});
   const zebraInst=new THREE.InstancedMesh(zebraGeo,zebraMat,crossN*10);
   const sideRoadGeo=new THREE.PlaneGeometry(8,30);
-  const sideRoadMat=new THREE.MeshBasicMaterial({color:0x2a3050});
+  const sideRoadMat=new THREE.MeshBasicMaterial({color:0x3a4565});
   const sideRoadL=new THREE.InstancedMesh(sideRoadGeo,sideRoadMat,crossN);
   const sideRoadR=new THREE.InstancedMesh(sideRoadGeo,sideRoadMat,crossN);
   for(let i=0;i<crossN;i++){
@@ -914,7 +916,7 @@ for(let i=0;i<FOLLOWER_N;i++){
   followerInst.setMatrixAt(i,dummy.matrix);followerInst.setColorAt(i,_col.setHex(followerColors[i]));
 }
 followerInst.instanceMatrix.needsUpdate=true;followerInst.instanceColor.needsUpdate=true;
-scene.add(followerInst);
+followerInst.frustumCulled=false;scene.add(followerInst);
 const followerPos=[];
 for(let i=0;i<FOLLOWER_N;i++)followerPos.push({x:0,z:-(i+1)*6,y:.4});
 
@@ -922,20 +924,20 @@ for(let i=0;i<FOLLOWER_N;i++)followerPos.push({x:0,z:-(i+1)*6,y:.4});
 const MAX_GREENS=10;
 const greens=[];
 const greenInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1.3,0),new THREE.MeshBasicMaterial({color:0x55ff77,transparent:true,opacity:1.0}),MAX_GREENS);
-scene.add(greenInst);
+greenInst.frustumCulled=false;scene.add(greenInst);
 
 // ---- COLLECTIBLE BEAMS ----
 const beamGeo=new THREE.CylinderGeometry(.05,.05,5,4);
 const beamMat=new THREE.MeshBasicMaterial({color:0x66ff88,transparent:true,opacity:0.6});
 const beamInst=new THREE.InstancedMesh(beamGeo,beamMat,MAX_GREENS);
-scene.add(beamInst);
+beamInst.frustumCulled=false;scene.add(beamInst);
 window._beamInst=beamInst;
 
 // ---- COLLECTIBLE RINGS ----
 const ringGeo=new THREE.RingGeometry(1.5,2,16);
 const ringMat=new THREE.MeshBasicMaterial({color:0x55ff77,transparent:true,opacity:0.5,side:THREE.DoubleSide});
 const ringInst=new THREE.InstancedMesh(ringGeo,ringMat,MAX_GREENS);
-scene.add(ringInst);
+ringInst.frustumCulled=false;scene.add(ringInst);
 window._ringInst=ringInst;
 
 
@@ -948,17 +950,17 @@ function spawnGreen(){
 }
 
 // ---- POWER-UPS (golden diamonds) ----
-const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.8,1),new THREE.MeshBasicMaterial({color:0xfbbf24}),MAX_POWERUPS);scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const z=car.position.z+(60+Math.random()*40);const rx=roadX(z);const x=rx+(Math.random()-.5)*7;  powerups.push({x,z,y:2.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
+const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.8,1),new THREE.MeshBasicMaterial({color:0xfbbf24}),MAX_POWERUPS);powerupInst.frustumCulled=false;scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const z=car.position.z+(60+Math.random()*40);const rx=roadX(z);const x=rx+(Math.random()-.5)*7;  powerups.push({x,z,y:2.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
 // ---- OBSTACLES (red) ----
 const MAX_OBS=6;
 const obstacles=[];
 const obsInst=new THREE.InstancedMesh(new THREE.BoxGeometry(2,2,2),new THREE.MeshBasicMaterial({color:0xff2222,transparent:true,opacity:0.9}),MAX_OBS);
-scene.add(obsInst);
+obsInst.frustumCulled=false;scene.add(obsInst);
 
 const obsRingGeo=new THREE.RingGeometry(1.2,1.8,16);
 const obsRingMat=new THREE.MeshBasicMaterial({color:0xff4444,transparent:true,opacity:0.4,side:THREE.DoubleSide});
 const obsRingInst=new THREE.InstancedMesh(obsRingGeo,obsRingMat,MAX_OBS);
-scene.add(obsRingInst);
+obsRingInst.frustumCulled=false;scene.add(obsRingInst);
 window._obsRingInst=obsRingInst;
 
 
@@ -982,7 +984,7 @@ function updateInstances(arr,inst,max,rotSpeed){
 // ---- PARTICLES ----
 const PART_MAX=50;const particles=[];
 const partInst=new THREE.InstancedMesh(new THREE.SphereGeometry(.1,4,4),new THREE.MeshBasicMaterial(),PART_MAX);
-scene.add(partInst);
+partInst.frustumCulled=false;scene.add(partInst);
 function emitParticles(x,y,z,color,n){for(let i=0;i<n&&particles.length<PART_MAX;i++){particles.push({x,y,z,vx:(Math.random()-.5)*.3,vy:Math.random()*.3+.1,vz:(Math.random()-.5)*.3,life:1,color})}}
 function updateParticles(){
   for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.z+=p.vz;p.vy-=.01;p.life-=.03;if(p.life<=0)particles.splice(i,1)}
@@ -1212,18 +1214,20 @@ function animate(){
     else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.12,spd-.012);
     else{spd*=.975;if(spd<.04)spd=.04}
 
-    // steering is now handled in auto-steer block below
+    if(Math.abs(spd)>.003){
+      if(keys.ArrowLeft||keys.KeyA)dir+=.035*Math.sign(spd);
+      if(keys.ArrowRight||keys.KeyD)dir-=.035*Math.sign(spd);
+    }
+    dir*=.95;
 
-    // Auto-steer: car follows road curve
-    const aheadX=roadX(car.position.z+15);
+    // Car follows curve by position pull (NOT rotation) - curves stay visible!
     const curX=roadX(car.position.z);
-    const curvePull=(curX-car.position.x)*.025;
+    const aheadX=roadX(car.position.z+30);
+    const curvePull=(curX-car.position.x)*.04;
     car.position.x+=curvePull;
-    const curveDir=Math.atan2(aheadX-curX,15)*.6;
-    dir=dir*.92+curveDir*.08;
-    if(keys.ArrowLeft||keys.KeyA)dir+=.035;
-    if(keys.ArrowRight||keys.KeyD)dir-=.035;
-    car.rotation.y=dir;
+    // Visual tilt only - slight lean into curves for feel
+    const curveAngle=Math.atan2(aheadX-curX,30)*.25;
+    car.rotation.y=dir+curveAngle;
     car.position.x+=Math.sin(dir)*spd;
     car.position.z+=Math.cos(dir)*spd;
 
