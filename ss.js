@@ -1,0 +1,26 @@
+const puppeteer = require('puppeteer');
+const path = require('path');
+(async () => {
+  const browser = await puppeteer.launch({headless:'new',args:['--no-sandbox','--disable-gpu']});
+  const page = await browser.newPage();
+  await page.setViewport({width:1280,height:720});
+  const filePath = path.resolve('index.html').split(path.sep).join('/');
+  const url = 'file:///' + filePath;
+  console.log('URL:', url);
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(url, {waitUntil:'networkidle2',timeout:15000});
+  await page.screenshot({path:'screen_start.png'});
+  await page.click('#playBtn').catch(e=>console.log('Click err:',e.message));
+  await new Promise(r=>setTimeout(r,3000));
+  await page.screenshot({path:'screen_game.png'});
+  await page.keyboard.down('ArrowUp');
+  await new Promise(r=>setTimeout(r,5000));
+  await page.keyboard.up('ArrowUp');
+  await page.screenshot({path:'screen_driving.png'});
+  const state = await page.evaluate(() => ({startVis:document.getElementById('startScreen')?.style.display,hudVis:document.getElementById('hud')?.style.display,score:document.getElementById('scoreVal')?.textContent,dist:document.getElementById('distVal')?.textContent}));
+  console.log('STATE:', JSON.stringify(state));
+  if(errors.length) console.log('JS ERRORS:', errors.join(' | '));
+  else console.log('No JS errors');
+  await browser.close();
+})();

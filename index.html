@@ -412,6 +412,52 @@ scene.add((() => {
 }
 // ---- FLOATING BALLOONS ----
 {  const BLN_N=25;const blnColors=[0xff6b9d,0x4ecdc4,0xffe66d,0xa855f7,0x06b6d4,0xf97316];  const blnGeo=new THREE.SphereGeometry(.6,8,8);  const blnMat=new THREE.MeshBasicMaterial({color:0xffffff});  const blnInst=new THREE.InstancedMesh(blnGeo,blnMat,BLN_N);  blnInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(BLN_N*3),3);  const blnData=[];  const _bc=new THREE.Color();  for(let i=0;i<BLN_N;i++){    const x=-20+Math.random()*40;    const z=Math.random()*2500;    const baseY=10+Math.random()*8;    blnData.push({x,z,baseY,phase:Math.random()*Math.PI*2,spd:.01+Math.random()*.02});    _bc.setHex(blnColors[i%blnColors.length]);    blnInst.instanceColor.setXYZ(i,_bc.r,_bc.g,_bc.b);    dummy.position.set(x,baseY,z);dummy.scale.setScalar(.8+Math.random()*.5);dummy.rotation.set(0,0,0);dummy.updateMatrix();    blnInst.setMatrixAt(i,dummy.matrix);  }  blnInst.instanceMatrix.needsUpdate=true;blnInst.instanceColor.needsUpdate=true;  scene.add(blnInst);  window._blnData={inst:blnInst,data:blnData,n:BLN_N};}
+
+// ---- ROAD BARRIERS (chicanes/turns) ----
+{
+  const BARRIER_N=30;
+  const barrierGeo=new THREE.BoxGeometry(3,.8,1);
+  const barrierMat=new THREE.MeshBasicMaterial({color:0xff6600});
+  const barrierInst=new THREE.InstancedMesh(barrierGeo,barrierMat,BARRIER_N);
+  const barrierData=[];
+  for(let i=0;i<BARRIER_N;i++){
+    const z=150+i*120;
+    const side=i%3===0?-3:(i%3===1?3:0);
+    const width=i%3===2?1.5:3;
+    barrierData.push({x:side,z:z,w:width});
+    dummy.position.set(side,.4,z);dummy.scale.set(width/3,1,1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    barrierInst.setMatrixAt(i,dummy.matrix);
+  }
+  barrierInst.instanceMatrix.needsUpdate=true;scene.add(barrierInst);
+  window._barrierData={inst:barrierInst,data:barrierData,n:BARRIER_N};
+}
+// ---- ROAD ARROWS (turn indicators) ----
+{
+  const ARROW_N=20;
+  const arrowGeo=new THREE.ConeGeometry(.6,1.5,3);
+  const arrowMat=new THREE.MeshBasicMaterial({color:0x44ff44});
+  const arrowInst=new THREE.InstancedMesh(arrowGeo,arrowMat,ARROW_N);
+  for(let i=0;i<ARROW_N;i++){
+    const z=130+i*120;
+    const side=i%3===0?1:(i%3===1?-1:0);
+    dummy.position.set(side*2,2.5,z);dummy.rotation.set(0,0,side*Math.PI/2);dummy.scale.setScalar(1);dummy.updateMatrix();
+    arrowInst.setMatrixAt(i,dummy.matrix);
+  }
+  arrowInst.instanceMatrix.needsUpdate=true;scene.add(arrowInst);
+}
+// ---- SPEED BUMPS ----
+{
+  const BUMP_N=25;
+  const bumpGeo=new THREE.CylinderGeometry(3,.01,.3,8);
+  const bumpMat=new THREE.MeshBasicMaterial({color:0xffdd00});
+  const bumpInst=new THREE.InstancedMesh(bumpGeo,bumpMat,BUMP_N);
+  for(let i=0;i<BUMP_N;i++){
+    dummy.position.set(0,.15,200+i*150);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    bumpInst.setMatrixAt(i,dummy.matrix);
+  }
+  bumpInst.instanceMatrix.needsUpdate=true;scene.add(bumpInst);
+}
+
 // ---- CROSS STREETS ----
 {  const crossGeo=new THREE.PlaneGeometry(30,.15);  const crossMat=new THREE.MeshBasicMaterial({color:0x334455});  const crossN=40;  const crossInst=new THREE.InstancedMesh(crossGeo,crossMat,crossN);  for(let i=0;i<crossN;i++){    dummy.position.set(0,.015,i*80+50);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();    crossInst.setMatrixAt(i,dummy.matrix);  }  crossInst.instanceMatrix.needsUpdate=true;scene.add(crossInst);}
 
@@ -491,8 +537,16 @@ for(let i=0;i<FOLLOWER_N;i++)followerPos.push({x:0,z:-(i+1)*6,y:.4});
 // ---- GREEN COLLECTIBLES ----
 const MAX_GREENS=10;
 const greens=[];
-const greenInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1.3,0),new THREE.MeshBasicMaterial({color:0x22c55e}),MAX_GREENS);
+const greenInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1.3,0),new THREE.MeshBasicMaterial({color:0x44ff66,transparent:true,opacity:0.9}),MAX_GREENS);
 scene.add(greenInst);
+
+// ---- COLLECTIBLE BEAMS ----
+const beamGeo=new THREE.CylinderGeometry(.05,.05,5,4);
+const beamMat=new THREE.MeshBasicMaterial({color:0x44ff66,transparent:true,opacity:0.4});
+const beamInst=new THREE.InstancedMesh(beamGeo,beamMat,MAX_GREENS);
+scene.add(beamInst);
+window._beamInst=beamInst;
+
 
 function spawnGreen(){
   if(greens.length>=MAX_GREENS)return;
@@ -505,7 +559,7 @@ const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh
 // ---- OBSTACLES (red) ----
 const MAX_OBS=6;
 const obstacles=[];
-const obsInst=new THREE.InstancedMesh(new THREE.BoxGeometry(2,2,2),new THREE.MeshBasicMaterial({color:0xef4444}),MAX_OBS);
+const obsInst=new THREE.InstancedMesh(new THREE.BoxGeometry(2,2,2),new THREE.MeshBasicMaterial({color:0xff2222,transparent:true,opacity:0.9}),MAX_OBS);
 scene.add(obsInst);
 
 function spawnObstacle(){
@@ -771,6 +825,9 @@ function animate(){
     if(boostTimer>0)boostTimer--;if(shieldTimer>0)shieldTimer--;if(turboTimer>0)turboTimer--;if(shieldTimer>0)car.children[0].material.color.setHex(fc%10<5?0x60a5fa:0x3b82f6);else if(turboTimer>0)car.children[0].material.color.setHex(fc%10<5?0xfbbf24:0xf59e0b);else if(boostTimer>0){car.children[0].material.color.setHex(fc%10<5?0x4ade80:0x22c55e)}
     else{car.children[0].material.color.setHex(0x22c55e)}
 
+
+  // Barrier collisions
+  if(window._barrierData){const bd=window._barrierData;for(let i=0;i<bd.n;i++){const b=bd.data[i];const dz=Math.abs(cz-b.z);if(dz<1){const dx=Math.abs(cx-b.x);if(dx<b.w*.6){spd*=.15;flow=Math.max(0,flow-2);emitParticles(cx,1,cz,0xff6600,4)}}}}
     // Follower cars
     for(let i=0;i<FOLLOWER_N;i++){
       const target=i===0?car.position:{x:followerPos[i-1].x,z:followerPos[i-1].z};
@@ -792,6 +849,7 @@ function animate(){
 
     // Bob greens & powerups
     for(let i=0;i<greens.length;i++){greens[i].y=3+Math.sin(fc*.05+i)*.5}
+if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i].active){dummy.position.set(greens[i].x,1.5,greens[i].z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();window._beamInst.setMatrixAt(i,dummy.matrix)}else{dummy.position.set(0,-100,0);dummy.scale.setScalar(0);dummy.updateMatrix();window._beamInst.setMatrixAt(i,dummy.matrix)}}window._beamInst.instanceMatrix.needsUpdate=true}
     for(let i=0;i<powerups.length;i++){powerups[i].y=2.5+Math.sin(fc*.06+i)*.6}
 
     checkCollisions();
