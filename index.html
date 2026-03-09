@@ -100,6 +100,7 @@
       font-size:clamp(20px,5vw,30px);color:#fff;cursor:pointer;user-select:none;-webkit-user-select:none}
     .ctrl-btn:active{background:rgba(255,255,255,.3);transform:scale(.92)}
     .ctrl-btn.gas{background:rgba(0,255,100,.2);border-color:rgba(0,255,100,.4)}
+    /* Screen flash */    #screenFlash{position:fixed;inset:0;z-index:15;pointer-events:none;opacity:0;transition:opacity .15s}    .flash-green{background:rgba(34,197,94,.25);opacity:1!important}    .flash-red{background:rgba(239,68,68,.25);opacity:1!important}    .flash-gold{background:rgba(251,191,36,.2);opacity:1!important}
     .ctrl-btn.brake{background:rgba(255,50,50,.2);border-color:rgba(255,50,50,.4)}
   </style>
 </head>
@@ -167,6 +168,8 @@
 </div>
 
 <!-- MOBILE CONTROLS -->
+<!-- SCREEN FLASH -->
+<div id="screenFlash"></div>
 <div id="mobileControls">
   <div class="ctrl-group"><button class="ctrl-btn" id="btnLeft">⬅️</button></div>
   <div class="ctrl-group">
@@ -285,6 +288,7 @@ function sfxRed(){playTone(150,.3,'sawtooth',.12);playTone(100,.4,'square',.08)}
 function sfxCollect(){playTone(880,.12,'sine',.1);setTimeout(()=>playTone(1100,.1,'sine',.08),70)}
 function sfxBoost(){[600,800,1000,1200].forEach((f,i)=>setTimeout(()=>playTone(f,.12,'sine',.08),i*60))}
 function sfxLevelUp(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.2,'sine',.1),i*100))}
+function screenFlash(cls){const el=document.getElementById("screenFlash");el.className=cls;el.style.opacity="1";setTimeout(()=>{el.style.opacity="0";el.className=""},300)}
 function sfxScenario(){playTone(440,.15,'triangle',.1);setTimeout(()=>playTone(554,.15,'triangle',.08),100)}
 
 // ---- RENDERER ----
@@ -368,6 +372,7 @@ for(let z=-100;z<=600;z+=10){
   inst.instanceMatrix.needsUpdate=true;scene.add(inst);
 }
 
+// ---- TREES (lollipop style) ----{  const trunkGeo=new THREE.CylinderGeometry(.15,.2,2,5);  const trunkMat=new THREE.MeshBasicMaterial({color:0x5c4033});  const leafGeo=new THREE.SphereGeometry(1.2,6,5);  const leafColors=[0x16a34a,0x22c55e,0x15803d,0x4ade80,0x86efac];  const treePositions=[];  for(let z=-80;z<=550;z+=15){    if(Math.random()>.35)treePositions.push([-7.5+(Math.random()-.5)*2,z]);    if(Math.random()>.35)treePositions.push([7.5+(Math.random()-.5)*2,z]);  }  const trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,treePositions.length);  const leafInst=new THREE.InstancedMesh(leafGeo,new THREE.MeshBasicMaterial(),treePositions.length);  treePositions.forEach(([x,z],i)=>{    dummy.position.set(x,1,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    trunkInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,3+Math.random()*.5,z);dummy.scale.setScalar(.7+Math.random()*.5);dummy.updateMatrix();    leafInst.setMatrixAt(i,dummy.matrix);leafInst.setColorAt(i,_col.setHex(leafColors[i%leafColors.length]));  });  trunkInst.instanceMatrix.needsUpdate=true;leafInst.instanceMatrix.needsUpdate=true;  if(leafInst.instanceColor)leafInst.instanceColor.needsUpdate=true;  scene.add(trunkInst);scene.add(leafInst);}// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=550;z+=20){lampPositions.push([-6,z],[6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshBasicMaterial({color:0x888888});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.25,4,4);  const glowMat2=new THREE.MeshBasicMaterial({color:0xffffaa});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
 // Sky + Stars + Moon
 scene.add(new THREE.Mesh(new THREE.SphereGeometry(200,8,4),new THREE.MeshBasicMaterial({color:0x071020,side:THREE.BackSide})));
 {const p=new Float32Array(200*3);for(let i=0;i<200;i++){p[i*3]=(Math.random()-.5)*240;p[i*3+1]=Math.random()*60+10;p[i*3+2]=(Math.random()-.5)*240}
@@ -420,6 +425,7 @@ function spawnGreen(){
   greens.push({x,z,y:1,active:true});
 }
 
+// ---- POWER-UPS (golden diamonds) ----const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.4,1),new THREE.MeshBasicMaterial({color:0xfbbf24}),MAX_POWERUPS);scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const x=(Math.random()-.5)*7;const z=car.position.z+(60+Math.random()*40);  powerups.push({x,z,y:1.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
 // ---- OBSTACLES (red) ----
 const MAX_OBS=6;
 const obstacles=[];
@@ -457,7 +463,7 @@ function updateParticles(){
 }
 
 // ---- GAME STATE ----
-let score=0,lives=3,level=1,flow=50,greenCount=0,redCount=0,streak=0,bestStreak=0;
+let score=0,lives=3,level=1,flow=50,greenCount=0,redCount=0,streak=0,bestStreak=0,shieldTimer=0,turboTimer=0;
 let gameActive=false,spd=0,dir=0,fc=0,boostTimer=0;
 let scenarioActive=false,scenarioTimer=0,scenarioTimeout=null,usedScenarios=[];
 let nextScenarioAt=0,scenariosAnswered=0;
@@ -547,14 +553,14 @@ function choose(type){
 
   if(isGreen){
     greenCount++;score+=s.green.points;flow=Math.min(100,flow+15);boostTimer=120;streak++;if(streak>bestStreak)bestStreak=streak;
-    sfxGreen();
+    sfxGreen();screenFlash("flash-green");
     emitParticles(car.position.x,2,car.position.z,0x22c55e,12);
     fbIcon.textContent='🟢';
     fbText.textContent=s.greenFeedback;
     fbText.style.color='#4ade80';
   } else {
     redCount++;score+=s.red.points;streak=0;if(score<0)score=0;flow=Math.max(0,flow-20);spd*=.3;
-    sfxRed();
+    sfxRed();screenFlash("flash-red");
     emitParticles(car.position.x,2,car.position.z,0xef4444,12);
     fbIcon.textContent='🔴';
     fbText.textContent=type==='timeout'?'⏰ לא הספקת לבחור — כולם מחכים...':s.redFeedback;
@@ -640,11 +646,12 @@ function checkCollisions(){
       greens.splice(i,1);spawnGreen();
     }
   }
+// Power-ups  for(let i=powerups.length-1;i>=0;i--){    const p=powerups[i];if(!p.active)continue;    if((cx-p.x)**2+(cz-p.z)**2<3){      p.active=false;screenFlash("flash-gold");      sfxBoost();emitParticles(p.x,p.y,p.z,0xfbbf24,10);      const proj=_v.set(p.x,p.y+1,p.z).project(cam);      if(p.type==="shield"){shieldTimer=300;showPopup("🛡️ מגן!",(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,"#60a5fa")}      else{turboTimer=180;showPopup("⚡ טורבו!",(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,"#fbbf24")}      powerups.splice(i,1);    }  }
   for(let i=obstacles.length-1;i>=0;i--){
     const o=obstacles[i];if(!o.active)continue;
     if((cx-o.x)**2+(cz-o.z)**2<2.5){
-      o.active=false;lives--;flow=Math.max(0,flow-10);spd*=.3;
-      sfxRed();emitParticles(o.x,o.y,o.z,0xef4444,10);
+      o.active=false;if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,o.y,o.z,0x60a5fa,8);sfxCollect();obstacles.splice(i,1);continue}lives--;flow=Math.max(0,flow-10);spd*=.3;
+      sfxRed();screenFlash("flash-red");emitParticles(o.x,o.y,o.z,0xef4444,10);
       const proj=_v.set(o.x,o.y+1,o.z).project(cam);
       showPopup('💥',(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,'#ef4444');
       obstacles.splice(i,1);
