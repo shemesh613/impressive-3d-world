@@ -124,9 +124,11 @@
 <!-- HUD -->
 <div id="hud">
   <div class="hud-bar">
+      <div class="hud-item"><span class="icon">&#9889;</span><span class="val" id="speedVal">0</span></div>
     <div class="hud-item"><span class="icon">🟢</span><span class="val" id="scoreVal">0</span></div>
     <div class="hud-item"><span class="icon">❤️</span><span class="val" id="livesVal">3</span></div>
     <div class="hud-item"><span class="icon">🌊</span><div id="flowBar"><div id="flowFill"></div></div></div>
+      <div class="hud-item" id="powerIndicator" style="display:none"><span class="icon" id="powerIcon">&#128737;</span><span class="val" id="powerTimer">0</span></div>
     <div class="hud-item"><span class="icon">🏆</span><span class="val" id="levelVal">1</span></div>
     <div class="hud-item"><span class="icon">🔥</span><span class="val" id="streakVal">0</span></div>
     <div class="hud-item"><span class="icon">🛣️</span><span class="val" id="distVal">0m</span></div>
@@ -885,6 +887,7 @@ function updateHUD(){
   document.getElementById('levelVal').textContent=level;
   document.getElementById('streakVal').textContent=streak>0?'🔥'.repeat(Math.min(streak,5)):'-';
   document.getElementById('flowFill').style.width=flow+'%';document.getElementById('distVal').textContent=Math.floor(car.position.z)+'m';
+  document.getElementById('speedVal').textContent=Math.round(spd*500)+'km/h';
 }
 
 // ---- COLLISIONS ----
@@ -952,6 +955,16 @@ function animate(){
 
   // Barrier collisions
   if(window._barrierData){const bd=window._barrierData;for(let i=0;i<bd.n;i++){const b=bd.data[i];const dz=Math.abs(cz-b.z);if(dz<1){const dx=Math.abs(cx-b.x);if(dx<b.w*.6){spd*=.15;flow=Math.max(0,flow-2);emitParticles(cx,1,cz,0xff6600,4)}}}}
+
+  // Obstacle sparks effect
+  if(obstacles.length>0){
+    for(let i=0;i<obstacles.length;i++){
+      const ob=obstacles[i];
+      if(ob.active&&Math.abs(car.position.z-ob.z)<50&&fc%8===0){
+        emitParticles(ob.x+Math.random()*2-1,ob.y+1,ob.z+Math.random()*2-1,0xff6633,1);
+      }
+    }
+  }
     // Follower cars
     for(let i=0;i<FOLLOWER_N;i++){
       const target=i===0?car.position:{x:followerPos[i-1].x,z:followerPos[i-1].z};
@@ -1057,7 +1070,11 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
   updateClouds();updateInstances(greens,greenInst,MAX_GREENS,true);
   updateInstances(obstacles,obsInst,MAX_OBS,false);updateInstances(powerups,powerupInst,MAX_POWERUPS,true);
   updateParticles();
-  if(fc%6===0){updateHUD();if(window._edgeMat){const fc2=flow/100;window._edgeMat.color.setRGB(1-fc2,fc2,.2)}}
+  if(fc%6===0){updateHUD();const pi=document.getElementById('powerIndicator');
+    if(shieldTimer>0){pi.style.display='flex';document.getElementById('powerIcon').innerHTML='&#128737;';document.getElementById('powerTimer').textContent=Math.ceil(shieldTimer/60)+'s'}
+    else if(turboTimer>0){pi.style.display='flex';document.getElementById('powerIcon').innerHTML='&#9889;';document.getElementById('powerTimer').textContent=Math.ceil(turboTimer/60)+'s'}
+    else{pi.style.display='none'}
+    if(window._edgeMat){const fc2=flow/100;window._edgeMat.color.setRGB(1-fc2,fc2,.2)}}
 
   // Camera
   _cv.set(car.position.x-Math.sin(dir+cTh)*14,7+cPh*4,car.position.z-Math.cos(dir+cTh)*14);
