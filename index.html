@@ -72,6 +72,10 @@
     .ctrl-btn.brake{background:rgba(255,50,50,.2);border-color:rgba(255,50,50,.4)}
     #mobileHint{position:fixed;bottom:clamp(80px,18vw,110px);left:0;right:0;text-align:center;z-index:30;display:none;
       color:rgba(255,255,255,.3);font-size:12px}
+    #driveHint{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:25;display:none;
+      color:#fff;font-size:clamp(24px,5vw,40px);font-weight:900;text-align:center;pointer-events:none;
+      text-shadow:0 0 20px rgba(0,229,255,.6),0 0 40px rgba(0,229,255,.3);animation:hintPulse 1.2s ease-in-out infinite}
+    @keyframes hintPulse{0%,100%{opacity:1;transform:translate(-50%,-50%) scale(1)}50%{opacity:.6;transform:translate(-50%,-50%) scale(1.1)}}
   </style>
 </head>
 <body>
@@ -125,6 +129,7 @@
   </div>
 </div>
 <div id="mobileHint">← → לכיוון &nbsp;|&nbsp; 🔼 גז &nbsp; 🔽 בלם</div>
+<div id="driveHint">🚗 לחצו W או 🔼 כדי לנסוע!</div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.min.js"></script>
 <script>
@@ -171,6 +176,15 @@ scene.fog=new THREE.FogExp2(0x050015,.008);
 {
   const m=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshBasicMaterial({color:0x0c0c22}));
   m.rotation.x=-Math.PI/2;scene.add(m);
+}
+
+// ---- SIDE GLOW STRIPS (so road is visible) ----
+{
+  const glowMat=new THREE.MeshBasicMaterial({color:0x6622aa});
+  [-6.5,6.5].forEach(x=>{
+    const strip=new THREE.Mesh(new THREE.PlaneGeometry(2,2000),glowMat);
+    strip.rotation.x=-Math.PI/2;strip.position.set(x,.005,0);scene.add(strip);
+  });
 }
 
 // ---- ROAD ----
@@ -398,7 +412,7 @@ function showPopup(text,x,y,color){
 }
 
 // ---- GAME STATE ----
-let score=0,lives=3,level=1,combo=1,comboTimer=0,gameActive=false,spd=0,dir=0,fc=0;
+let score=0,lives=3,level=1,combo=1,comboTimer=0,gameActive=false,spd=0,dir=0,fc=0,driveHintShown=false;
 let starsForLevel=0,starsNeeded=5,invincibleTimer=0;
 const hudScore=document.getElementById('scoreVal');
 const hudLives=document.getElementById('livesVal');
@@ -439,7 +453,8 @@ function startGame(){
   document.getElementById('startScreen').style.display='none';
   document.getElementById('hud').style.display='block';
   if(isMobile){document.getElementById('mobileControls').style.display='flex';document.getElementById('mobileHint').style.display='block'}
-  gameActive=true;
+  gameActive=true;driveHintShown=true;
+  document.getElementById('driveHint').style.display='block';
   score=0;lives=3;level=1;combo=1;comboTimer=0;starsForLevel=0;starsNeeded=5;spd=0;dir=0;invincibleTimer=0;
   car.position.set(0,0,0);
   collectibles.length=0;obstacles.length=0;particles.length=0;
@@ -537,6 +552,7 @@ function animate(){
 
   if(gameActive){
     // Car physics
+    if(driveHintShown&&(keys.ArrowUp||keys.KeyW)){driveHintShown=false;document.getElementById('driveHint').style.display='none'}
     if(keys.ArrowUp||keys.KeyW)spd=Math.min(.3,spd+.014);
     else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.15,spd-.014);
     else spd*=.975;
