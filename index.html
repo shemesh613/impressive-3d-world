@@ -994,7 +994,7 @@ function updateParticles(){
 }
 
 // ---- GAME STATE ----
-let score=0,lives=3,level=1,flow=50,greenCount=0,redCount=0,streak=0,bestStreak=0,shieldTimer=0,turboTimer=0;
+let score=0,lives=3,level=1,flow=75,greenCount=0,redCount=0,streak=0,bestStreak=0,shieldTimer=0,turboTimer=0;
 let gameActive=false,spd=0,dir=0,fc=0,boostTimer=0,lastMilestone=0;
 let scenarioActive=false,scenarioTimer=0,scenarioTimeout=null,usedScenarios=[];
 let nextScenarioAt=0,scenariosAnswered=0;
@@ -1083,14 +1083,14 @@ function choose(type){
   scenariosAnswered++;
 
   if(isGreen){
-    greenCount++;score+=s.green.points;flow=Math.min(100,flow+15);boostTimer=120;streak++;if(streak>bestStreak)bestStreak=streak;
+    greenCount++;score+=s.green.points;flow=Math.min(100,flow+20);boostTimer=120;streak++;if(streak>bestStreak)bestStreak=streak;
     sfxGreen();screenFlash("flash-green");
     emitParticles(car.position.x,2,car.position.z,0x22c55e,12);
     fbIcon.textContent='🟢';
     fbText.textContent=s.greenFeedback;
     fbText.style.color='#4ade80';
   } else {
-    redCount++;score+=s.red.points;streak=0;if(score<0)score=0;flow=Math.max(0,flow-20);spd*=.3;
+    redCount++;score+=s.red.points;streak=0;if(score<0)score=0;flow=Math.max(0,flow-12);spd*=.4;
     sfxRed();screenFlash("flash-red");
     emitParticles(car.position.x,2,car.position.z,0xef4444,12);
     fbIcon.textContent='🔴';
@@ -1143,7 +1143,7 @@ function startGame(){
   document.getElementById('hud').style.display='block';
   document.getElementById('followers').style.display='block';
   gameActive=true;
-  score=0;lives=3;level=1;flow=50;greenCount=0;redCount=0;streak=0;bestStreak=0;
+  score=0;lives=3;level=1;flow=75;greenCount=0;redCount=0;streak=0;bestStreak=0;
   spd=0;dir=0;boostTimer=0;shieldTimer=0;turboTimer=0;lastMilestone=0;scenarioActive=false;scenariosAnswered=0;
   usedScenarios=[];nextScenarioAt=50;
   car.position.set(0,0,0);
@@ -1171,7 +1171,7 @@ function checkCollisions(){
   for(let i=greens.length-1;i>=0;i--){
     const g=greens[i];if(!g.active)continue;
     if((cx-g.x)**2+(cz-g.z)**2<5){
-      g.active=false;score+=5;flow=Math.min(100,flow+3);
+      g.active=false;score+=5;flow=Math.min(100,flow+5);
       sfxCollect();emitParticles(g.x,g.y,g.z,0x22c55e,6);
       const proj=_v.set(g.x,g.y+1,g.z).project(cam);
       showPopup('+5 🟢',(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,'#4ade80');
@@ -1183,7 +1183,7 @@ function checkCollisions(){
   for(let i=obstacles.length-1;i>=0;i--){
     const o=obstacles[i];if(!o.active)continue;
     if((cx-o.x)**2+(cz-o.z)**2<4){
-      o.active=false;if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,o.y,o.z,0x60a5fa,8);sfxCollect();obstacles.splice(i,1);continue}lives--;flow=Math.max(0,flow-10);spd*=.3;
+      o.active=false;if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,o.y,o.z,0x60a5fa,8);sfxCollect();obstacles.splice(i,1);continue}lives--;flow=Math.max(0,flow-6);spd*=.4;
       sfxRed();screenFlash("flash-red");emitParticles(o.x,o.y,o.z,0xef4444,10);
       const proj=_v.set(o.x,o.y+1,o.z).project(cam);
       showPopup('💥',(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,'#ef4444');
@@ -1232,7 +1232,7 @@ function animate(){
 
 
   // Barrier collisions
-  if(window._barrierData){const bd=window._barrierData;for(let i=0;i<bd.n;i++){const b=bd.data[i];const dz=Math.abs(car.position.z-b.z);if(dz<1){const dx=Math.abs(car.position.x-b.x);if(dx<b.w*.6){spd*=.15;flow=Math.max(0,flow-2);emitParticles(car.position.x,1,car.position.z,0xff6600,4)}}}}
+  if(window._barrierData){const bd=window._barrierData;for(let i=0;i<bd.n;i++){const b=bd.data[i];const dz=Math.abs(car.position.z-b.z);if(dz<1){const dx=Math.abs(car.position.x-b.x);if(dx<b.w*.6){spd*=.5;if(!b._hit){b._hit=true;flow=Math.max(0,flow-3);emitParticles(car.position.x,1,car.position.z,0xff6600,4)}}}else{b._hit=false}}}
 
   // Obstacle sparks effect
   if(obstacles.length>0){
@@ -1280,7 +1280,7 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
     if(car.position.z>=nextScenarioAt)triggerScenario();
 
     // Flow decay
-    if(fc%120===0){flow=Math.max(0,flow-1);if(flow<=0){
+    if(fc%200===0){flow=Math.max(0,flow-1);if(flow<=0){
       gameActive=false;
       document.getElementById('finalScore').textContent=score;
       document.getElementById('finalGreen').textContent=greenCount;
@@ -1315,7 +1315,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
         if(o.z-car.position.z<25&&o.z>car.position.z){const _pr=_v.set(o.x,2,o.z).project(cam);if(_pr.z<1)showPopup('⚠️',((_pr.x*.5+.5)*innerWidth),((-_pr.y*.5+.5)*innerHeight),'#ffcc00')}
         if(Math.abs(car.position.x-o.x)<1.8&&Math.abs(car.position.z-o.z)<2.5){
           if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,1,o.z,0x60a5fa,8);o.active=false;}
-          else{lives--;flow=Math.max(0,flow-15);spd*=0.1;sfxRed();screenFlash("flash-red");emitParticles(o.x,1,o.z,0xff4444,12);o.active=false;
+          else{lives--;flow=Math.max(0,flow-8);spd*=0.2;sfxRed();screenFlash("flash-red");emitParticles(o.x,1,o.z,0xff4444,12);o.active=false;
             if(lives<=0){gameActive=false;document.getElementById('finalScore').textContent=score;document.getElementById('finalGreen').textContent=greenCount;document.getElementById('finalRed').textContent=redCount;document.getElementById('finalStreak').textContent=bestStreak;document.getElementById('finalMsg').textContent='התנגשת במכונית!';document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';document.getElementById('gameOver').style.display='flex';return;}
           }
         }
@@ -1356,7 +1356,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
         ct.roofInst.setMatrixAt(i,dummy.matrix);
         if(Math.abs(car.position.x-c.x)<1.8&&Math.abs(car.position.z-c.crossZ)<1.5){
           if(shieldTimer>0){shieldTimer=0;emitParticles(c.x,1,c.crossZ,0x60a5fa,8);c.active=false;}
-          else{lives--;flow=Math.max(0,flow-15);spd*=0.1;sfxRed();screenFlash("flash-red");emitParticles(c.x,1,c.crossZ,0xff4444,12);c.active=false;}
+          else{lives--;flow=Math.max(0,flow-8);spd*=0.2;sfxRed();screenFlash("flash-red");emitParticles(c.x,1,c.crossZ,0xff4444,12);c.active=false;}
         }
       } else {
         dummy.position.set(0,-100,0);
