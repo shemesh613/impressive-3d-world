@@ -601,7 +601,7 @@ function choose(type){
     document.getElementById('finalStreak').textContent=bestStreak;
     const ratio=greenCount/(greenCount+redCount+.001);
     document.getElementById('finalMsg').textContent=ratio>.7?'🌟 זורם מדהים! כולם רוצים לנסוע איתך!':ratio>.4?'👍 לא רע! עוד קצת אימון וזורם מושלם!':'💪 צריך עוד אימון בזרימה — ננסה שוב?';
-    document.getElementById('gameOver').style.display='flex';
+    document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';document.getElementById('gameOver').style.display='flex';
     return;
   }
 
@@ -674,7 +674,7 @@ function checkCollisions(){
         document.getElementById('finalRed').textContent=redCount;
     document.getElementById('finalStreak').textContent=bestStreak;
         document.getElementById('finalMsg').textContent='💥 אוי! נגמרו החיים — ננסה שוב?';
-        document.getElementById('gameOver').style.display='flex';return;
+        document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';document.getElementById('gameOver').style.display='flex';return;
       }
       spawnObstacle();
     }
@@ -747,7 +747,7 @@ function animate(){
       document.getElementById('finalRed').textContent=redCount;
     document.getElementById('finalStreak').textContent=bestStreak;
       document.getElementById('finalMsg').textContent='🌊 מד הזרימה התרוקן — ננסה שוב?';
-      document.getElementById('gameOver').style.display='flex';
+      document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';document.getElementById('gameOver').style.display='flex';
     }}
   } else if(scenarioActive){
     spd*=.95; // slow down during scenario
