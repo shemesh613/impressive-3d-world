@@ -470,6 +470,34 @@ scene.add((() => {
 
 
 
+
+// ---- CURVE MARKERS ----
+{
+  const CMARK_N=100;
+  const cmarkGeo=new THREE.BoxGeometry(0.3,0.1,2);
+  const cmarkMatL=new THREE.MeshBasicMaterial({color:0xffcc00});
+  const cmarkMatR=new THREE.MeshBasicMaterial({color:0xffffff});
+  const cmarkLInst=new THREE.InstancedMesh(cmarkGeo,cmarkMatL,CMARK_N);
+  const cmarkRInst=new THREE.InstancedMesh(cmarkGeo,cmarkMatR,CMARK_N);
+  for(let i=0;i<CMARK_N;i++){
+    const z=i*30;
+    const curve=Math.sin(z*0.003)*3;
+    dummy.position.set(-4.8+curve,0.02,z);
+    dummy.scale.setScalar(1);
+    dummy.rotation.set(-Math.PI/2,0,0);
+    dummy.updateMatrix();
+    cmarkLInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(4.8+curve,0.02,z);
+    dummy.updateMatrix();
+    cmarkRInst.setMatrixAt(i,dummy.matrix);
+  }
+  cmarkLInst.instanceMatrix.needsUpdate=true;
+  cmarkRInst.instanceMatrix.needsUpdate=true;
+  scene.add(cmarkLInst);
+  scene.add(cmarkRInst);
+  window._cmarkData={lInst:cmarkLInst,rInst:cmarkRInst,n:CMARK_N};
+}
+
 // ---- PEDESTRIANS ----
 {
   const PED_N=20;
@@ -1090,15 +1118,18 @@ function animate(){
     car.position.x+=Math.sin(dir)*spd;
     car.position.z+=Math.cos(dir)*spd;
 
-    if(car.position.x<-4.5)car.position.x+=(-4.5-car.position.x)*.05+.05;
-    if(car.position.x>4.5)car.position.x+=(4.5-car.position.x)*.05-.05;
+    const roadCurve=Math.sin(car.position.z*0.003)*3;
+    const leftEdge=-4.5+roadCurve;
+    const rightEdge=4.5+roadCurve;
+    if(car.position.x<leftEdge)car.position.x+=(leftEdge-car.position.x)*.05+.05;
+    if(car.position.x>rightEdge)car.position.x+=(rightEdge-car.position.x)*.05-.05;
 
     if(boostTimer>0)boostTimer--;if(shieldTimer>0)shieldTimer--;if(turboTimer>0)turboTimer--;if(shieldTimer>0)car.children[0].material.color.setHex(fc%10<5?0x60a5fa:0x3b82f6);else if(turboTimer>0)car.children[0].material.color.setHex(fc%10<5?0xfbbf24:0xf59e0b);else if(boostTimer>0){car.children[0].material.color.setHex(fc%10<5?0x4ade80:0x22c55e)}
     else{car.children[0].material.color.setHex(0x22c55e)}
 
 
   // Barrier collisions
-  if(window._barrierData){const bd=window._barrierData;for(let i=0;i<bd.n;i++){const b=bd.data[i];const dz=Math.abs(cz-b.z);if(dz<1){const dx=Math.abs(cx-b.x);if(dx<b.w*.6){spd*=.15;flow=Math.max(0,flow-2);emitParticles(cx,1,cz,0xff6600,4)}}}}
+  if(window._barrierData){const bd=window._barrierData;for(let i=0;i<bd.n;i++){const b=bd.data[i];const dz=Math.abs(car.position.z-b.z);if(dz<1){const dx=Math.abs(car.position.x-b.x);if(dx<b.w*.6){spd*=.15;flow=Math.max(0,flow-2);emitParticles(car.position.x,1,car.position.z,0xff6600,4)}}}}
 
   // Obstacle sparks effect
   if(obstacles.length>0){
@@ -1196,6 +1227,27 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
 
 
+
+
+  // Update curve markers around car
+  if(window._cmarkData){
+    const cm=window._cmarkData;
+    const baseZ=Math.floor(car.position.z/30)*30-30*10;
+    for(let i=0;i<cm.n;i++){
+      const z=baseZ+i*30;
+      const curve=Math.sin(z*0.003)*3;
+      dummy.position.set(-4.8+curve,0.02,z);
+      dummy.scale.setScalar(1);
+      dummy.rotation.set(-Math.PI/2,0,0);
+      dummy.updateMatrix();
+      cm.lInst.setMatrixAt(i,dummy.matrix);
+      dummy.position.set(4.8+curve,0.02,z);
+      dummy.updateMatrix();
+      cm.rInst.setMatrixAt(i,dummy.matrix);
+    }
+    cm.lInst.instanceMatrix.needsUpdate=true;
+    cm.rInst.instanceMatrix.needsUpdate=true;
+  }
 
   // Pedestrian walking
   if(window._pedData){
