@@ -469,6 +469,43 @@ scene.add((() => {
 
 
 
+
+// ---- PEDESTRIANS ----
+{
+  const PED_N=20;
+  const pedBodyGeo=new THREE.CylinderGeometry(0.15,0.15,0.8,5);
+  const pedHeadGeo=new THREE.SphereGeometry(0.2,6,6);
+  const pedColors=[0xffccaa,0xddaa88,0xeebb99,0xcc9977,0xffddbb];
+  const pedBodyInst=new THREE.InstancedMesh(pedBodyGeo,new THREE.MeshBasicMaterial({color:0x4488cc}),PED_N);
+  const pedHeadInst=new THREE.InstancedMesh(pedHeadGeo,new THREE.MeshBasicMaterial({color:0xffffff}),PED_N);
+  pedHeadInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(PED_N*3),3);
+  const _pedc=new THREE.Color();
+  const pedData=[];
+  for(let i=0;i<PED_N;i++){
+    const side=i%2===0?-7:7;
+    const z=Math.random()*2500;
+    const dir=Math.random()>0.5?1:-1;
+    const spd=0.005+Math.random()*0.01;
+    pedData.push({x:side+Math.random()*1.5-0.75,z:z,dir:dir,spd:spd,phase:Math.random()*Math.PI*2});
+    _pedc.setHex(pedColors[i%pedColors.length]);
+    pedHeadInst.instanceColor.setXYZ(i,_pedc.r,_pedc.g,_pedc.b);
+    dummy.position.set(side,0.5,z);
+    dummy.scale.setScalar(1);
+    dummy.rotation.set(0,0,0);
+    dummy.updateMatrix();
+    pedBodyInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(side,1.1,z);
+    dummy.updateMatrix();
+    pedHeadInst.setMatrixAt(i,dummy.matrix);
+  }
+  pedBodyInst.instanceMatrix.needsUpdate=true;
+  pedHeadInst.instanceMatrix.needsUpdate=true;
+  pedHeadInst.instanceColor.needsUpdate=true;
+  scene.add(pedBodyInst);
+  scene.add(pedHeadInst);
+  window._pedData={bodyInst:pedBodyInst,headInst:pedHeadInst,data:pedData,n:PED_N};
+}
+
 // ---- PARKED CARS ----
 {
   const PARKED_N=30;
@@ -1158,6 +1195,27 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
   }
 
 
+
+
+  // Pedestrian walking
+  if(window._pedData){
+    const pd=window._pedData;
+    for(let i=0;i<pd.n;i++){
+      const p=pd.data[i];
+      p.z+=p.spd*p.dir;
+      const bob=Math.sin(fc*0.1+p.phase)*0.05;
+      dummy.position.set(p.x,0.5+bob,p.z);
+      dummy.scale.setScalar(1);
+      dummy.rotation.set(0,p.dir>0?0:Math.PI,0);
+      dummy.updateMatrix();
+      pd.bodyInst.setMatrixAt(i,dummy.matrix);
+      dummy.position.set(p.x,1.1+bob,p.z);
+      dummy.updateMatrix();
+      pd.headInst.setMatrixAt(i,dummy.matrix);
+    }
+    pd.bodyInst.instanceMatrix.needsUpdate=true;
+    pd.headInst.instanceMatrix.needsUpdate=true;
+  }
 
   // Shop lights pulse
   if(window._shopData){
