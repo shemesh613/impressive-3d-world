@@ -73,7 +73,7 @@
 <!-- START SCREEN -->
 <div id="startScreen">
   <h1>🌟 מירוץ הכוכבים 🌟</h1>
-  <div class="subtitle">Star Racer — !המשחק הכי כיפי</div>
+  <div class="subtitle">Star Racer — המשחק הכי כיפי!</div>
   <div class="instructions">
     <p><span class="emoji">⭐</span> אספו כוכבים לצבור נקודות</p>
     <p><span class="emoji">💎</span> יהלומים שווים יותר נקודות</p>
@@ -81,7 +81,7 @@
     <p><span class="emoji">🏆</span> עברו שלבים והפכו לאלופים</p>
     <p style="margin-top:15px;color:#88f;font-size:clamp(11px,2vw,14px)">🎮 מקלדת: WASD / חצים &nbsp;|&nbsp; 📱 נייד: כפתורים על המסך</p>
   </div>
-  <button id="playBtn" onclick="startGame()">🚀 !בואו נשחק</button>
+  <button id="playBtn" onclick="startGame()">בואו נשחק! 🚀</button>
 </div>
 
 <!-- HUD -->
@@ -100,9 +100,9 @@
 
 <!-- GAME OVER -->
 <div id="gameOver">
-  <h2>💥 !המשחק נגמר</h2>
+  <h2>המשחק נגמר! 💥</h2>
   <div class="finalScore" id="finalScore">ניקוד: 0</div>
-  <button id="restartBtn" onclick="restartGame()">?שוב 🔄</button>
+  <button id="restartBtn" onclick="restartGame()">שוב? 🔄</button>
 </div>
 
 <!-- MOBILE CONTROLS -->
@@ -185,7 +185,7 @@ scene.fog=new THREE.FogExp2(0x050015,.005);
   const m=new THREE.MeshBasicMaterial({color:0xffdd00});
   const inst=new THREE.InstancedMesh(g,m,200);
   for(let i=0;i<200;i++){
-    dummy.position.set(0,.03,-600+i*6);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
+    dummy.position.set(0,.03,-50+i*6);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
     inst.setMatrixAt(i,dummy.matrix);
   }
   inst.instanceMatrix.needsUpdate=true;scene.add(inst);
@@ -193,7 +193,7 @@ scene.fog=new THREE.FogExp2(0x050015,.005);
 
 // ---- BUILDINGS ----
 const bdata=[];
-for(let z=-500;z<=100;z+=10){
+for(let z=-100;z<=600;z+=10){
   bdata.push([-10,z,2.5+Math.random()*2,4+Math.random()*12,2.5+Math.random()*2]);
   bdata.push([10,z,2.5+Math.random()*2,4+Math.random()*12,2.5+Math.random()*2]);
   if(Math.random()>.5)bdata.push([-16,z,2+Math.random()*2,3+Math.random()*8,2+Math.random()*2]);
@@ -289,7 +289,7 @@ function spawnCollectible(){
   const type=Math.random()>.7?'diamond':'star';
   const t=COLLECTIBLE_TYPES[type];
   const x=(Math.random()-.5)*8;
-  const z=car.position.z-(40+Math.random()*60);
+  const z=car.position.z+(40+Math.random()*60);
   collectibles.push({type,x,z,y:1+Math.sin(Date.now()*.001)*.3,active:true,size:t.size});
   updateCollectibleMatrices();
 }
@@ -323,7 +323,7 @@ scene.add(obstacleInst);
 function spawnObstacle(){
   if(obstacles.length>=MAX_OBSTACLES)return;
   const x=(Math.random()-.5)*8;
-  const z=car.position.z-(50+Math.random()*60);
+  const z=car.position.z+(50+Math.random()*60);
   obstacles.push({x,z,y:.5,active:true});
   updateObstacleMatrices();
 }
@@ -486,7 +486,7 @@ function checkCollisions(){
         sfxLevelUp();
         const lu=document.getElementById('levelUp');
         document.getElementById('levelUpText').textContent='שלב '+level+' 🎉';
-        document.getElementById('levelUpSub').textContent='!תיזהרו - קשה יותר';
+        document.getElementById('levelUpSub').textContent='תיזהרו - קשה יותר!';
         lu.style.display='flex';
         setTimeout(()=>{lu.style.display='none'},1500);
         // More obstacles
@@ -565,10 +565,10 @@ function animate(){
 
     // Clean distant items
     for(let i=collectibles.length-1;i>=0;i--){
-      if(collectibles[i].z>car.position.z+30)collectibles.splice(i,1);
+      if(collectibles[i].z<car.position.z-30)collectibles.splice(i,1);
     }
     for(let i=obstacles.length-1;i>=0;i--){
-      if(obstacles[i].z>car.position.z+30)obstacles.splice(i,1);
+      if(obstacles[i].z<car.position.z-30)obstacles.splice(i,1);
     }
 
     // Animate collectibles bobbing
