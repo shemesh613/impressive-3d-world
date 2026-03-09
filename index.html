@@ -489,7 +489,7 @@ scene.add((() => {
   const bumpMat=new THREE.MeshBasicMaterial({color:0xffdd00});
   const bumpInst=new THREE.InstancedMesh(bumpGeo,bumpMat,BUMP_N);
   for(let i=0;i<BUMP_N;i++){
-    dummy.position.set(roadX(200+i*150),.15,200+i*150);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    dummy.position.set(roadX(200+i*250),.15,200+i*250);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
     bumpInst.setMatrixAt(i,dummy.matrix);
   }
   bumpInst.instanceMatrix.needsUpdate=true;scene.add(bumpInst);
@@ -994,7 +994,7 @@ function updateParticles(){
 }
 
 // ---- GAME STATE ----
-let score=0,lives=3,level=1,flow=75,greenCount=0,redCount=0,streak=0,bestStreak=0,shieldTimer=0,turboTimer=0;
+let score=0,lives=5,level=1,flow=85,greenCount=0,redCount=0,streak=0,bestStreak=0,shieldTimer=0,turboTimer=0;
 let gameActive=false,spd=0,dir=0,fc=0,boostTimer=0,lastMilestone=0;
 let scenarioActive=false,scenarioTimer=0,scenarioTimeout=null,usedScenarios=[];
 let nextScenarioAt=0,scenariosAnswered=0;
@@ -1048,8 +1048,8 @@ function triggerScenario(){
   // Timer (8 seconds)
   const tf=document.getElementById('timerFill');
   tf.style.transition='none';tf.style.width='100%';
-  requestAnimationFrame(()=>{tf.style.transition='width 8s linear';tf.style.width='0%'});
-  scenarioTimeout=setTimeout(()=>{if(scenarioActive)choose('timeout')},8000);
+  requestAnimationFrame(()=>{tf.style.transition='width 12s linear';tf.style.width='0%'});
+  scenarioTimeout=setTimeout(()=>{if(scenarioActive)choose('timeout')},12000);
 }
 
 function choose(type){
@@ -1090,7 +1090,7 @@ function choose(type){
     fbText.textContent=s.greenFeedback;
     fbText.style.color='#4ade80';
   } else {
-    redCount++;score+=s.red.points;streak=0;if(score<0)score=0;flow=Math.max(0,flow-12);spd*=.4;
+    redCount++;score+=s.red.points;streak=0;if(score<0)score=0;flow=Math.max(0,flow-8);spd*=.5;
     sfxRed();screenFlash("flash-red");
     emitParticles(car.position.x,2,car.position.z,0xef4444,12);
     fbIcon.textContent='🔴';
@@ -1143,14 +1143,14 @@ function startGame(){
   document.getElementById('hud').style.display='block';
   document.getElementById('followers').style.display='block';
   gameActive=true;
-  score=0;lives=3;level=1;flow=75;greenCount=0;redCount=0;streak=0;bestStreak=0;
+  score=0;lives=5;level=1;flow=85;greenCount=0;redCount=0;streak=0;bestStreak=0;
   spd=0;dir=0;boostTimer=0;shieldTimer=0;turboTimer=0;lastMilestone=0;scenarioActive=false;scenariosAnswered=0;
   usedScenarios=[];nextScenarioAt=50;
   car.position.set(0,0,0);
   greens.length=0;obstacles.length=0;powerups.length=0;particles.length=0;
   for(let i=0;i<FOLLOWER_N;i++){followerPos[i].x=0;followerPos[i].z=-(i+1)*6}
   for(let i=0;i<5;i++)spawnGreen();
-  for(let i=0;i<2;i++)spawnObstacle();
+  // obstacles spawn naturally
   updateHUD();
 }
 
@@ -1171,7 +1171,7 @@ function checkCollisions(){
   for(let i=greens.length-1;i>=0;i--){
     const g=greens[i];if(!g.active)continue;
     if((cx-g.x)**2+(cz-g.z)**2<5){
-      g.active=false;score+=5;flow=Math.min(100,flow+5);
+      g.active=false;score+=8;flow=Math.min(100,flow+6);
       sfxCollect();emitParticles(g.x,g.y,g.z,0x22c55e,6);
       const proj=_v.set(g.x,g.y+1,g.z).project(cam);
       showPopup('+5 🟢',(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,'#4ade80');
@@ -1183,7 +1183,7 @@ function checkCollisions(){
   for(let i=obstacles.length-1;i>=0;i--){
     const o=obstacles[i];if(!o.active)continue;
     if((cx-o.x)**2+(cz-o.z)**2<4){
-      o.active=false;if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,o.y,o.z,0x60a5fa,8);sfxCollect();obstacles.splice(i,1);continue}lives--;flow=Math.max(0,flow-6);spd*=.4;
+      o.active=false;if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,o.y,o.z,0x60a5fa,8);sfxCollect();obstacles.splice(i,1);continue}flow=Math.max(0,flow-4);spd*=.5;
       sfxRed();screenFlash("flash-red");emitParticles(o.x,o.y,o.z,0xef4444,10);
       const proj=_v.set(o.x,o.y+1,o.z).project(cam);
       showPopup('💥',(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,'#ef4444');
@@ -1232,7 +1232,7 @@ function animate(){
 
 
   // Barrier collisions
-  if(window._barrierData){const bd=window._barrierData;for(let i=0;i<bd.n;i++){const b=bd.data[i];const dz=Math.abs(car.position.z-b.z);if(dz<1){const dx=Math.abs(car.position.x-b.x);if(dx<b.w*.6){spd*=.5;if(!b._hit){b._hit=true;flow=Math.max(0,flow-3);emitParticles(car.position.x,1,car.position.z,0xff6600,4)}}}else{b._hit=false}}}
+  if(window._barrierData){const bd=window._barrierData;for(let i=0;i<bd.n;i++){const b=bd.data[i];const dz=Math.abs(car.position.z-b.z);if(dz<1){const dx=Math.abs(car.position.x-b.x);if(dx<b.w*.6){spd*=.5;if(!b._hit){b._hit=true;flow=Math.max(0,flow-1);emitParticles(car.position.x,1,car.position.z,0xff6600,4)}}}else{b._hit=false}}}
 
   // Obstacle sparks effect
   if(obstacles.length>0){
@@ -1255,7 +1255,7 @@ function animate(){
     followerInst.instanceMatrix.needsUpdate=true;
 
     // Spawn
-    if(fc%30===0){spawnGreen();if(Math.random()<.2+level*.03)spawnObstacle();if(Math.random()<.08)spawnPowerup()}
+    if(fc%20===0){spawnGreen();if(Math.random()<.1+level*.02)spawnObstacle();if(Math.random()<.15)spawnPowerup()}
 
     // Clean
     for(let i=greens.length-1;i>=0;i--){if(greens[i].z<car.position.z-50)greens.splice(i,1)}
@@ -1280,7 +1280,7 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
     if(car.position.z>=nextScenarioAt)triggerScenario();
 
     // Flow decay
-    if(fc%200===0){flow=Math.max(0,flow-1);if(flow<=0){
+    if(fc%300===0){flow=Math.max(0,flow-1);if(flow<=0){
       gameActive=false;
       document.getElementById('finalScore').textContent=score;
       document.getElementById('finalGreen').textContent=greenCount;
@@ -1325,7 +1325,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
         od.lightInst.setMatrixAt(i*2,dummy.matrix);od.lightInst.setMatrixAt(i*2+1,dummy.matrix);
       }
     }
-    if(fc%90===0&&activeCount<4){
+    if(false&&fc%90===0&&activeCount<4){
       for(let i=0;i<od.n;i++){if(!od.data[i].active){od.data[i].active=true;od.data[i].z=car.position.z+60+Math.random()*30;od.data[i].x=roadX(od.data[i].z)-3.5+Math.random()*1.5;od.data[i].spd=0.08+Math.random()*0.1;break;}}
     }
     od.bodyInst.instanceMatrix.needsUpdate=true;od.roofInst.instanceMatrix.needsUpdate=true;od.lightInst.instanceMatrix.needsUpdate=true;
@@ -1366,7 +1366,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
         ct.roofInst.setMatrixAt(i,dummy.matrix);
       }
     }
-    if(fc%150===0&&activeCount<3){
+    if(false&&fc%150===0&&activeCount<3){
       const nextCrossZ=Math.ceil(car.position.z/80)*80+50;
       if(Math.abs(car.position.z-nextCrossZ)<60){
         for(let i=0;i<ct.n;i++){
