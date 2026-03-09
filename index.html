@@ -320,7 +320,7 @@ const _col=new THREE.Color();
 
 // ---- GROUND ----
 scene.add((() => {
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,6000),new THREE.MeshBasicMaterial({color:0x1a2a3a}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,6000),new THREE.MeshBasicMaterial({color:0x0d1a2d}));
   m.rotation.x=-Math.PI/2;return m;
 })());
 
@@ -465,6 +465,32 @@ scene.add((() => {
 
 
 
+
+
+// ---- TWINKLING STARS ----
+{
+  const STAR_N=80;
+  const starGeo=new THREE.SphereGeometry(0.12,4,4);
+  const starMat=new THREE.MeshBasicMaterial({color:0xffffff});
+  const starInst=new THREE.InstancedMesh(starGeo,starMat,STAR_N);
+  const starData=[];
+  for(let i=0;i<STAR_N;i++){
+    const x=-60+Math.random()*120;
+    const y=20+Math.random()*25;
+    const z=Math.random()*3000-200;
+    const phase=Math.random()*Math.PI*2;
+    const twinkleSpd=0.02+Math.random()*0.05;
+    starData.push({x,y,z,phase,twinkleSpd});
+    dummy.position.set(x,y,z);
+    dummy.scale.setScalar(0.5+Math.random()*0.8);
+    dummy.rotation.set(0,0,0);
+    dummy.updateMatrix();
+    starInst.setMatrixAt(i,dummy.matrix);
+  }
+  starInst.instanceMatrix.needsUpdate=true;
+  scene.add(starInst);
+  window._starData={inst:starInst,data:starData,n:STAR_N};
+}
 
 // ---- BRIDGES ----
 {
@@ -663,12 +689,12 @@ for(let i=0;i<FOLLOWER_N;i++)followerPos.push({x:0,z:-(i+1)*6,y:.4});
 // ---- GREEN COLLECTIBLES ----
 const MAX_GREENS=10;
 const greens=[];
-const greenInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1.3,0),new THREE.MeshBasicMaterial({color:0x44ff66,transparent:true,opacity:0.9}),MAX_GREENS);
+const greenInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1.3,0),new THREE.MeshBasicMaterial({color:0x55ff77,transparent:true,opacity:1.0}),MAX_GREENS);
 scene.add(greenInst);
 
 // ---- COLLECTIBLE BEAMS ----
 const beamGeo=new THREE.CylinderGeometry(.05,.05,5,4);
-const beamMat=new THREE.MeshBasicMaterial({color:0x44ff66,transparent:true,opacity:0.4});
+const beamMat=new THREE.MeshBasicMaterial({color:0x66ff88,transparent:true,opacity:0.6});
 const beamInst=new THREE.InstancedMesh(beamGeo,beamMat,MAX_GREENS);
 scene.add(beamInst);
 window._beamInst=beamInst;
@@ -1048,6 +1074,22 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
       for(let i=0;i<od.n;i++){if(!od.data[i].active){od.data[i].active=true;od.data[i].z=car.position.z+80+Math.random()*40;od.data[i].x=-3.5+Math.random()*1.5;od.data[i].spd=0.12+Math.random()*0.15;break;}}
     }
     od.bodyInst.instanceMatrix.needsUpdate=true;od.roofInst.instanceMatrix.needsUpdate=true;od.lightInst.instanceMatrix.needsUpdate=true;
+  }
+
+
+  // Star twinkling
+  if(window._starData){
+    const sd=window._starData;
+    for(let i=0;i<sd.n;i++){
+      const st=sd.data[i];
+      const twinkle=0.3+Math.abs(Math.sin(fc*st.twinkleSpd+st.phase))*0.9;
+      dummy.position.set(st.x,st.y,st.z);
+      dummy.scale.setScalar(twinkle);
+      dummy.rotation.set(0,0,0);
+      dummy.updateMatrix();
+      sd.inst.setMatrixAt(i,dummy.matrix);
+    }
+    sd.inst.instanceMatrix.needsUpdate=true;
   }
 
   // Tunnel lights flicker
