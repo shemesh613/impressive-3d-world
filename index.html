@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🟢</text></svg>">
   <title>🟢 תיקיה ירוקה — זרימה בכביש!</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -41,8 +42,8 @@
     #livesVal{color:#FF6B6B}
     #flowVal{color:#fbbf24}
     #levelVal{color:#60a5fa}
-    #flowBar{width:100px;height:10px;background:rgba(255,255,255,.12);border-radius:5px;overflow:hidden}
-    #flowFill{height:100%;width:50%;background:linear-gradient(90deg,#ef4444,#fbbf24,#22c55e);border-radius:5px;transition:width .3s}
+    #flowBar{width:130px;height:14px;background:rgba(255,255,255,.12);border-radius:5px;overflow:hidden}
+    #flowFill{height:100%;width:50%;background:linear-gradient(90deg,#ef4444,#fbbf24,#22c55e);box-shadow:0 0 8px rgba(34,197,94,.4);border-radius:5px;transition:width .3s}
 
     /* Scenario popup */
     #scenario{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:40;display:none;
@@ -126,6 +127,7 @@
     <div class="hud-item"><span class="icon">❤️</span><span class="val" id="livesVal">3</span></div>
     <div class="hud-item"><span class="icon">🌊</span><div id="flowBar"><div id="flowFill"></div></div></div>
     <div class="hud-item"><span class="icon">🏆</span><span class="val" id="levelVal">1</span></div>
+    <div class="hud-item"><span class="icon">🔥</span><span class="val" id="streakVal">0</span></div>
   </div>
 </div>
 
@@ -157,6 +159,7 @@
   <div class="stats">ניקוד: <span id="finalScore">0</span></div>
   <div class="stats">בחירות ירוקות: <span id="finalGreen">0</span></div>
   <div class="stats">בחירות אדומות: <span id="finalRed">0</span></div>
+  <div class="stats">רצף ירוקים הכי ארוך: <span id="finalStreak">0</span> 🔥</div>
   <div class="stats" id="finalMsg"></div>
   <button id="restartBtn" onclick="restartGame()">נסיעה חדשה! 🔄</button>
 </div>
@@ -310,7 +313,7 @@ scene.add((() => {
 {
   const road=new THREE.Mesh(new THREE.PlaneGeometry(10,2000),new THREE.MeshBasicMaterial({color:0x2a3050}));
   road.rotation.x=-Math.PI/2;road.position.y=.01;scene.add(road);
-  const edgeMat=new THREE.MeshBasicMaterial({color:0x22c55e});
+  const edgeMat=new THREE.MeshBasicMaterial({color:0x22c55e});window._edgeMat=edgeMat;
   [-5.2,5.2].forEach(x=>{
     const e=new THREE.Mesh(new THREE.PlaneGeometry(.2,2000),edgeMat);
     e.rotation.x=-Math.PI/2;e.position.set(x,.02,0);scene.add(e);
@@ -452,7 +455,7 @@ function updateParticles(){
 }
 
 // ---- GAME STATE ----
-let score=0,lives=3,level=1,flow=50,greenCount=0,redCount=0;
+let score=0,lives=3,level=1,flow=50,greenCount=0,redCount=0,streak=0,bestStreak=0;
 let gameActive=false,spd=0,dir=0,fc=0,boostTimer=0;
 let scenarioActive=false,scenarioTimer=0,scenarioTimeout=null,usedScenarios=[];
 let nextScenarioAt=0,scenariosAnswered=0;
@@ -541,14 +544,14 @@ function choose(type){
   scenariosAnswered++;
 
   if(isGreen){
-    greenCount++;score+=s.green.points;flow=Math.min(100,flow+15);boostTimer=120;
+    greenCount++;score+=s.green.points;flow=Math.min(100,flow+15);boostTimer=120;streak++;if(streak>bestStreak)bestStreak=streak;
     sfxGreen();
     emitParticles(car.position.x,2,car.position.z,0x22c55e,12);
     fbIcon.textContent='🟢';
     fbText.textContent=s.greenFeedback;
     fbText.style.color='#4ade80';
   } else {
-    redCount++;score+=s.red.points;if(score<0)score=0;flow=Math.max(0,flow-20);spd*=.3;
+    redCount++;score+=s.red.points;streak=0;if(score<0)score=0;flow=Math.max(0,flow-20);spd*=.3;
     sfxRed();
     emitParticles(car.position.x,2,car.position.z,0xef4444,12);
     fbIcon.textContent='🔴';
@@ -576,6 +579,7 @@ function choose(type){
     document.getElementById('finalScore').textContent=score;
     document.getElementById('finalGreen').textContent=greenCount;
     document.getElementById('finalRed').textContent=redCount;
+    document.getElementById('finalStreak').textContent=bestStreak;
     const ratio=greenCount/(greenCount+redCount+.001);
     document.getElementById('finalMsg').textContent=ratio>.7?'🌟 זורם מדהים! כולם רוצים לנסוע איתך!':ratio>.4?'👍 לא רע! עוד קצת אימון וזורם מושלם!':'💪 צריך עוד אימון בזרימה — ננסה שוב?';
     document.getElementById('gameOver').style.display='flex';
@@ -617,6 +621,7 @@ function updateHUD(){
   document.getElementById('scoreVal').textContent=score;
   document.getElementById('livesVal').textContent='❤️'.repeat(Math.max(0,lives));
   document.getElementById('levelVal').textContent=level;
+  document.getElementById('streakVal').textContent=streak>0?'🔥'.repeat(Math.min(streak,5)):'-';
   document.getElementById('flowFill').style.width=flow+'%';
 }
 
@@ -646,6 +651,7 @@ function checkCollisions(){
         document.getElementById('finalScore').textContent=score;
         document.getElementById('finalGreen').textContent=greenCount;
         document.getElementById('finalRed').textContent=redCount;
+    document.getElementById('finalStreak').textContent=bestStreak;
         document.getElementById('finalMsg').textContent='💥 אוי! נגמרו החיים — ננסה שוב?';
         document.getElementById('gameOver').style.display='flex';return;
       }
@@ -711,6 +717,7 @@ function animate(){
       document.getElementById('finalScore').textContent=score;
       document.getElementById('finalGreen').textContent=greenCount;
       document.getElementById('finalRed').textContent=redCount;
+    document.getElementById('finalStreak').textContent=bestStreak;
       document.getElementById('finalMsg').textContent='🌊 מד הזרימה התרוקן — ננסה שוב?';
       document.getElementById('gameOver').style.display='flex';
     }}
@@ -721,7 +728,7 @@ function animate(){
   updateInstances(greens,greenInst,MAX_GREENS,true);
   updateInstances(obstacles,obsInst,MAX_OBS,false);
   updateParticles();
-  if(fc%6===0)updateHUD();
+  if(fc%6===0){updateHUD();if(window._edgeMat){const fc2=flow/100;window._edgeMat.color.setRGB(1-fc2,fc2,.2)}}
 
   // Camera
   _cv.set(car.position.x-Math.sin(dir+cTh)*14,7+cPh*4,car.position.z-Math.cos(dir+cTh)*14);
