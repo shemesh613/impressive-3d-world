@@ -462,6 +462,29 @@ scene.add((() => {
 {  const crossGeo=new THREE.PlaneGeometry(30,.15);  const crossMat=new THREE.MeshBasicMaterial({color:0x334455});  const crossN=40;  const crossInst=new THREE.InstancedMesh(crossGeo,crossMat,crossN);  for(let i=0;i<crossN;i++){    dummy.position.set(0,.015,i*80+50);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();    crossInst.setMatrixAt(i,dummy.matrix);  }  crossInst.instanceMatrix.needsUpdate=true;scene.add(crossInst);}
 
 
+
+// ---- ONCOMING TRAFFIC ----
+{
+  const ONC_N=8;
+  const oncBodyGeo=new THREE.BoxGeometry(1.2,0.6,2.2);
+  const oncRoofGeo=new THREE.BoxGeometry(0.9,0.4,1.2);
+  const oncColors=[0xe74c3c,0x3498db,0xf39c12,0x9b59b6,0x1abc9c,0xe67e22,0x2ecc71,0xecf0f1];
+  const oncBodyInst=new THREE.InstancedMesh(oncBodyGeo,new THREE.MeshBasicMaterial({color:0xffffff}),ONC_N);
+  oncBodyInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(ONC_N*3),3);
+  const oncRoofInst=new THREE.InstancedMesh(oncRoofGeo,new THREE.MeshBasicMaterial({color:0x222222}),ONC_N);
+  const oncLightInst=new THREE.InstancedMesh(new THREE.SphereGeometry(0.15,4,4),new THREE.MeshBasicMaterial({color:0xff4444}),ONC_N*2);
+  const _oc=new THREE.Color();
+  const oncData=[];
+  for(let i=0;i<ONC_N;i++){
+    _oc.setHex(oncColors[i%oncColors.length]);
+    oncBodyInst.instanceColor.setXYZ(i,_oc.r,_oc.g,_oc.b);
+    oncData.push({x:-3.5+Math.random()*1.5,z:0,spd:0.12+Math.random()*0.15,active:false});
+  }
+  oncBodyInst.instanceColor.needsUpdate=true;
+  scene.add(oncBodyInst);scene.add(oncRoofInst);scene.add(oncLightInst);
+  window._oncData={bodyInst:oncBodyInst,roofInst:oncRoofInst,lightInst:oncLightInst,data:oncData,n:ONC_N};
+}
+
 // ---- TUNNELS ----
 {
   const TUNNEL_N=5;
@@ -926,6 +949,40 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
 
   if(window._tlData){const tld=window._tlData;const cycle=Math.floor(fc/120)%3;for(let i=0;i<tld.n;i++){const ph=(cycle+(i%3))%3;dummy.scale.setScalar(ph===0?1:.3);dummy.position.set(tld.positions[i].x,4.55,tld.positions[i].z);dummy.rotation.set(0,0,0);dummy.updateMatrix();tld.redInst.setMatrixAt(i,dummy.matrix);dummy.scale.setScalar(ph===1?1:.3);dummy.position.set(tld.positions[i].x,4.2,tld.positions[i].z);dummy.updateMatrix();tld.yelInst.setMatrixAt(i,dummy.matrix);dummy.scale.setScalar(ph===2?1:.3);dummy.position.set(tld.positions[i].x,3.85,tld.positions[i].z);dummy.updateMatrix();tld.grnInst.setMatrixAt(i,dummy.matrix)}tld.redInst.instanceMatrix.needsUpdate=true;tld.yelInst.instanceMatrix.needsUpdate=true;tld.grnInst.instanceMatrix.needsUpdate=true}
 if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.data[i];dummy.position.set(b.x+Math.sin(fc*.008+b.phase)*2,b.baseY+Math.sin(fc*b.spd+b.phase)*3,b.z);dummy.scale.setScalar(.8+Math.sin(fc*.01+b.phase)*.2);dummy.rotation.set(0,fc*.005,0);dummy.updateMatrix();bd.inst.setMatrixAt(i,dummy.matrix)}bd.inst.instanceMatrix.needsUpdate=true}
+
+
+  // Oncoming traffic update
+  if(window._oncData){
+    const od=window._oncData;
+    let activeCount=0;
+    for(let i=0;i<od.n;i++){
+      const o=od.data[i];
+      if(o.active){
+        activeCount++;
+        o.z-=o.spd;
+        if(o.z<car.position.z-40){o.active=false;}
+        dummy.position.set(o.x,0.4,o.z);dummy.scale.setScalar(1);dummy.rotation.set(0,Math.PI,0);dummy.updateMatrix();
+        od.bodyInst.setMatrixAt(i,dummy.matrix);
+        dummy.position.set(o.x,0.8,o.z);dummy.updateMatrix();od.roofInst.setMatrixAt(i,dummy.matrix);
+        dummy.position.set(o.x-0.4,0.3,o.z+1.2);dummy.scale.setScalar(0.8);dummy.updateMatrix();od.lightInst.setMatrixAt(i*2,dummy.matrix);
+        dummy.position.set(o.x+0.4,0.3,o.z+1.2);dummy.updateMatrix();od.lightInst.setMatrixAt(i*2+1,dummy.matrix);
+        if(Math.abs(car.position.x-o.x)<1.5&&Math.abs(car.position.z-o.z)<2){
+          if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,1,o.z,0x60a5fa,8);o.active=false;}
+          else{lives--;flow=Math.max(0,flow-15);spd*=0.1;sfxRed();screenFlash("flash-red");emitParticles(o.x,1,o.z,0xff4444,12);o.active=false;
+            if(lives<=0){gameActive=false;document.getElementById('finalScore').textContent=score;document.getElementById('finalGreen').textContent=greenCount;document.getElementById('finalRed').textContent=redCount;document.getElementById('finalStreak').textContent=bestStreak;document.getElementById('finalMsg').textContent='התנגשת במכונית!';document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';document.getElementById('gameOver').style.display='flex';return;}
+          }
+        }
+      } else {
+        dummy.position.set(0,-100,0);dummy.scale.setScalar(0);dummy.updateMatrix();
+        od.bodyInst.setMatrixAt(i,dummy.matrix);od.roofInst.setMatrixAt(i,dummy.matrix);
+        od.lightInst.setMatrixAt(i*2,dummy.matrix);od.lightInst.setMatrixAt(i*2+1,dummy.matrix);
+      }
+    }
+    if(fc%90===0&&activeCount<4){
+      for(let i=0;i<od.n;i++){if(!od.data[i].active){od.data[i].active=true;od.data[i].z=car.position.z+80+Math.random()*40;od.data[i].x=-3.5+Math.random()*1.5;od.data[i].spd=0.12+Math.random()*0.15;break;}}
+    }
+    od.bodyInst.instanceMatrix.needsUpdate=true;od.roofInst.instanceMatrix.needsUpdate=true;od.lightInst.instanceMatrix.needsUpdate=true;
+  }
 
   // Tunnel lights flicker
   if(window._tunnelData){
