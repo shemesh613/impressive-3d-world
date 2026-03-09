@@ -6,463 +6,114 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-    #c { display: block; width: 100vw; height: 100vh; }
-    #ui {
-      position: fixed; top: 30px; left: 0; right: 0;
-      text-align: center; z-index: 10; pointer-events: none;
-    }
+    canvas { display: block; }
+    #ui { position: fixed; top: 30px; left: 0; right: 0; text-align: center; z-index: 10; pointer-events: none; }
     #ui h1 {
-      font-size: clamp(24px, 4vw, 60px);
-      font-weight: 900; letter-spacing: 6px;
+      font-size: clamp(24px, 4vw, 60px); font-weight: 900; letter-spacing: 6px;
       background: linear-gradient(90deg, #00f5ff, #ff00ff, #ffff00);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(255,0,255,0.4);
-      animation: titlePulse 2s ease-in-out infinite;
+      text-shadow: 0 0 30px rgba(0,245,255,0.8);
+      animation: pulse 2s ease-in-out infinite;
     }
-    @keyframes titlePulse {
-      0%,100% { text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(255,0,255,0.4); }
-      50% { text-shadow: 0 0 50px rgba(0,245,255,1), 0 0 100px rgba(255,0,255,0.8), 0 0 150px rgba(255,255,0,0.3); }
+    @keyframes pulse {
+      0%,100% { filter: brightness(1); } 50% { filter: brightness(1.5); }
     }
-    #ui p {
-      color: rgba(255,255,255,0.4); letter-spacing: 5px; margin-top: 8px; font-size: 13px;
-      animation: subtitleGlow 3s ease-in-out infinite;
-    }
-    @keyframes subtitleGlow {
-      0%,100% { color: rgba(0,245,255,0.4); text-shadow: none; }
-      50% { color: rgba(0,245,255,0.8); text-shadow: 0 0 20px rgba(0,245,255,0.6); }
-    }
-    #hint { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
-      color: rgba(0,245,255,0.6); font-size: 13px; letter-spacing: 4px; z-index: 10;
-      pointer-events: none; animation: hintFade 3s ease-in-out forwards; }
-    @keyframes hintFade { 0%{opacity:0} 20%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
-    #ctrl {
-      position: fixed; bottom: 25px; left: 0; right: 0;
-      text-align: center; color: rgba(255,255,255,0.35);
-      font-size: 12px; letter-spacing: 3px; z-index: 10; pointer-events: none;
-    }
-    #hud {
-      position: fixed; bottom: 55px; right: 30px;
-      z-index: 10; pointer-events: none; text-align: right;
-    }
-    #speedbar {
-      width: 120px; height: 4px; background: rgba(255,255,255,0.1);
-      border-radius: 2px; margin-top: 4px; overflow: hidden;
-    }
-    #speedfill {
-      height: 100%; width: 0%; background: linear-gradient(90deg, #00f5ff, #ff00ff);
-      border-radius: 2px; transition: width 0.1s;
-    }
-    #speednum { color: #00f5ff; font-size: 11px; letter-spacing: 2px; font-family: monospace; }
-    #gauge {
-      position: fixed; bottom: 20px; right: 20px; z-index: 10; pointer-events: none;
-      width: 90px; height: 90px;
-    }
-    #scanlines {
-      position: fixed; inset: 0; z-index: 7; pointer-events: none;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-    }
-    #minimap {
-      position: fixed; bottom: 55px; left: 20px; z-index: 10;
-      width: 100px; height: 100px; border: 1px solid rgba(0,245,255,0.4);
-      background: rgba(0,0,0,0.5); border-radius: 4px; pointer-events: none;
-      border-color: rgba(0,245,255,0.6); box-shadow: 0 0 10px rgba(0,245,255,0.3);
-    }
-    #minimap canvas { width: 100%; height: 100%; }
-    #speedlines {
-      position: fixed; inset: 0; z-index: 8; pointer-events: none;
-      opacity: 0; transition: opacity 0.1s;
-      background: radial-gradient(ellipse at center, transparent 30%, transparent 60%, rgba(0,200,255,0.08) 80%, rgba(0,200,255,0.15) 100%);
-    }
-    #err {
-      position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
-      background: #000; color: #ff4444; font-size: 20px; text-align: center; z-index: 99;
-    }
-    #vignette {
-      position: fixed; inset: 0; z-index: 9; pointer-events: none;
-      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
-    }
-    #chromatic {
-      position: fixed; inset: 0; z-index: 6; pointer-events: none;
-      mix-blend-mode: screen; opacity: 0.04;
-      background: radial-gradient(ellipse at 48% 50%, transparent 60%, rgba(255,0,100,0.5) 100%),
-                  radial-gradient(ellipse at 52% 50%, transparent 60%, rgba(0,100,255,0.5) 100%);
-    }
+    #ui p { color: rgba(0,245,255,0.5); letter-spacing: 5px; margin-top: 8px; font-size: 13px; }
+    #ctrl { position: fixed; bottom: 25px; left: 0; right: 0; text-align: center;
+      color: rgba(255,255,255,0.35); font-size: 12px; letter-spacing: 3px; z-index: 10; pointer-events: none; }
+    #speed { position: fixed; bottom: 55px; right: 30px; z-index: 10; pointer-events: none;
+      color: #00f5ff; font: bold 14px monospace; letter-spacing: 2px; }
+    #vignette { position: fixed; inset: 0; z-index: 5; pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%); }
   </style>
 </head>
 <body>
-<canvas id="c"></canvas>
-<div id="chromatic"></div>
-<div id="ui">
-  <h1>עולם תלת-ממדי</h1>
-  <p>✦ INTERACTIVE 3D WORLD ✦</p>
-</div>
+<div id="ui"><h1>עולם תלת-ממדי</h1><p>✦ INTERACTIVE 3D WORLD ✦</p></div>
 <div id="vignette"></div>
-<div id="hint">✦ W A S D לנהיגה &nbsp;|&nbsp; CLICK לניצוצות ✦</div>
-<div id="scanlines"></div>
-<div id="speedlines"></div>
-<div id="minimap"><canvas id="mmCanvas" width="100" height="100"></canvas></div>
 <div id="ctrl">W A S D — נהיגה &nbsp;|&nbsp; גרור עכבר — סיבוב מצלמה</div>
-<canvas id="gauge" width="90" height="90"></canvas>
-<div id="hud" style="display:none">
-  <div id="speednum">0 KM/H</div>
-  <div id="speedbar"><div id="speedfill"></div></div>
-</div>
-<div id="err"><div>WebGL לא נתמך בדפדפן זה<br><small>נסה Chrome</small></div></div>
+<div id="speed">0 KM/H</div>
 
-<script src="three.min.js"></script>
-<script>
-// === PERFORMANCE-OPTIMIZED VERSION ===
-// Changes: ~60 lights → ~12, no scene.traverse per frame, throttled HUD,
-// reduced particles, pooled objects, no CSS filters, cached DOM, no GC allocs
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
 
-if (!window.WebGLRenderingContext) {
-  document.getElementById('err').style.display = 'flex';
-  throw new Error('No WebGL');
-}
-
-const canvas = document.getElementById('c');
-let renderer;
-try {
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
-} catch(e) {
-  document.getElementById('err').style.display = 'flex';
-  throw e;
-}
+// ---- RENDERER ----
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
-renderer.shadowMap.enabled = false;
 renderer.setClearColor(0x05000f);
+document.body.prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x05000f, 0.025);
+scene.fog = new THREE.FogExp2(0x05000f, 0.018);
 const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 300);
 camera.position.set(0, 8, 16);
 
-// ---- LIGHTS: 0 dynamic lights! Everything is MeshBasic ----
-// No lights needed — all materials are MeshBasicMaterial (unlit)
-// The neon city look comes from bright colored MeshBasic materials
+// ---- ALL MESHBASIC — ZERO LIGHTS NEEDED ----
 
-// ---- GROUND ----
-const ground = new THREE.Mesh(
+// Ground
+scene.add(Object.assign(new THREE.Mesh(
   new THREE.PlaneGeometry(100, 100),
   new THREE.MeshBasicMaterial({ color: 0x0d0d1a })
-);
-ground.rotation.x = -Math.PI / 2;
-scene.add(ground);
+), { rotation: new THREE.Euler(-Math.PI/2, 0, 0) }));
 
-// Ground cracks — InstancedMesh (8 meshes → 1)
-{
-  const crackData = [[-15,-8],[15,-8],[-20,5],[20,5],[-10,-20],[10,-20],[-25,-15],[25,15]];
-  const crackInst = new THREE.InstancedMesh(
-    new THREE.PlaneGeometry(0.06, 4), new THREE.MeshBasicMaterial({ color: 0x00f5ff }), crackData.length);
-  const d = new THREE.Object3D();
-  crackData.forEach(([x,z], i) => {
-    d.position.set(x+(Math.random()-0.5)*5, 0.005, z+(Math.random()-0.5)*5);
-    d.rotation.set(-Math.PI/2, 0, Math.random()*Math.PI);
-    d.updateMatrix();
-    crackInst.setMatrixAt(i, d.matrix);
-  });
-  scene.add(crackInst);
-}
-
-const grid = new THREE.GridHelper(100, 50, 0x00f5ff, 0x220055);
-grid.material.opacity = 0.4;
-grid.material.transparent = true;
+// Grid
+const grid = new THREE.GridHelper(100, 40, 0x003344, 0x110022);
+grid.material.opacity = 0.5; grid.material.transparent = true;
 scene.add(grid);
 
-// ---- NEBULA SKY (reduced to 3) ----
-function makeNebula(color, x, y, z, size, opacity) {
-  const m = new THREE.Mesh(
-    new THREE.PlaneGeometry(size, size),
-    new THREE.MeshBasicMaterial({ color, transparent: true, opacity, side: THREE.DoubleSide, depthWrite: false })
-  );
-  m.position.set(x, y, z); m.lookAt(0, y, 0);
-  scene.add(m);
-}
-makeNebula(0x220066, -60, 40, -80, 120, 0.15);
-makeNebula(0x660033, 60, 50, -80, 100, 0.12);
-makeNebula(0x003355, 0, 60, -100, 150, 0.1);
-
-// ---- FLOATING PARTICLES: 500→200 ----
-const floatPositions = [];
-for (let i = 0; i < 200; i++) {
-  floatPositions.push((Math.random()-0.5)*60, Math.random()*15+1, (Math.random()-0.5)*60);
-}
-const floatGeo = new THREE.BufferGeometry();
-floatGeo.setAttribute('position', new THREE.Float32BufferAttribute(floatPositions, 3));
-const floatParticles = new THREE.Points(floatGeo, new THREE.PointsMaterial({ color: 0x88ddff, size: 0.12, transparent: true, opacity: 0.6 }));
-scene.add(floatParticles);
-
-// ---- ROAD ----
-const road = new THREE.Mesh(
+// Road
+scene.add(Object.assign(new THREE.Mesh(
   new THREE.PlaneGeometry(6, 100),
   new THREE.MeshBasicMaterial({ color: 0x111122 })
-);
-road.rotation.x = -Math.PI/2; road.position.y = 0.01;
-scene.add(road);
+), { rotation: new THREE.Euler(-Math.PI/2, 0, 0), position: new THREE.Vector3(0, 0.01, 0) }));
 
-// Road marks — InstancedMesh (15 meshes → 1)
+// Road marks — 1 InstancedMesh
 {
-  const markGeo = new THREE.PlaneGeometry(0.25, 3);
-  const markMat = new THREE.MeshBasicMaterial({ color: 0xffdd00 });
-  const markCount = Math.ceil(90/6);
-  const markInst = new THREE.InstancedMesh(markGeo, markMat, markCount);
+  const g = new THREE.PlaneGeometry(0.25, 3);
+  const m = new THREE.MeshBasicMaterial({ color: 0xffdd00 });
+  const count = 15;
+  const inst = new THREE.InstancedMesh(g, m, count);
   const d = new THREE.Object3D();
-  let idx = 0;
-  for (let z=-45; z<45; z+=6) {
-    d.position.set(0, 0.02, z); d.rotation.set(-Math.PI/2,0,0); d.updateMatrix();
-    markInst.setMatrixAt(idx++, d.matrix);
+  for (let i = 0; i < count; i++) {
+    d.position.set(0, 0.02, -42 + i * 6);
+    d.rotation.set(-Math.PI/2, 0, 0);
+    d.updateMatrix();
+    inst.setMatrixAt(i, d.matrix);
   }
-  scene.add(markInst);
+  scene.add(inst);
 }
 
-// Shooting stars removed — dynamic geometry creation killed FPS
-
-// ---- STARS: 2000→800 ----
-const starPositions = [];
-for (let i = 0; i < 800; i++) {
-  starPositions.push((Math.random()-0.5)*300, Math.random()*80+10, (Math.random()-0.5)*300);
-}
-const starGeo = new THREE.BufferGeometry();
-starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
-scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.2, transparent: true, opacity: 0.7 })));
-
-// ---- NEON ARCHES: no PointLight per arch ----
-function makeArch(z, color) {
-  const g = new THREE.Group();
-  const mat = new THREE.MeshBasicMaterial({ color });
-  [-3.5, 3.5].forEach(x => {
-    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 5, 6), mat);
-    post.position.set(x, 2.5, 0); g.add(post);
-  });
-  const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 7.2, 6), mat);
-  bar.rotation.z = Math.PI/2; bar.position.set(0, 5.1, 0); g.add(bar);
-  g.position.z = z;
-  scene.add(g);
-}
-makeArch(-12, 0x00f5ff); makeArch(-22, 0xff00ff); makeArch(-32, 0xffff00);
-makeArch(-42, 0x00ff88); makeArch(-52, 0xff6600);
-
-// ---- NEON CLOUDS ----
-const cloudGroup = new THREE.Group();
-[[0x440066,0,45,-60],[0x003344,-30,50,-80],[0x220033,30,42,-70]].forEach(([c,x,y,z]) => {
-  for(let i=0;i<4;i++){
-    const sphere = new THREE.Mesh(
-      new THREE.SphereGeometry(4+Math.random()*4, 6, 4),
-      new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.12, depthWrite: false })
-    );
-    sphere.position.set(x+i*5-10, y+Math.random()*3, z+Math.random()*8);
-    cloudGroup.add(sphere);
-  }
+// Road edge strips
+[-3.2, 3.2].forEach(x => {
+  scene.add(Object.assign(new THREE.Mesh(
+    new THREE.PlaneGeometry(0.12, 100),
+    new THREE.MeshBasicMaterial({ color: 0x00f5ff })
+  ), { rotation: new THREE.Euler(-Math.PI/2, 0, 0), position: new THREE.Vector3(x, 0.015, 0) }));
 });
-scene.add(cloudGroup);
 
-// Click sparks removed — dynamic scene.add/remove kills FPS
+// Stars — single Points object
+{
+  const pos = new Float32Array(600 * 3);
+  for (let i = 0; i < 600; i++) {
+    pos[i*3] = (Math.random()-0.5)*300;
+    pos[i*3+1] = Math.random()*80+10;
+    pos[i*3+2] = (Math.random()-0.5)*300;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.2 })));
+}
 
-// ---- RAIN: 800→100 ----
-const rainCount = 100;
-const rainPos = new Float32Array(rainCount*3);
-for (let i=0;i<rainCount;i++) { rainPos[i*3]=(Math.random()-0.5)*80; rainPos[i*3+1]=Math.random()*30; rainPos[i*3+2]=(Math.random()-0.5)*80; }
-const rainGeo = new THREE.BufferGeometry();
-rainGeo.setAttribute('position', new THREE.Float32BufferAttribute(rainPos, 3));
-const rain = new THREE.Points(rainGeo, new THREE.PointsMaterial({ color: 0x99ccff, size: 0.08, transparent: true, opacity: 0.4 }));
-scene.add(rain);
-
-// ---- SKY DOME: lower poly ----
+// Sky dome
 scene.add(new THREE.Mesh(
-  new THREE.SphereGeometry(150, 16, 8),
+  new THREE.SphereGeometry(150, 12, 6),
   new THREE.MeshBasicMaterial({ color: 0x05001a, side: THREE.BackSide })
 ));
 
-// Sky gradient bands
-[[0x110033, 0, -60, 80, 15], [0x220011, -20, -60, 80, 10], [0x001133, 20, -60, 80, 10]].forEach(([c,x,z,w,h]) => {
-  const m = new THREE.Mesh(
-    new THREE.PlaneGeometry(w, h),
-    new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false })
-  );
-  m.position.set(x, 20, z);
-  scene.add(m);
-});
-
-// ---- ENERGY ORBS: no PointLight per orb ----
-const orbColors = [0x00f5ff, 0xff00ff, 0xffff00, 0x00ff88, 0xff6600, 0x8800ff];
-const orbs = [];
-orbColors.forEach((c, i) => {
-  const orb = new THREE.Mesh(
-    new THREE.SphereGeometry(0.4, 8, 8),
-    new THREE.MeshBasicMaterial({ color: c })
-  );
-  const angle = (i/orbColors.length)*Math.PI*2;
-  orb.position.set(Math.cos(angle)*12, 4+Math.sin(angle)*2, Math.sin(angle)*12-10);
-  scene.add(orb);
-  orbs.push({ mesh: orb, angle, speed: 0.3+Math.random()*0.3 });
-});
-
-// ---- AURORA ----
-const auroraPlanes = [];
-[0x00ff88, 0x0088ff, 0xff00ff, 0x00ffff].forEach((c, i) => {
-  const m = new THREE.Mesh(
-    new THREE.PlaneGeometry(180, 25),
-    new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.06, side: THREE.DoubleSide, depthWrite: false })
-  );
-  m.position.set(0, 35+i*8, -70); m.rotation.x = -0.3+i*0.1;
-  scene.add(m);
-  auroraPlanes.push(m);
-});
-
-// ---- MOUNTAINS ----
-function makeMountain(x, z, w, h) {
-  const shape = new THREE.Shape();
-  shape.moveTo(-w/2, 0); shape.lineTo(-w*0.35, h*0.55); shape.lineTo(-w*0.1, h*0.82);
-  shape.lineTo(0, h); shape.lineTo(w*0.15, h*0.75); shape.lineTo(w*0.3, h*0.6);
-  shape.lineTo(w/2, 0); shape.closePath();
-  const m = new THREE.Mesh(new THREE.ShapeGeometry(shape),
-    new THREE.MeshBasicMaterial({ color: 0x07001a, side: THREE.DoubleSide, depthWrite: false }));
-  m.position.set(x, 0, z);
-  scene.add(m);
-  const glowM = new THREE.Mesh(new THREE.PlaneGeometry(w*0.6, 1.5),
-    new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false }));
-  glowM.position.set(x, h*0.97, z+0.5);
-  scene.add(glowM);
-}
-for (let i=0;i<10;i++) makeMountain((i-5)*22, -88, 18+Math.random()*12, 18+Math.random()*22);
-
-// ---- HOLOGRAPHIC RINGS: no PointLight per ring ----
-const rings = [];
-[{z:-5,c:0x00f5ff},{z:-25,c:0xff00ff},{z:-45,c:0xffff00},{z:-65,c:0x00ff88}].forEach(({z,c},i) => {
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.09, 8, 40), new THREE.MeshBasicMaterial({ color: c }));
-  ring.position.set(0, 5, z); ring.rotation.x = Math.PI/2;
-  scene.add(ring);
-  rings.push({ mesh: ring, baseY: 5, phase: i*Math.PI/2 });
-  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.04, 6, 30),
-    new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.4 }));
-  ring2.position.copy(ring.position); ring2.rotation.x = Math.PI/2;
-  scene.add(ring2);
-  rings.push({ mesh: ring2, baseY: 5, phase: i*Math.PI/2+0.5 });
-});
-
-// ---- LIGHT BEAMS ----
-const beams = [];
-[[-8,-6,0x00f5ff],[8,-6,0xff00ff],[-12,-12,0xffff00],[12,-12,0x00ff88]].forEach(([x,z,c],i) => {
-  const beam = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.05, 1.2, 60, 6, 1, true),
-    new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.04, side: THREE.DoubleSide, depthWrite: false })
-  );
-  beam.position.set(x, 30, z);
-  scene.add(beam);
-  beams.push({ mesh: beam, phase: i*Math.PI/2 });
-});
-
-// ---- FLOATING SIGN ----
-const signCv = document.createElement('canvas');
-signCv.width = 512; signCv.height = 128;
-const sctx = signCv.getContext('2d');
-sctx.font = 'bold 56px Arial'; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
-for (let gi=6;gi>=0;gi--) {
-  sctx.shadowBlur = gi*18; sctx.shadowColor = '#00f5ff';
-  sctx.fillStyle = gi===0?'#ffffff':`rgba(0,${200+gi*8},255,${0.5+gi*0.08})`;
-  sctx.fillText('✦ CYBER CITY 2084 ✦', 256, 64);
-}
-const floatingSign = new THREE.Mesh(
-  new THREE.PlaneGeometry(22, 5.5),
-  new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(signCv), transparent: true, depthWrite: false, side: THREE.DoubleSide })
-);
-floatingSign.position.set(0, 24, -38);
-scene.add(floatingSign);
-
-// ---- MOON: 1 light kept ----
-const moon = new THREE.Mesh(new THREE.SphereGeometry(4, 12, 12), new THREE.MeshBasicMaterial({ color: 0xddeeff }));
-moon.position.set(-40, 50, -80); scene.add(moon);
-// Moon light removed — MeshBasic moon is bright enough
-
-// ---- STREET LAMPS: InstancedMesh (48 meshes → 3 draw calls) ----
-{
-  const lampPositions = [];
-  for (let z=-40;z<40;z+=10) { lampPositions.push([-4.5, z]); lampPositions.push([4.5, z]); }
-  const d = new THREE.Object3D();
-
-  const poleInst = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.07,0.1,5,5), new THREE.MeshBasicMaterial({ color: 0x444466 }), lampPositions.length);
-  const armInst = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05,0.05,1.5,5), new THREE.MeshBasicMaterial({ color: 0x444466 }), lampPositions.length);
-  const bulbInst = new THREE.InstancedMesh(new THREE.SphereGeometry(0.2, 6, 6), new THREE.MeshBasicMaterial({ color: 0xffffaa }), lampPositions.length);
-
-  lampPositions.forEach(([x, z], i) => {
-    d.position.set(x, 2.5, z); d.rotation.set(0,0,0); d.updateMatrix();
-    poleInst.setMatrixAt(i, d.matrix);
-    d.position.set(x+Math.sign(x)*0.75, 5, z); d.rotation.set(0,0,Math.PI/2); d.updateMatrix();
-    armInst.setMatrixAt(i, d.matrix);
-    d.position.set(x+Math.sign(x)*1.5, 5, z); d.rotation.set(0,0,0); d.updateMatrix();
-    bulbInst.setMatrixAt(i, d.matrix);
-  });
-  scene.add(poleInst); scene.add(armInst); scene.add(bulbInst);
-}
-
-// ---- BUILDINGS: InstancedMesh for all windows (1 draw call!) ----
-const winGeo = new THREE.PlaneGeometry(0.5, 0.5);
-const wColors = [0xffff88, 0x88ffff, 0xff88ff];
-const winInstances = {};
-wColors.forEach(c => { winInstances[c] = []; });
-function makeBuilding(x, z, w, h, d, color) {
-  const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(w, h, d),
-    new THREE.MeshBasicMaterial({ color })
-  );
-  mesh.position.set(x, h/2, z);
-  scene.add(mesh);
-
-  const wc = wColors[Math.floor(Math.random()*3)];
-  for (let iy=0;iy<Math.floor(h/2);iy++) {
-    for (let ix=-1;ix<=1;ix++) {
-      if (Math.random()>0.35) {
-        winInstances[wc].push({ x: x+ix*0.8, y: iy*1.4+1.5, z: z+d/2+0.01 });
-      }
-    }
-  }
-}
-
-// ---- ROAD EDGE STRIPS: cached refs (no traverse!) ----
-const roadEdgeStrips = [];
-[-3.2, 3.2].forEach(x => {
-  const strip = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.15, 100),
-    new THREE.MeshBasicMaterial({ color: 0x00f5ff, transparent: true, opacity: 1 })
-  );
-  strip.rotation.x = -Math.PI/2; strip.position.set(x, 0.015, 0);
-  scene.add(strip);
-  roadEdgeStrips.push(strip);
-});
-
-// Horizon
-const horizon = new THREE.Mesh(new THREE.PlaneGeometry(200, 20),
-  new THREE.MeshBasicMaterial({ color: 0x220044, transparent: true, opacity: 0.6, side: THREE.DoubleSide }));
-horizon.position.set(0, 10, -90); scene.add(horizon);
-const hband = new THREE.Mesh(new THREE.PlaneGeometry(200, 3),
-  new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.2, side: THREE.DoubleSide }));
-hband.position.set(0, 8, -89); scene.add(hband);
-
-// ---- TEXT SIGNS: no PointLight per sign ----
-function makeTextSign(text, x, y, z, color, rotY) {
-  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 80;
-  const cx = cv.getContext('2d');
-  cx.fillStyle = 'rgba(0,0,0,0.85)'; cx.fillRect(0,0,256,80);
-  cx.strokeStyle = color; cx.lineWidth = 3; cx.strokeRect(3,3,250,74);
-  cx.fillStyle = color; cx.shadowColor = color; cx.shadowBlur = 18;
-  cx.font = 'bold 32px Arial'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
-  cx.fillText(text, 128, 42);
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 1.1),
-    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true }));
-  mesh.position.set(x, y, z); mesh.rotation.y = rotY||0;
-  scene.add(mesh);
-}
-makeTextSign('NEON CITY', -9.5, 10, -7, '#00ffff', 0);
-makeTextSign('HOTEL ✦', 9.5, 12, -9, '#ff00ff', Math.PI);
-makeTextSign('CYBER BAR', -9.5, 8, -17, '#ffff00', 0);
-makeTextSign('CLUB 3D', 9.5, 9, -19, '#ff6600', Math.PI);
-makeTextSign('FUTURE', -9.5, 11, 7, '#00ff88', 0);
-makeTextSign('DRIVE ▶', 9.5, 8, 9, '#ff0088', Math.PI);
-
-// Neon signs removed — text signs with canvas textures are enough
-
+// Buildings — ALL in ONE InstancedMesh per color
 const bdata = [
   [-8,-6,3,9,3,0xff00ff],[8,-6,3,11,3,0x00f5ff],
   [-12,-12,2.5,13,2.5,0x00f5ff],[12,-12,2.5,8,2.5,0xff6600],
@@ -471,122 +122,207 @@ const bdata = [
   [-8,6,3,8,3,0x00ff88],[8,6,3,10,3,0xff00ff],
   [-12,12,2.5,12,2.5,0xffff00],[12,12,2.5,7,2.5,0x00f5ff],
 ];
-bdata.forEach(d => makeBuilding(...d));
 
-// Create InstancedMesh for windows — 144 meshes → 3 draw calls
+// Group buildings by color for instancing
+const buildingsByColor = {};
+bdata.forEach(([x,z,w,h,d,color]) => {
+  if (!buildingsByColor[color]) buildingsByColor[color] = [];
+  buildingsByColor[color].push({x,z,w,h,d});
+});
+
+// Each color = 1 draw call (box geometry is reused)
 const dummy = new THREE.Object3D();
-wColors.forEach(c => {
-  const arr = winInstances[c];
-  if (arr.length === 0) return;
-  const inst = new THREE.InstancedMesh(winGeo, new THREE.MeshBasicMaterial({ color: c }), arr.length);
-  arr.forEach((w, i) => {
-    dummy.position.set(w.x, w.y, w.z);
+Object.entries(buildingsByColor).forEach(([color, buildings]) => {
+  const geo = new THREE.BoxGeometry(1, 1, 1);
+  const mat = new THREE.MeshBasicMaterial({ color: parseInt(color) });
+  const inst = new THREE.InstancedMesh(geo, mat, buildings.length);
+  buildings.forEach((b, i) => {
+    dummy.position.set(b.x, b.h/2, b.z);
+    dummy.scale.set(b.w, b.h, b.d);
     dummy.updateMatrix();
     inst.setMatrixAt(i, dummy.matrix);
   });
   scene.add(inst);
 });
 
-// ---- EXHAUST: 60→25 ----
-const exhaustCount = 25;
-const exhaustGeo = new THREE.BufferGeometry();
-exhaustGeo.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(exhaustCount*3), 3));
-const exhaustMat = new THREE.PointsMaterial({ color: 0x4466ff, size: 0.25, transparent: true, opacity: 0.7 });
-scene.add(new THREE.Points(exhaustGeo, exhaustMat));
+// Windows — ALL in 1 InstancedMesh
+{
+  const winPositions = [];
+  bdata.forEach(([x,z,w,h,d]) => {
+    for (let iy=0;iy<Math.floor(h/2);iy++) {
+      for (let ix=-1;ix<=1;ix++) {
+        if (Math.random()>0.4) winPositions.push(x+ix*0.8, iy*1.4+1.5, z+d/2+0.01);
+      }
+    }
+  });
+  const winGeo = new THREE.PlaneGeometry(0.5, 0.5);
+  const winMat = new THREE.MeshBasicMaterial({ color: 0xffff88 });
+  const winInst = new THREE.InstancedMesh(winGeo, winMat, winPositions.length/3);
+  for (let i = 0; i < winPositions.length/3; i++) {
+    dummy.position.set(winPositions[i*3], winPositions[i*3+1], winPositions[i*3+2]);
+    dummy.scale.set(1,1,1); dummy.rotation.set(0,0,0);
+    dummy.updateMatrix();
+    winInst.setMatrixAt(i, dummy.matrix);
+  }
+  scene.add(winInst);
+}
+
+// Lamps — 1 InstancedMesh for bulbs only (poles skip for perf)
+{
+  const lampPos = [];
+  for (let z=-40;z<40;z+=10) { lampPos.push([-4.5,z]); lampPos.push([4.5,z]); }
+  const bulbGeo = new THREE.SphereGeometry(0.25, 6, 6);
+  const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffffaa });
+  const bulbInst = new THREE.InstancedMesh(bulbGeo, bulbMat, lampPos.length);
+  lampPos.forEach(([x,z], i) => {
+    dummy.position.set(x+Math.sign(x)*1.5, 5, z);
+    dummy.scale.set(1,1,1); dummy.updateMatrix();
+    bulbInst.setMatrixAt(i, dummy.matrix);
+  });
+  scene.add(bulbInst);
+}
+
+// Arches — 1 InstancedMesh for bars
+{
+  const archColors = [0x00f5ff, 0xff00ff, 0xffff00, 0x00ff88, 0xff6600];
+  const archZs = [-12, -22, -32, -42, -52];
+  archColors.forEach((c, idx) => {
+    const mat = new THREE.MeshBasicMaterial({ color: c });
+    const barGeo = new THREE.CylinderGeometry(0.08, 0.08, 7.2, 6);
+    const postGeo = new THREE.CylinderGeometry(0.08, 0.08, 5, 6);
+    // top bar
+    const bar = new THREE.Mesh(barGeo, mat);
+    bar.rotation.z = Math.PI/2; bar.position.set(0, 5.1, archZs[idx]);
+    scene.add(bar);
+    // 2 posts
+    [-3.5, 3.5].forEach(x => {
+      const post = new THREE.Mesh(postGeo, mat);
+      post.position.set(x, 2.5, archZs[idx]);
+      scene.add(post);
+    });
+  });
+}
+
+// Holographic rings — 4 rings
+const rings = [];
+[{z:-5,c:0x00f5ff},{z:-25,c:0xff00ff},{z:-45,c:0xffff00},{z:-65,c:0x00ff88}].forEach(({z,c},i) => {
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(4.5, 0.09, 6, 32),
+    new THREE.MeshBasicMaterial({ color: c })
+  );
+  ring.position.set(0, 5, z); ring.rotation.x = Math.PI/2;
+  scene.add(ring);
+  rings.push({ mesh: ring, baseY: 5, phase: i*Math.PI/2 });
+});
+
+// Text sign (1 canvas texture)
+{
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 128;
+  const ctx = cv.getContext('2d');
+  ctx.font = 'bold 56px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.shadowBlur = 30; ctx.shadowColor = '#00f5ff';
+  ctx.fillStyle = '#ffffff'; ctx.fillText('✦ CYBER CITY 2084 ✦', 256, 64);
+  const sign = new THREE.Mesh(
+    new THREE.PlaneGeometry(20, 5),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, side: THREE.DoubleSide })
+  );
+  sign.position.set(0, 22, -38);
+  scene.add(sign);
+}
+
+// Moon
+scene.add(Object.assign(new THREE.Mesh(
+  new THREE.SphereGeometry(4, 10, 10),
+  new THREE.MeshBasicMaterial({ color: 0xddeeff })
+), { position: new THREE.Vector3(-40, 50, -80) }));
+
+// Mountains — simple triangles
+for (let i=0;i<8;i++) {
+  const w = 20+Math.random()*10, h = 20+Math.random()*20;
+  const shape = new THREE.Shape();
+  shape.moveTo(-w/2, 0); shape.lineTo(0, h); shape.lineTo(w/2, 0); shape.closePath();
+  const m = new THREE.Mesh(new THREE.ShapeGeometry(shape),
+    new THREE.MeshBasicMaterial({ color: 0x07001a, side: THREE.DoubleSide }));
+  m.position.set((i-4)*25, 0, -90);
+  scene.add(m);
+}
+
+// Rain — just 80 particles
+{
+  const pos = new Float32Array(80*3);
+  for (let i=0;i<80;i++) { pos[i*3]=(Math.random()-0.5)*60; pos[i*3+1]=Math.random()*25; pos[i*3+2]=(Math.random()-0.5)*60; }
+  var rainGeo = new THREE.BufferGeometry();
+  rainGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  scene.add(new THREE.Points(rainGeo, new THREE.PointsMaterial({ color: 0x6699cc, size: 0.06 })));
+}
+
+// Energy orbs — 6 simple spheres
+const orbs = [];
+[0x00f5ff, 0xff00ff, 0xffff00, 0x00ff88, 0xff6600, 0x8800ff].forEach((c, i) => {
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.4, 6, 6), new THREE.MeshBasicMaterial({ color: c }));
+  const angle = (i/6)*Math.PI*2;
+  orb.position.set(Math.cos(angle)*12, 4, Math.sin(angle)*12-10);
+  scene.add(orb);
+  orbs.push({ mesh: orb, angle, speed: 0.3+Math.random()*0.3 });
+});
 
 // ---- CAR ----
 const car = new THREE.Group();
 scene.add(car);
 
-const bodyMesh = new THREE.Mesh(
+car.add(Object.assign(new THREE.Mesh(
   new THREE.BoxGeometry(1.8, 0.6, 3.6),
   new THREE.MeshBasicMaterial({ color: 0x00ccff })
-);
-bodyMesh.position.y = 0.5; car.add(bodyMesh);
+), { position: new THREE.Vector3(0, 0.5, 0) }));
 
-const cabinMesh = new THREE.Mesh(
-  new THREE.BoxGeometry(1.4, 0.55, 2),
-  new THREE.MeshBasicMaterial({ color: 0x001122, transparent: true, opacity: 0.85 })
-);
-cabinMesh.position.set(0, 1.07, -0.15); car.add(cabinMesh);
+car.add(Object.assign(new THREE.Mesh(
+  new THREE.BoxGeometry(1.4, 0.5, 2),
+  new THREE.MeshBasicMaterial({ color: 0x003344 })
+), { position: new THREE.Vector3(0, 1.05, -0.15) }));
 
-const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.3, 10);
-const wheelMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
-const wheels = [[-1.05,.35,1.2],[1.05,.35,1.2],[-1.05,.35,-1.2],[1.05,.35,-1.2]].map(p => {
-  const w = new THREE.Mesh(wheelGeo, wheelMat);
-  w.position.set(...p); w.rotation.z = Math.PI/2; car.add(w); return w;
-});
-
-// Headlights — visual only + 1 shared PointLight (was 2 SpotLights)
-[-0.5, 0.5].forEach(x => {
-  const hl = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.18,0.05), new THREE.MeshBasicMaterial({ color: 0xffffcc }));
-  hl.position.set(x, 0.5, 1.81); car.add(hl);
-});
-
-// Taillights — emissive only
-[-0.6, 0.6].forEach(x => {
-  const tl = new THREE.Mesh(new THREE.BoxGeometry(0.25,0.15,0.04), new THREE.MeshBasicMaterial({ color: 0xff2200 }));
-  tl.position.set(x, 0.5, -1.82); car.add(tl);
-});
-
-// Underglow visual (no light, just a glowing plane)
-const glowPlane = new THREE.Mesh(
+// Underglow
+car.add(Object.assign(new THREE.Mesh(
   new THREE.PlaneGeometry(1.8, 3.6),
   new THREE.MeshBasicMaterial({ color: 0x00aaff, transparent: true, opacity: 0.3 })
-);
-glowPlane.rotation.x = -Math.PI/2; glowPlane.position.y = 0.05;
-car.add(glowPlane);
+), { rotation: new THREE.Euler(-Math.PI/2, 0, 0), position: new THREE.Vector3(0, 0.05, 0) }));
 
-// Puddles removed — minimal visual impact, 6 draw calls saved
+// Headlights
+[-0.5, 0.5].forEach(x => {
+  car.add(Object.assign(new THREE.Mesh(
+    new THREE.BoxGeometry(0.3, 0.15, 0.05),
+    new THREE.MeshBasicMaterial({ color: 0xffffcc })
+  ), { position: new THREE.Vector3(x, 0.5, 1.81) }));
+});
 
-// ---- AUDIO ----
-let audioStarted = false;
-function startAudio() {
-  if (audioStarted) return; audioStarted = true;
-  const ac = new AudioContext();
-  function note(freq, start, dur, vol=0.06) {
-    const o = ac.createOscillator(), g = ac.createGain();
-    o.type = 'sawtooth'; o.frequency.value = freq;
-    g.gain.setValueAtTime(0, ac.currentTime+start);
-    g.gain.linearRampToValueAtTime(vol, ac.currentTime+start+0.01);
-    g.gain.linearRampToValueAtTime(0, ac.currentTime+start+dur);
-    o.connect(g); g.connect(ac.destination);
-    o.start(ac.currentTime+start); o.stop(ac.currentTime+start+dur+0.1);
-  }
-  function beat() {
-    [110,0,138.6,0,110,0,164.8,146.8].forEach((f,i) => { if(f) note(f, i*0.25, 0.22, 0.04); });
-    note(55, 0, 2, 0.05); note(55, 2, 2, 0.05);
-  }
-  beat(); setInterval(beat, 2000);
-}
-document.addEventListener('keydown', startAudio, { once: true });
-document.addEventListener('click', startAudio, { once: true });
+// Taillights
+[-0.6, 0.6].forEach(x => {
+  car.add(Object.assign(new THREE.Mesh(
+    new THREE.BoxGeometry(0.25, 0.12, 0.04),
+    new THREE.MeshBasicMaterial({ color: 0xff2200 })
+  ), { position: new THREE.Vector3(x, 0.5, -1.82) }));
+});
 
-// ---- GROUND REFLECTION ----
-const reflGround = new THREE.Mesh(
-  new THREE.PlaneGeometry(100, 100),
-  new THREE.MeshBasicMaterial({ color: 0x112244, transparent: true, opacity: 0.18 })
-);
-reflGround.rotation.x = -Math.PI/2; reflGround.position.y = 0.003;
-scene.add(reflGround);
-
-// ---- TRAFFIC CARS ----
-const traffic = [];
-function makeTrafficCar(z, lane, color) {
-  const g = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.BoxGeometry(1.4,0.5,2.8),
-    new THREE.MeshBasicMaterial({ color }));
-  body.position.y = 0.45; g.add(body);
-  [-0.4, 0.4].forEach(x => {
-    const hl = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.12,0.04), new THREE.MeshBasicMaterial({ color: 0xffffcc }));
-    hl.position.set(x, 0.45, -1.42); g.add(hl);
-    const tl = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.1,0.04), new THREE.MeshBasicMaterial({ color: 0xff2200 }));
-    tl.position.set(x, 0.45, 1.42); g.add(tl);
+// Wheels — 1 InstancedMesh
+{
+  const wGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.3, 8);
+  const wMat = new THREE.MeshBasicMaterial({ color: 0x222222 });
+  const wInst = new THREE.InstancedMesh(wGeo, wMat, 4);
+  [[-1.05,.35,1.2],[1.05,.35,1.2],[-1.05,.35,-1.2],[1.05,.35,-1.2]].forEach((p, i) => {
+    dummy.position.set(...p); dummy.rotation.set(0,0,Math.PI/2); dummy.scale.set(1,1,1);
+    dummy.updateMatrix();
+    wInst.setMatrixAt(i, dummy.matrix);
   });
-  g.position.set(lane, 0, z); scene.add(g);
-  traffic.push({ group: g, speed: 0.15+Math.random()*0.1 });
+  car.add(wInst);
 }
-[-50,-30,-70,-15,-90].forEach((z,i) => makeTrafficCar(z, (i%2===0)?1.3:-1.3, [0xff3300,0xffaa00,0x00ff88,0xff00aa,0xffffff][i]));
+
+// Traffic — 5 simple boxes
+const traffic = [];
+[0xff3300, 0xffaa00, 0x00ff88, 0xff00aa, 0xcccccc].forEach((c, i) => {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 2.8), new THREE.MeshBasicMaterial({ color: c }));
+  m.position.set((i%2===0)?1.3:-1.3, 0.45, -50-i*20);
+  scene.add(m);
+  traffic.push({ mesh: m, speed: 0.15+Math.random()*0.1 });
+});
 
 // ---- INPUT ----
 const keys = {};
@@ -602,113 +338,86 @@ window.addEventListener('mousemove', e => {
   camPhi = Math.max(0.15, Math.min(1.3, camPhi-(e.clientY-my0)*0.006));
   mx0 = e.clientX; my0 = e.clientY;
 });
-window.addEventListener('touchstart', e => { dragging = true; mx0 = e.touches[0].clientX; my0 = e.touches[0].clientY; }, { passive: true });
-window.addEventListener('touchend', () => dragging = false);
+window.addEventListener('touchstart', e => { dragging=true; mx0=e.touches[0].clientX; my0=e.touches[0].clientY; }, {passive:true});
+window.addEventListener('touchend', () => dragging=false);
 window.addEventListener('touchmove', e => {
   if (!dragging) return;
   camTheta += (e.touches[0].clientX-mx0)*0.006;
   camPhi = Math.max(0.15, Math.min(1.3, camPhi-(e.touches[0].clientY-my0)*0.006));
-  mx0 = e.touches[0].clientX; my0 = e.touches[0].clientY;
-}, { passive: true });
+  mx0=e.touches[0].clientX; my0=e.touches[0].clientY;
+}, {passive:true});
+
+// Audio
+let audioStarted = false;
+function startAudio() {
+  if (audioStarted) return; audioStarted = true;
+  const ac = new AudioContext();
+  function note(freq, start, dur, vol=0.04) {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sawtooth'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, ac.currentTime+start);
+    g.gain.linearRampToValueAtTime(vol, ac.currentTime+start+0.01);
+    g.gain.linearRampToValueAtTime(0, ac.currentTime+start+dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(ac.currentTime+start); o.stop(ac.currentTime+start+dur+0.1);
+  }
+  (function beat() {
+    [110,0,138.6,0,110,0,164.8,146.8].forEach((f,i) => { if(f) note(f,i*0.25,0.22); });
+    note(55,0,2,0.05); note(55,2,2,0.05);
+    setTimeout(beat, 2000);
+  })();
+}
+document.addEventListener('keydown', startAudio, {once:true});
+document.addEventListener('click', startAudio, {once:true});
 
 // ---- STATE ----
-let speed = 0, dir = 0;
+let speed = 0, dir = 0, fc = 0;
 const MAX_SPEED = 0.28, ACCEL = 0.013, BRAKE = 0.022, TURN = 0.038;
-const camTarget = new THREE.Vector3();
 const _camPos = new THREE.Vector3();
+const _camTarget = new THREE.Vector3();
 const clock = new THREE.Clock();
-let frameCount = 0;
+const speedEl = document.getElementById('speed');
 
-// Cache DOM refs — gauge and minimap hidden (too expensive to redraw)
-document.getElementById('gauge').style.display = 'none';
-document.getElementById('minimap').style.display = 'none';
-document.getElementById('speedlines').style.display = 'none';
-document.getElementById('hud').style.display = 'block';
-const speednumEl = document.getElementById('speednum');
-
-// ---- ANIMATE ----
+// ---- ULTRA-LEAN ANIMATE LOOP ----
 function animate() {
   requestAnimationFrame(animate);
   const t = clock.getElapsedTime();
-  frameCount++;
+  fc++;
 
-  // Car controls
+  // Car
   if (keys['ArrowUp']||keys['KeyW']) speed = Math.min(MAX_SPEED, speed+ACCEL);
   else if (keys['ArrowDown']||keys['KeyS']) speed = Math.max(-MAX_SPEED*0.5, speed-ACCEL);
   else speed *= (1-BRAKE);
-
   if (Math.abs(speed)>0.002) {
     if (keys['ArrowLeft']||keys['KeyA']) dir += TURN*Math.sign(speed);
     if (keys['ArrowRight']||keys['KeyD']) dir -= TURN*Math.sign(speed);
   }
-
   car.rotation.y = dir;
   car.position.x += Math.sin(dir)*speed;
   car.position.z += Math.cos(dir)*speed;
-  car.position.y = Math.abs(speed)>0.01 ? Math.sin(t*20)*0.015 : 0;
-  wheels.forEach(w => { w.rotation.x += speed*4.5; });
 
-  // Camera — pre-allocated vector, no GC
-  _camPos.set(car.position.x-Math.sin(dir+camTheta)*15, car.position.y+7+camPhi*4, car.position.z-Math.cos(dir+camTheta)*15);
+  // Camera
+  _camPos.set(car.position.x-Math.sin(dir+camTheta)*15, 7+camPhi*4, car.position.z-Math.cos(dir+camTheta)*15);
   camera.position.lerp(_camPos, 0.07);
-  camTarget.lerp(car.position, 0.1);
-  camTarget.y = car.position.y+1.5;
-  camera.lookAt(camTarget);
+  _camTarget.set(car.position.x, 1.5, car.position.z);
+  camera.lookAt(_camTarget);
 
   // Traffic
-  traffic.forEach(tc => { tc.group.position.z += tc.speed; if (tc.group.position.z>30) tc.group.position.z=-100; });
+  traffic.forEach(tc => { tc.mesh.position.z += tc.speed; if (tc.mesh.position.z>30) tc.mesh.position.z=-100; });
 
-  // HUD — simple text only, every 6th frame
-  if (frameCount%6===0) {
-    const kmh = Math.abs(Math.round(speed*200));
-    speednumEl.textContent = kmh+' KM/H';
+  // Every 4th frame: rings + orbs
+  if (fc%4===0) {
+    rings.forEach((r,i) => { r.mesh.rotation.z += 0.03*(i%2===0?1:-1); r.mesh.position.y = r.baseY+Math.sin(t*0.7+r.phase)*0.8; });
+    orbs.forEach(o => { o.angle+=o.speed*0.04; o.mesh.position.set(Math.cos(o.angle)*12, 4+Math.sin(t+o.angle)*1.5, Math.sin(o.angle)*12-10); });
   }
 
-  // Rings
-  rings.forEach((r, i) => {
-    r.mesh.rotation.z += 0.008*(i%2===0?1:-1);
-    r.mesh.position.y = r.baseY+Math.sin(t*0.7+r.phase)*0.8;
-  });
-
-  // Beams
-  beams.forEach(b => { b.mesh.material.opacity = 0.025+0.035*Math.abs(Math.sin(t*0.4+b.phase)); b.mesh.rotation.y = t*0.2+b.phase; });
-
-  // Sign + clouds
-  floatingSign.position.y = 24+Math.sin(t*0.25)*1.5;
-  floatingSign.rotation.y = Math.sin(t*0.08)*0.08;
-  floatingSign.material.opacity = 0.7+Math.sin(t*0.5)*0.3;
-  cloudGroup.position.x = Math.sin(t*0.05)*5;
-
-  // Orbs + Aurora — every 4th frame
-  if (frameCount%4===0) {
-    orbs.forEach(o => {
-      o.angle += o.speed*0.04;
-      o.mesh.position.set(Math.cos(o.angle)*12, 4+Math.sin(t*1.5+o.angle)*1.5, Math.sin(o.angle)*12-10);
-    });
-    auroraPlanes.forEach((a,i) => { a.material.opacity = 0.04+0.04*Math.sin(t*0.5+i*1.5); a.position.x = Math.sin(t*0.2+i)*20; });
-  }
-
-  // Exhaust — every 3rd frame
-  if (frameCount%3===0) {
-    const ep = exhaustGeo.attributes.position;
-    for (let i=0;i<exhaustCount;i++) {
-      ep.array[i*3] = car.position.x+(Math.random()-0.5)*0.4-Math.sin(car.rotation.y)*1.8;
-      ep.array[i*3+1] = car.position.y+0.3+Math.random()*0.3;
-      ep.array[i*3+2] = car.position.z+(Math.random()-0.5)*0.4-Math.cos(car.rotation.y)*1.8;
-    }
-    ep.needsUpdate = true;
-    exhaustMat.opacity = Math.abs(speed)>0.05 ? 0.6 : 0.1;
-  }
-
-  // Rain — every 4th frame only
-  if (frameCount%4===0) {
+  // Every 6th frame: rain + HUD
+  if (fc%6===0) {
     const rp = rainGeo.attributes.position;
-    for (let i=0;i<rainCount;i++) { rp.array[i*3+1]-=1.2; if(rp.array[i*3+1]<0) rp.array[i*3+1]=30; }
+    for (let i=0;i<80;i++) { rp.array[i*3+1]-=1.8; if(rp.array[i*3+1]<0) rp.array[i*3+1]=25; }
     rp.needsUpdate = true;
+    speedEl.textContent = Math.abs(Math.round(speed*200))+' KM/H';
   }
-
-  // Float particles — just rotate, no per-vertex update
-  floatParticles.rotation.y = t*0.03;
 
   renderer.render(scene, camera);
 }
@@ -719,6 +428,9 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 });
+
+// Debug: log draw calls
+console.log('Scene objects:', scene.children.length);
 </script>
 </body>
 </html>
