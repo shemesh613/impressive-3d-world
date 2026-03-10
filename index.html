@@ -866,7 +866,7 @@ for(let z=-100;z<=2800;z+=10){
   const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshBasicMaterial();
   const inst=new THREE.InstancedMesh(geo,mat,bdata.length);
   const biomes=[[0x22c55e,0x10b981,0x059669,0x34d399],[0xd4a054,0xb8860b,0xcd853f,0xdeb887],[0x6495ed,0x4169e1,0x87ceeb,0xb0c4de],[0xcd5c5c,0xb22222,0xdc143c,0xe9967a],[0x9370db,0x8a2be2,0xba55d3,0xdda0dd]];
-  function biomeColor(z,i){const b=biomes[Math.floor(z/500)%biomes.length];return b[i%b.length]}
+  function biomeColor(z,i){const idx=((Math.floor(z/500)%biomes.length)+biomes.length)%biomes.length;const b=biomes[idx];return b[i%b.length]}
   const colors=[0x22c55e,0x10b981,0x059669,0x34d399,0x6ee7b7,0x14b8a6,0x0d9488,0x2dd4bf];
   bdata.forEach((b,i)=>{
     dummy.position.set(b[0],b[3]/2,b[1]);dummy.scale.set(b[2],b[3],b[4]);dummy.rotation.set(0,0,0);dummy.updateMatrix();
