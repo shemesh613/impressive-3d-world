@@ -950,8 +950,7 @@ for(let i=0;i<FOLLOWER_N;i++){
 }
 followerInst.instanceMatrix.needsUpdate=true;
     const fEl=document.getElementById('followers');
-    const fn=Math.max(0,Math.round(lives));
-    fEl.textContent='🚗'.repeat(fn)+(fn>0?' חברים נוסעים אחריך!':' 😢 אין חברים...');followerInst.instanceColor.needsUpdate=true;
+    fEl.textContent='🚗🚗🚗🚗🚗 חברים נוסעים אחריך!';followerInst.instanceColor.needsUpdate=true;
 followerInst.frustumCulled=false;scene.add(followerInst);
 const followerPos=[];
 for(let i=0;i<FOLLOWER_N;i++)followerPos.push({x:0,z:-(i+1)*6,y:.4});
