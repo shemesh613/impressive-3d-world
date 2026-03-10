@@ -725,7 +725,7 @@ scene.add((() => {
     dummy.rotation.set(0,0,0);
     dummy.updateMatrix();
     shopFrontInst.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(side,_shy+3.5,z);
+    dummy.position.set(side,roadY(z)+3.5,z);
     dummy.scale.setScalar(1);
     dummy.updateMatrix();
     shopLightInst.setMatrixAt(i,dummy.matrix);
@@ -1570,7 +1570,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
       const side=i%2===0?-8.5:8.5;
       const z=50+i*80;
       const pulse=0.6+Math.sin(fc*0.03+i*1.7)*0.4;
-      dummy.position.set(side,_shy+3.5,z);
+      dummy.position.set(side,roadY(z)+3.5,z);
       dummy.scale.setScalar(pulse);
       dummy.rotation.set(0,0,0);
       dummy.updateMatrix();
