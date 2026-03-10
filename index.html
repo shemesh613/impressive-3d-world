@@ -1261,7 +1261,7 @@ function animate(){
     // Car follows curve by position pull (NOT rotation) - curves stay visible!
     const curX=roadX(car.position.z);
     const aheadX=roadX(car.position.z+30);
-    const curvePull=(curX-car.position.x)*.012;
+    const curvePull=(curX-car.position.x)*.003;
     car.position.x+=curvePull;
     // Visual tilt only - slight lean into curves for feel
     const curveAngle=Math.atan2(aheadX-curX,30)*.12;
@@ -1270,10 +1270,10 @@ function animate(){
     car.position.z+=Math.cos(dir)*spd;
 
     const roadCurve=curX;
-    const leftEdge=-4.5+roadCurve;
-    const rightEdge=4.5+roadCurve;
-    if(car.position.x<leftEdge)car.position.x+=(leftEdge-car.position.x)*.08+.05;
-    if(car.position.x>rightEdge)car.position.x+=(rightEdge-car.position.x)*.08-.05;
+    const leftEdge=-3.5+roadCurve;
+    const rightEdge=3.5+roadCurve;
+    if(car.position.x<leftEdge)car.position.x+=(leftEdge-car.position.x)*.15+.1;
+    if(car.position.x>rightEdge)car.position.x+=(rightEdge-car.position.x)*.15-.1;
 
     if(boostTimer>0)boostTimer--;if(shieldTimer>0)shieldTimer--;if(turboTimer>0)turboTimer--;if(shieldTimer>0)car.children[0].material.color.setHex(fc%10<5?0x60a5fa:0x3b82f6);else if(turboTimer>0)car.children[0].material.color.setHex(fc%10<5?0xfbbf24:0xf59e0b);else if(boostTimer>0){car.children[0].material.color.setHex(fc%10<5?0x4ade80:0x22c55e)}
     else{car.children[0].material.color.setHex(0x22c55e)}
@@ -1561,9 +1561,11 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
     if(window._edgeMat){const fc2=flow/100;window._edgeMat.color.setRGB(1-fc2,fc2,.2)}}
 
   // Camera
-  _cv.set(car.position.x-Math.sin(dir+cTh)*14,7+cPh*4,car.position.z-Math.cos(dir+cTh)*14);
-  cam.position.lerp(_cv,.045);
-  _ct.set(car.position.x+Math.sin(dir)*20,2,car.position.z+Math.cos(dir)*20);cam.lookAt(_ct);
+  if(!window._camX)window._camX=car.position.x;
+  window._camX+=(car.position.x-window._camX)*.015;
+  _cv.set(window._camX-Math.sin(dir+cTh)*14,7+cPh*4,car.position.z-Math.cos(dir+cTh)*14);
+  cam.position.lerp(_cv,.035);
+  _ct.set(window._camX+Math.sin(dir)*25,2,car.position.z+Math.cos(dir)*25);cam.lookAt(_ct);
 
 
   // Minimap render
