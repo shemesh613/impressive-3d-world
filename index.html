@@ -81,6 +81,14 @@
       display:none;color:#fff;font-size:clamp(12px,2.5vw,16px);text-align:center;
       background:rgba(0,0,0,.5);padding:6px 16px;border-radius:20px}
 
+    /* Friend notification */
+    #friendNotify{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;
+      font-size:clamp(20px,4vw,32px);font-weight:bold;text-align:center;pointer-events:none;
+      opacity:0;transition:opacity 0.3s;text-shadow:0 2px 8px rgba(0,0,0,.7)}
+    #friendNotify.show{opacity:1}
+    #friendNotify.lost{color:#ff4444}
+    #friendNotify.gained{color:#22ff66}
+
     /* Game Over */
     #gameOver{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;
       background:rgba(0,0,0,.88);backdrop-filter:blur(8px)}
@@ -160,6 +168,7 @@
 <!-- FOLLOWERS -->
 <!-- TIP -->
 <div id="tip" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:42;display:none;background:rgba(0,40,20,.9);border:1px solid rgba(74,222,128,.3);border-radius:16px;padding:10px 20px;color:#a7f3d0;font-size:clamp(13px,2.5vw,17px);text-align:center;max-width:400px;pointer-events:none;direction:rtl"></div>
+<div id="friendNotify"></div>
 <div id="followers" id="followersEl">🚗🚗🚗🚗🚗 חברים נוסעים אחריך!</div>
 
 <!-- LEVEL UP -->
@@ -1042,14 +1051,13 @@ addEventListener('keydown',e=>{keys[e.code]=true;if(scenarioActive){if(e.code===
 addEventListener('keyup',e=>{keys[e.code]=false});
 window._gkeys=keys;window._gcar=()=>typeof car!=='undefined'?car:null;
 
-// Screenshot mode: expose globals and auto-drive when ?auto=1
+// Screenshot mode: expose globals when ?auto=1 (no auto-drive)
 if(location.search.includes('auto=1')){
   window._autoMode=true;
   setTimeout(()=>{
     // Click start button
     document.querySelectorAll('button').forEach(b=>{if(b.textContent.includes('בואו'))b.click()});
-    // Start driving after 1s
-    setTimeout(()=>{keys['ArrowUp']=true},1000);
+    // Auto-drive disabled
     // Capture at various distances
     let captured=0;
     setInterval(()=>{
@@ -1222,9 +1230,25 @@ function startGame(){
 
 function restartGame(){document.getElementById('gameOver').style.display='none';startGame()}
 
+let _lastFriendCount=5;
+function notifyFriend(gained){
+  const el=document.getElementById('friendNotify');
+  if(!el)return;
+  el.className=gained?'show gained':'show lost';
+  el.textContent=gained?'🧒 +חבר חדש הצטרף!':'😢 חבר עזב...';
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>{el.className=''},1500);
+}
 function updateHUD(){
+  const curFriends=Math.max(0,Math.round(lives));
+  if(curFriends>_lastFriendCount)notifyFriend(true);
+  else if(curFriends<_lastFriendCount)notifyFriend(false);
+  _lastFriendCount=curFriends;
   document.getElementById('scoreVal').textContent=score;
-  document.getElementById('livesVal').textContent='🧒'.repeat(Math.max(0,Math.round(lives)))+(lives<5?' 😢'.repeat(5-Math.max(0,Math.round(lives))):'');
+  const friendsN=Math.max(0,Math.round(lives));
+  document.getElementById('livesVal').textContent='🧒'.repeat(friendsN)+(lives<5?' 😢'.repeat(5-friendsN):'');
+  const fEl=document.getElementById('followers');
+  if(fEl)fEl.textContent='🚗'.repeat(friendsN)+(friendsN>=5?' חברים נוסעים אחריך!':friendsN>0?' '+friendsN+' חברים נשארו... שמרו עליהם!':' 😢 אין חברים... נסו שוב!');
   document.getElementById('levelVal').textContent=level;
   document.getElementById('streakVal').textContent=streak>0?'🔥'.repeat(Math.min(streak,5)):'-';
   document.getElementById('flowFill').style.width=flow+'%';document.getElementById('distVal').textContent=Math.floor(car.position.z)+'m';
