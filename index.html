@@ -1248,7 +1248,7 @@ function animate(){
 
   if(gameActive&&!scenarioActive){
     const maxSpd=turboTimer>0?.5:boostTimer>0?.4:.28;
-    if(keys.ArrowUp||keys.KeyW||window._autoMode)spd=Math.min(maxSpd,spd+.014);
+    if(keys.ArrowUp||keys.KeyW)spd=Math.min(maxSpd,spd+.014);
     else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.12,spd-.012);
     else{spd*=.975;if(spd<.04)spd=.04}
 
