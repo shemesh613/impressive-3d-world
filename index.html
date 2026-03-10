@@ -45,7 +45,7 @@
     .hud-item .icon{font-size:clamp(16px,2.5vw,24px)}
     .hud-item .val{font-size:clamp(14px,2.5vw,22px);font-weight:900;color:#fff}
     #scoreVal{color:#4ade80}
-    #livesVal{color:#FF6B6B}
+    #livesVal{color:#60a5fa;font-size:13px}
     #flowVal{color:#fbbf24}
     #levelVal{color:#60a5fa}
     #flowBar{width:130px;height:14px;background:rgba(255,255,255,.12);border-radius:5px;overflow:hidden}
@@ -132,7 +132,7 @@
   <div class="hud-bar">
       <div class="hud-item"><span class="icon">&#9889;</span><span class="val" id="speedVal">0</span></div>
     <div class="hud-item"><span class="icon">🟢</span><span class="val" id="scoreVal">0</span></div>
-    <div class="hud-item"><span class="icon">❤️</span><span class="val" id="livesVal">3</span></div>
+    <div class="hud-item"><span class="icon">👫</span><span class="val" id="livesVal">🧒🧒🧒🧒🧒</span></div>
     <div class="hud-item"><span class="icon">🌊</span><div id="flowBar"><div id="flowFill"></div></div></div>
       <div class="hud-item" id="powerIndicator" style="display:none"><span class="icon" id="powerIcon">&#128737;</span><span class="val" id="powerTimer">0</span></div>
     <div class="hud-item"><span class="icon">🏆</span><span class="val" id="levelVal">1</span></div>
@@ -160,7 +160,7 @@
 <!-- FOLLOWERS -->
 <!-- TIP -->
 <div id="tip" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:42;display:none;background:rgba(0,40,20,.9);border:1px solid rgba(74,222,128,.3);border-radius:16px;padding:10px 20px;color:#a7f3d0;font-size:clamp(13px,2.5vw,17px);text-align:center;max-width:400px;pointer-events:none;direction:rtl"></div>
-<div id="followers" id="followersEl">🚗🚗🚗 חברים נוסעים אחריך!</div>
+<div id="followers" id="followersEl">🚗🚗🚗🚗🚗 חברים נוסעים אחריך!</div>
 
 <!-- LEVEL UP -->
 <div id="levelUp"><div class="box"><h2 id="levelUpText"></h2><p id="levelUpSub"></p></div></div>
@@ -477,6 +477,30 @@ scene.add((() => {
   barrierInst.instanceMatrix.needsUpdate=true;scene.add(barrierInst);
   window._barrierData={inst:barrierInst,data:barrierData,n:BARRIER_N};
 }
+
+// ---- RED DANGER EDGES ----
+{
+  const RED_EDGE_N=20;
+  const redEdgeGeo=new THREE.PlaneGeometry(1.5,25);
+  const redEdgeMat=new THREE.MeshBasicMaterial({color:0xff2222});
+  const redEdgeL=new THREE.InstancedMesh(redEdgeGeo,redEdgeMat,RED_EDGE_N);
+  const redEdgeR=new THREE.InstancedMesh(redEdgeGeo,redEdgeMat,RED_EDGE_N);
+  const redEdgeData=[];
+  for(let i=0;i<RED_EDGE_N;i++){
+    const z=200+i*140+Math.random()*40;
+    const rx=roadX(z);
+    redEdgeData.push({z:z,len:25});
+    dummy.rotation.order='YXZ';
+    const ca=Math.atan2(roadX(z+2)-roadX(z-2),4);
+    dummy.rotation.set(-Math.PI/2,ca,0);dummy.scale.setScalar(1);
+    dummy.position.set(rx-5,.025,z);dummy.updateMatrix();redEdgeL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(rx+5,.025,z);dummy.updateMatrix();redEdgeR.setMatrixAt(i,dummy.matrix);
+  }
+  redEdgeL.instanceMatrix.needsUpdate=true;redEdgeR.instanceMatrix.needsUpdate=true;
+  scene.add(redEdgeL);scene.add(redEdgeR);
+  window._redEdges={data:redEdgeData,n:RED_EDGE_N};
+}
+
 // ---- ROAD ARROWS (turn indicators) ----
 {
   const ARROW_N=20;
@@ -917,14 +941,17 @@ const car=new THREE.Group();
 scene.add(car);
 
 // ---- FOLLOWER CARS ----
-const FOLLOWER_N=3;
-const followerColors=[0x60a5fa,0xfbbf24,0xf472b6];
+const FOLLOWER_N=5;
+const followerColors=[0x60a5fa,0xfbbf24,0xf472b6,0xa78bfa,0x34d399];
 const followerInst=new THREE.InstancedMesh(new THREE.BoxGeometry(1.6,.5,3),new THREE.MeshBasicMaterial(),FOLLOWER_N);
 for(let i=0;i<FOLLOWER_N;i++){
   dummy.position.set(0,-100,0);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
   followerInst.setMatrixAt(i,dummy.matrix);followerInst.setColorAt(i,_col.setHex(followerColors[i]));
 }
-followerInst.instanceMatrix.needsUpdate=true;followerInst.instanceColor.needsUpdate=true;
+followerInst.instanceMatrix.needsUpdate=true;
+    const fEl=document.getElementById('followers');
+    const fn=Math.max(0,Math.round(lives));
+    fEl.textContent='🚗'.repeat(fn)+(fn>0?' חברים נוסעים אחריך!':' 😢 אין חברים...');followerInst.instanceColor.needsUpdate=true;
 followerInst.frustumCulled=false;scene.add(followerInst);
 const followerPos=[];
 for(let i=0;i<FOLLOWER_N;i++)followerPos.push({x:0,z:-(i+1)*6,y:.4});
@@ -1123,14 +1150,14 @@ function choose(type){
   scenariosAnswered++;
 
   if(isGreen){
-    greenCount++;score+=s.green.points;flow=Math.min(100,flow+20);boostTimer=120;streak++;if(streak>bestStreak)bestStreak=streak;
+    greenCount++;score+=s.green.points;flow=Math.min(100,flow+20);boostTimer=120;streak++;if(streak>bestStreak)bestStreak=streak;lives=Math.min(5,lives+0.5);
     sfxGreen();screenFlash("flash-green");
     emitParticles(car.position.x,2,car.position.z,0x22c55e,12);
     fbIcon.textContent='🟢';
     fbText.textContent=s.greenFeedback;
     fbText.style.color='#4ade80';
   } else {
-    redCount++;score+=s.red.points;streak=0;if(score<0)score=0;flow=Math.max(0,flow-8);spd*=.5;
+    redCount++;score+=s.red.points;streak=0;if(score<0)score=0;flow=Math.max(0,flow-8);spd*=.5;lives=Math.max(0,lives-0.7);
     sfxRed();screenFlash("flash-red");
     emitParticles(car.position.x,2,car.position.z,0xef4444,12);
     fbIcon.textContent='🔴';
@@ -1198,7 +1225,7 @@ function restartGame(){document.getElementById('gameOver').style.display='none';
 
 function updateHUD(){
   document.getElementById('scoreVal').textContent=score;
-  document.getElementById('livesVal').textContent='❤️'.repeat(Math.max(0,lives));
+  document.getElementById('livesVal').textContent='🧒'.repeat(Math.max(0,Math.round(lives)))+(lives<5?' 😢'.repeat(5-Math.max(0,Math.round(lives))):'');
   document.getElementById('levelVal').textContent=level;
   document.getElementById('streakVal').textContent=streak>0?'🔥'.repeat(Math.min(streak,5)):'-';
   document.getElementById('flowFill').style.width=flow+'%';document.getElementById('distVal').textContent=Math.floor(car.position.z)+'m';
@@ -1211,19 +1238,23 @@ function checkCollisions(){
   for(let i=greens.length-1;i>=0;i--){
     const g=greens[i];if(!g.active)continue;
     if((cx-g.x)**2+(cz-g.z)**2<5){
-      g.active=false;score+=8;flow=Math.min(100,flow+6);
+      g.active=false;score+=8;flow=Math.min(100,flow+6);lives=Math.min(5,lives+0.3);
       sfxCollect();emitParticles(g.x,g.y,g.z,0x22c55e,6);
       const proj=_v.set(g.x,g.y+1,g.z).project(cam);
       showPopup('🟢 תיקיה ירוקה — לזרום!',(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,'#4ade80');
       greens.splice(i,1);
     }
   }
+
+  // Red edge collision
+  if(window._redEdges){const re=window._redEdges;for(let i=0;i<re.n;i++){const rd=re.data[i];const dz=car.position.z-rd.z;if(dz>-12&&dz<12){const rx=roadX(rd.z);const dx=car.position.x-rx;if(Math.abs(dx)>4){lives=Math.max(0,lives-0.02);if(fc%30===0){sfxRed();emitParticles(car.position.x,.5,car.position.z,0xff2222,3)}if(lives<=0){gameActive=false;document.getElementById('finalScore').textContent=score;document.getElementById('finalGreen').textContent=greenCount;document.getElementById('finalRed').textContent=redCount;document.getElementById('finalStreak').textContent=bestStreak;document.getElementById('finalMsg').textContent='😢 כל החברים עזבו... ננסה שוב?';document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';document.getElementById('gameOver').style.display='flex';return}}}}}
+
 // Power-ups
   for(let i=powerups.length-1;i>=0;i--){    const p=powerups[i];if(!p.active)continue;    if((cx-p.x)**2+(cz-p.z)**2<3){      p.active=false;screenFlash("flash-gold");      sfxBoost();emitParticles(p.x,p.y,p.z,0xfbbf24,10);      const proj=_v.set(p.x,p.y+1,p.z).project(cam);      if(p.type==="shield"){shieldTimer=300;showPopup("🛡️ מגן!",(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,"#60a5fa")}      else{turboTimer=180;showPopup("⚡ טורבו!",(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,"#fbbf24")}      powerups.splice(i,1);    }  }
   for(let i=obstacles.length-1;i>=0;i--){
     const o=obstacles[i];if(!o.active)continue;
     if((cx-o.x)**2+(cz-o.z)**2<4){
-      o.active=false;if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,o.y,o.z,0x60a5fa,8);sfxCollect();obstacles.splice(i,1);continue}flow=Math.max(0,flow-4);spd*=.5;
+      o.active=false;if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,o.y,o.z,0x60a5fa,8);sfxCollect();obstacles.splice(i,1);continue}flow=Math.max(0,flow-4);spd*=.5;lives=Math.max(0,lives-0.5);
       sfxRed();screenFlash("flash-red");emitParticles(o.x,o.y,o.z,0xef4444,10);
       const proj=_v.set(o.x,o.y+1,o.z).project(cam);
       showPopup('🔴 תיקיה אדומה — להיתקע זה לא נעים!',(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,'#ef4444');
@@ -1234,7 +1265,7 @@ function checkCollisions(){
         document.getElementById('finalGreen').textContent=greenCount;
         document.getElementById('finalRed').textContent=redCount;
     document.getElementById('finalStreak').textContent=bestStreak;
-        document.getElementById('finalMsg').textContent='💥 אוי! נגמרו החיים — ננסה שוב?';
+        document.getElementById('finalMsg').textContent='😢 כל החברים עזבו... ננסה שוב?';
         document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';document.getElementById('gameOver').style.display='flex';return;
       }
       spawnObstacle();
@@ -1296,8 +1327,9 @@ function animate(){
       const target=i===0?car.position:{x:followerPos[i-1].x,z:followerPos[i-1].z};
       followerPos[i].x+=(target.x-followerPos[i].x)*.04;
       followerPos[i].z+=(target.z-6-followerPos[i].z)*.04;
-      dummy.position.set(followerPos[i].x,followerPos[i].y,followerPos[i].z);
-      dummy.scale.setScalar(1);dummy.rotation.set(0,dir*.5,0);dummy.updateMatrix();
+      const visible=i<Math.round(lives);
+      dummy.position.set(followerPos[i].x,visible?followerPos[i].y:-100,followerPos[i].z);
+      dummy.scale.setScalar(visible?1:0);dummy.rotation.set(0,dir*.5,0);dummy.updateMatrix();
       followerInst.setMatrixAt(i,dummy.matrix);
     }
     followerInst.instanceMatrix.needsUpdate=true;
@@ -1385,8 +1417,8 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
         if(o.z-car.position.z<25&&o.z>car.position.z){const _pr=_v.set(o.x,2,o.z).project(cam);if(_pr.z<1)showPopup('⚠️',((_pr.x*.5+.5)*innerWidth),((-_pr.y*.5+.5)*innerHeight),'#ffcc00')}
         if(Math.abs(car.position.x-o.x)<1.8&&Math.abs(car.position.z-o.z)<2.5){
           if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,1,o.z,0x60a5fa,8);o.active=false;}
-          else{lives--;flow=Math.max(0,flow-8);spd*=0.2;sfxRed();screenFlash("flash-red");emitParticles(o.x,1,o.z,0xff4444,12);o.active=false;
-            if(lives<=0){gameActive=false;document.getElementById('finalScore').textContent=score;document.getElementById('finalGreen').textContent=greenCount;document.getElementById('finalRed').textContent=redCount;document.getElementById('finalStreak').textContent=bestStreak;document.getElementById('finalMsg').textContent='התנגשת במכונית!';document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';document.getElementById('gameOver').style.display='flex';return;}
+          else{lives=Math.max(0,lives-1);flow=Math.max(0,flow-8);spd*=0.2;sfxRed();screenFlash("flash-red");emitParticles(o.x,1,o.z,0xff4444,12);o.active=false;
+            if(lives<=0){gameActive=false;document.getElementById('finalScore').textContent=score;document.getElementById('finalGreen').textContent=greenCount;document.getElementById('finalRed').textContent=redCount;document.getElementById('finalStreak').textContent=bestStreak;document.getElementById('finalMsg').textContent='😢 כל החברים עזבו... ננסה שוב?';document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';document.getElementById('gameOver').style.display='flex';return;}
           }
         }
       } else {
@@ -1426,7 +1458,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
         ct.roofInst.setMatrixAt(i,dummy.matrix);
         if(Math.abs(car.position.x-c.x)<1.8&&Math.abs(car.position.z-c.crossZ)<1.5){
           if(shieldTimer>0){shieldTimer=0;emitParticles(c.x,1,c.crossZ,0x60a5fa,8);c.active=false;}
-          else{lives--;flow=Math.max(0,flow-8);spd*=0.2;sfxRed();screenFlash("flash-red");emitParticles(c.x,1,c.crossZ,0xff4444,12);c.active=false;}
+          else{lives=Math.max(0,lives-1);flow=Math.max(0,flow-8);spd*=0.2;sfxRed();screenFlash("flash-red");emitParticles(c.x,1,c.crossZ,0xff4444,12);c.active=false;}
         }
       } else {
         dummy.position.set(0,-100,0);
