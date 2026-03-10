@@ -348,6 +348,7 @@ const _ct=new THREE.Vector3();
 const _col=new THREE.Color();
 
 // ---- ROAD CURVE FUNCTION ----
+function roadY(z){return Math.sin(z*.012)*3+Math.sin(z*.025)*1.5}
 function roadX(z){
   if(z<0)return 0;
   const s=z%600;
@@ -360,7 +361,7 @@ function roadX(z){
 // ---- GROUND ----
 scene.add((() => {
   const m=new THREE.Mesh(new THREE.PlaneGeometry(400,6000),new THREE.MeshBasicMaterial({color:0x0d1a2d}));
-  m.rotation.x=-Math.PI/2;return m;
+  m.rotation.x=-Math.PI/2;m.position.y=-5;return m;
 })());
 
 // ---- CURVED ROAD ----
@@ -376,15 +377,15 @@ scene.add((() => {
   const glowL=new THREE.InstancedMesh(glowGeo,glowMat,RSEGS);
   const glowR=new THREE.InstancedMesh(glowGeo,glowMat,RSEGS);
   for(let i=0;i<RSEGS;i++){
-    const z=-50+i*SLEN,zc=z+SLEN/2,x=roadX(zc);
-    const ca=Math.atan2(roadX(zc+2)-roadX(zc-2),4);
+    const z=-50+i*SLEN,zc=z+SLEN/2,x=roadX(zc),hy=roadY(zc);
+    const ca=Math.atan2(roadX(zc+2)-roadX(zc-2),4);const hillA=Math.atan2(roadY(zc+SLEN/2)-roadY(zc-SLEN/2),SLEN);
     const cosA=Math.cos(ca),sinA=Math.sin(ca);
-    dummy.rotation.order='YXZ';dummy.rotation.set(-Math.PI/2,ca,0);dummy.scale.setScalar(1);
-    dummy.position.set(x,.01,zc);dummy.updateMatrix();roadInst.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(x-5.2*cosA,.02,zc+5.2*sinA);dummy.updateMatrix();edgeL.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(x+5.2*cosA,.02,zc-5.2*sinA);dummy.updateMatrix();edgeR.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(x-6.8*cosA,.005,zc+6.8*sinA);dummy.updateMatrix();glowL.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(x+6.8*cosA,.005,zc-6.8*sinA);dummy.updateMatrix();glowR.setMatrixAt(i,dummy.matrix);
+    dummy.rotation.order='YXZ';dummy.rotation.set(-Math.PI/2+hillA,ca,0);dummy.scale.setScalar(1);
+    dummy.position.set(x,hy+.01,zc);dummy.updateMatrix();roadInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x-5.2*cosA,hy+.02,zc+5.2*sinA);dummy.updateMatrix();edgeL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x+5.2*cosA,hy+.02,zc-5.2*sinA);dummy.updateMatrix();edgeR.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x-6.8*cosA,hy+.005,zc+6.8*sinA);dummy.updateMatrix();glowL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x+6.8*cosA,hy+.005,zc-6.8*sinA);dummy.updateMatrix();glowR.setMatrixAt(i,dummy.matrix);
   }
   [roadInst,edgeL,edgeR,glowL,glowR].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});
 }
@@ -394,7 +395,7 @@ scene.add((() => {
   const g=new THREE.PlaneGeometry(.2,3);const m=new THREE.MeshBasicMaterial({color:0xfbbf24});
   const inst=new THREE.InstancedMesh(g,m,600);
   for(let i=0;i<600;i++){
-    const _z=-50+i*6;dummy.position.set(roadX(_z),.03,_z);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
+    const _z=-50+i*6;dummy.position.set(roadX(_z),roadY(_z)+.03,_z);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
     inst.setMatrixAt(i,dummy.matrix);
   }
   inst.instanceMatrix.needsUpdate=true;scene.add(inst);
@@ -409,7 +410,7 @@ scene.add((() => {
   const parkInst=new THREE.InstancedMesh(parkGeo,parkMat,parkN);
   for(let i=0;i<parkN;i++){
     const _pz=i*60+30;const side=i%2===0?roadX(_pz)-14:roadX(_pz)+14;
-    dummy.position.set(side,.02,_pz);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
+    dummy.position.set(side,roadY(_pz)+.02,_pz);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
     parkInst.setMatrixAt(i,dummy.matrix);
   }
   parkInst.instanceMatrix.needsUpdate=true;scene.add(parkInst);
@@ -423,7 +424,7 @@ scene.add((() => {
   const benchInst=new THREE.InstancedMesh(benchGeo,benchMat,benchN);
   for(let i=0;i<benchN;i++){
     const _bz=i*60+32;const side=i%2===0?roadX(_bz)-13:roadX(_bz)+13;
-    dummy.position.set(side,.25,_bz);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    dummy.position.set(side,roadY(_bz)+.25,_bz);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
     benchInst.setMatrixAt(i,dummy.matrix);
   }
   benchInst.instanceMatrix.needsUpdate=true;scene.add(benchInst);
@@ -436,8 +437,8 @@ scene.add((() => {
   const swR=new THREE.InstancedMesh(new THREE.BoxGeometry(1.2,.15,SW_LEN),swMat,SW_SEGS);
   for(let i=0;i<SW_SEGS;i++){
     const z=-50+i*SW_LEN,rx=roadX(z+SW_LEN/2);
-    dummy.position.set(rx-5.8,.08,z+SW_LEN/2);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();swL.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(rx+5.8,.08,z+SW_LEN/2);dummy.updateMatrix();swR.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(rx-5.8,roadY(z+SW_LEN/2)+.08,z+SW_LEN/2);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();swL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(rx+5.8,roadY(z+SW_LEN/2)+.08,z+SW_LEN/2);dummy.updateMatrix();swR.setMatrixAt(i,dummy.matrix);
   }
   swL.instanceMatrix.needsUpdate=true;swR.instanceMatrix.needsUpdate=true;scene.add(swL);scene.add(swR);
 }
@@ -454,16 +455,16 @@ scene.add((() => {
   for(let i=0;i<signN;i++){
     const x=i%2===0?-5.5:5.5;
     const z=i*160+80;
-    dummy.position.set(x,1.25,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    dummy.position.set(x,roadY(z)+1.25,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
     poleInst.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(x,2.7,z);dummy.updateMatrix();
+    dummy.position.set(x,roadY(z)+2.7,z);dummy.updateMatrix();
     signInst.setMatrixAt(i,dummy.matrix);
   }
   poleInst.instanceMatrix.needsUpdate=true;signInst.instanceMatrix.needsUpdate=true;
   scene.add(poleInst);scene.add(signInst);
 }
 // ---- TRAFFIC LIGHTS ----
-{  const TL_N=15;  const tlPoleGeo=new THREE.CylinderGeometry(.06,.06,4,6);  const tlPoleMat=new THREE.MeshBasicMaterial({color:0x444444});  const tlPoleInst=new THREE.InstancedMesh(tlPoleGeo,tlPoleMat,TL_N);  const tlBoxGeo=new THREE.BoxGeometry(.5,1.2,.3);  const tlBoxMat=new THREE.MeshBasicMaterial({color:0x222222});  const tlBoxInst=new THREE.InstancedMesh(tlBoxGeo,tlBoxMat,TL_N);  const tlLightGeo=new THREE.SphereGeometry(.15,8,8);  const tlRedMat=new THREE.MeshBasicMaterial({color:0xff0000});  const tlYelMat=new THREE.MeshBasicMaterial({color:0xffcc00});  const tlGrnMat=new THREE.MeshBasicMaterial({color:0x00ff00});  const tlRedInst=new THREE.InstancedMesh(tlLightGeo,tlRedMat,TL_N);  const tlYelInst=new THREE.InstancedMesh(tlLightGeo,tlYelMat,TL_N);  const tlGrnInst=new THREE.InstancedMesh(tlLightGeo,tlGrnMat,TL_N);  const tlPositions=[];  for(let i=0;i<TL_N;i++){    const side=i%2===0?-4.5:4.5;    const z=i*200+100;    tlPositions.push({x:side,z:z});    dummy.position.set(side,2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    tlPoleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,4.2,z);dummy.updateMatrix();    tlBoxInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,4.55,z);dummy.updateMatrix();tlRedInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,4.2,z);dummy.updateMatrix();tlYelInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,3.85,z);dummy.updateMatrix();tlGrnInst.setMatrixAt(i,dummy.matrix);  }  tlPoleInst.instanceMatrix.needsUpdate=true;tlBoxInst.instanceMatrix.needsUpdate=true;  tlRedInst.instanceMatrix.needsUpdate=true;tlYelInst.instanceMatrix.needsUpdate=true;tlGrnInst.instanceMatrix.needsUpdate=true;  scene.add(tlPoleInst);scene.add(tlBoxInst);scene.add(tlRedInst);scene.add(tlYelInst);scene.add(tlGrnInst);  window._tlData={redInst:tlRedInst,yelInst:tlYelInst,grnInst:tlGrnInst,positions:tlPositions,n:TL_N};
+{  const TL_N=15;  const tlPoleGeo=new THREE.CylinderGeometry(.06,.06,4,6);  const tlPoleMat=new THREE.MeshBasicMaterial({color:0x444444});  const tlPoleInst=new THREE.InstancedMesh(tlPoleGeo,tlPoleMat,TL_N);  const tlBoxGeo=new THREE.BoxGeometry(.5,1.2,.3);  const tlBoxMat=new THREE.MeshBasicMaterial({color:0x222222});  const tlBoxInst=new THREE.InstancedMesh(tlBoxGeo,tlBoxMat,TL_N);  const tlLightGeo=new THREE.SphereGeometry(.15,8,8);  const tlRedMat=new THREE.MeshBasicMaterial({color:0xff0000});  const tlYelMat=new THREE.MeshBasicMaterial({color:0xffcc00});  const tlGrnMat=new THREE.MeshBasicMaterial({color:0x00ff00});  const tlRedInst=new THREE.InstancedMesh(tlLightGeo,tlRedMat,TL_N);  const tlYelInst=new THREE.InstancedMesh(tlLightGeo,tlYelMat,TL_N);  const tlGrnInst=new THREE.InstancedMesh(tlLightGeo,tlGrnMat,TL_N);  const tlPositions=[];  for(let i=0;i<TL_N;i++){    const side=i%2===0?-4.5:4.5;    const z=i*200+100;    tlPositions.push({x:side,z:z});    dummy.position.set(side,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    tlPoleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,4.2,z);dummy.updateMatrix();    tlBoxInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.55,z);dummy.updateMatrix();tlRedInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,4.2,z);dummy.updateMatrix();tlYelInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+3.85,z);dummy.updateMatrix();tlGrnInst.setMatrixAt(i,dummy.matrix);  }  tlPoleInst.instanceMatrix.needsUpdate=true;tlBoxInst.instanceMatrix.needsUpdate=true;  tlRedInst.instanceMatrix.needsUpdate=true;tlYelInst.instanceMatrix.needsUpdate=true;tlGrnInst.instanceMatrix.needsUpdate=true;  scene.add(tlPoleInst);scene.add(tlBoxInst);scene.add(tlRedInst);scene.add(tlYelInst);scene.add(tlGrnInst);  window._tlData={redInst:tlRedInst,yelInst:tlYelInst,grnInst:tlGrnInst,positions:tlPositions,n:TL_N};
 }
 // ---- FLOATING BALLOONS ----
 {  const BLN_N=25;const blnColors=[0xff6b9d,0x4ecdc4,0xffe66d,0xa855f7,0x06b6d4,0xf97316];  const blnGeo=new THREE.SphereGeometry(.6,8,8);  const blnMat=new THREE.MeshBasicMaterial({color:0xffffff});  const blnInst=new THREE.InstancedMesh(blnGeo,blnMat,BLN_N);  blnInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(BLN_N*3),3);  const blnData=[];  const _bc=new THREE.Color();  for(let i=0;i<BLN_N;i++){    const x=-20+Math.random()*40;    const z=Math.random()*2500;    const baseY=10+Math.random()*8;    blnData.push({x,z,baseY,phase:Math.random()*Math.PI*2,spd:.01+Math.random()*.02});    _bc.setHex(blnColors[i%blnColors.length]);    blnInst.instanceColor.setXYZ(i,_bc.r,_bc.g,_bc.b);    dummy.position.set(x,baseY,z);dummy.scale.setScalar(.8+Math.random()*.5);dummy.rotation.set(0,0,0);dummy.updateMatrix();    blnInst.setMatrixAt(i,dummy.matrix);  }  blnInst.instanceMatrix.needsUpdate=true;blnInst.instanceColor.needsUpdate=true;  scene.add(blnInst);  window._blnData={inst:blnInst,data:blnData,n:BLN_N};}
@@ -480,7 +481,7 @@ scene.add((() => {
     const _brx=roadX(z);const side=_brx+(i%3===0?-3:(i%3===1?3:0));
     const width=i%3===2?1.5:3;
     barrierData.push({x:side,z:z,w:width});
-    dummy.position.set(side,.4,z);dummy.scale.set(width/3,1,1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    dummy.position.set(side,roadY(z)+.4,z);dummy.scale.set(width/3,1,1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
     barrierInst.setMatrixAt(i,dummy.matrix);
   }
   barrierInst.instanceMatrix.needsUpdate=true;scene.add(barrierInst);
@@ -502,8 +503,8 @@ scene.add((() => {
     dummy.rotation.order='YXZ';
     const ca=Math.atan2(roadX(z+2)-roadX(z-2),4);
     dummy.rotation.set(-Math.PI/2,ca,0);dummy.scale.setScalar(1);
-    dummy.position.set(rx-5,.025,z);dummy.updateMatrix();redEdgeL.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(rx+5,.025,z);dummy.updateMatrix();redEdgeR.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(rx-5,roadY(z)+.025,z);dummy.updateMatrix();redEdgeL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(rx+5,roadY(z)+.025,z);dummy.updateMatrix();redEdgeR.setMatrixAt(i,dummy.matrix);
   }
   redEdgeL.instanceMatrix.needsUpdate=true;redEdgeR.instanceMatrix.needsUpdate=true;
   scene.add(redEdgeL);scene.add(redEdgeR);
@@ -519,7 +520,7 @@ scene.add((() => {
   for(let i=0;i<ARROW_N;i++){
     const z=130+i*120;
     const side=i%3===0?1:(i%3===1?-1:0);
-    dummy.position.set(roadX(z)+side*2,2.5,z);dummy.rotation.set(0,0,side*Math.PI/2);dummy.scale.setScalar(1);dummy.updateMatrix();
+    dummy.position.set(roadX(z)+side*2,roadY(z)+2.5,z);dummy.rotation.set(0,0,side*Math.PI/2);dummy.scale.setScalar(1);dummy.updateMatrix();
     arrowInst.setMatrixAt(i,dummy.matrix);
   }
   arrowInst.instanceMatrix.needsUpdate=true;scene.add(arrowInst);
@@ -531,7 +532,7 @@ scene.add((() => {
   const bumpMat=new THREE.MeshBasicMaterial({color:0xffdd00});
   const bumpInst=new THREE.InstancedMesh(bumpGeo,bumpMat,BUMP_N);
   for(let i=0;i<BUMP_N;i++){
-    dummy.position.set(roadX(200+i*250),.15,200+i*250);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    const _bz=200+i*250;dummy.position.set(roadX(_bz),roadY(_bz)+.15,_bz);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
     bumpInst.setMatrixAt(i,dummy.matrix);
   }
   bumpInst.instanceMatrix.needsUpdate=true;scene.add(bumpInst);
@@ -551,14 +552,14 @@ scene.add((() => {
   const sideRoadL=new THREE.InstancedMesh(sideRoadGeo,sideRoadMat,crossN);
   const sideRoadR=new THREE.InstancedMesh(sideRoadGeo,sideRoadMat,crossN);
   for(let i=0;i<crossN;i++){
-    const z=70+i*80,x=roadX(z);
+    const z=70+i*80,x=roadX(z),ihy=roadY(z);
     dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);
-    dummy.position.set(x,.013,z);dummy.updateMatrix();crossInst.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(x-12,.011,z);dummy.rotation.set(-Math.PI/2,0,Math.PI/2);dummy.updateMatrix();sideRoadL.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(x+12,.011,z);dummy.updateMatrix();sideRoadR.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x,ihy+.013,z);dummy.updateMatrix();crossInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x-12,ihy+.011,z);dummy.rotation.set(-Math.PI/2,0,Math.PI/2);dummy.updateMatrix();sideRoadL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x+12,ihy+.011,z);dummy.updateMatrix();sideRoadR.setMatrixAt(i,dummy.matrix);
     for(let j=0;j<10;j++){
       dummy.rotation.set(-Math.PI/2,0,0);
-      dummy.position.set(x-4.5+j*1,.025,z);dummy.updateMatrix();
+      dummy.position.set(x-4.5+j*1,ihy+.025,z);dummy.updateMatrix();
       zebraInst.setMatrixAt(i*10+j,dummy.matrix);
     }
   }
@@ -609,12 +610,12 @@ scene.add((() => {
   for(let i=0;i<CMARK_N;i++){
     const z=i*30;
     const curve=roadX(z);
-    dummy.position.set(-5+curve,0.02,z);
+    dummy.position.set(-5+curve,roadY(z)+0.02,z);
     dummy.scale.setScalar(1);
     dummy.rotation.set(-Math.PI/2,0,0);
     dummy.updateMatrix();
     cmarkLInst.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(5+curve,0.02,z);
+    dummy.position.set(5+curve,roadY(z)+0.02,z);
     dummy.updateMatrix();
     cmarkRInst.setMatrixAt(i,dummy.matrix);
   }
@@ -711,20 +712,20 @@ scene.add((() => {
   const _sc=new THREE.Color();
   for(let i=0;i<SHOP_N;i++){
     const z=50+i*80;
-    const side=i%2===0?roadX(z)-8.5:roadX(z)+8.5;
+    const side=i%2===0?roadX(z)-8.5:roadX(z)+8.5;const _shy=roadY(z);
     _sc.setHex(shopColors[i%shopColors.length]);
     awningInst.instanceColor.setXYZ(i,_sc.r,_sc.g,_sc.b);
     shopLightInst.instanceColor.setXYZ(i,_sc.r,_sc.g,_sc.b);
-    dummy.position.set(side,3.2,z);
+    dummy.position.set(side,_shy+3.2,z);
     dummy.scale.setScalar(1);
     dummy.rotation.set(0.15*(i%2===0?1:-1),0,0);
     dummy.updateMatrix();
     awningInst.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(side,2,z);
+    dummy.position.set(side,_shy+2,z);
     dummy.rotation.set(0,0,0);
     dummy.updateMatrix();
     shopFrontInst.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(side,3.5,z);
+    dummy.position.set(side,_shy+3.5,z);
     dummy.scale.setScalar(1);
     dummy.updateMatrix();
     shopLightInst.setMatrixAt(i,dummy.matrix);
@@ -781,29 +782,29 @@ scene.add((() => {
   const archMat=new THREE.MeshBasicMaterial({color:0x7799bb});
   const archInst=new THREE.InstancedMesh(archGeo,archMat,BRIDGE_N*2);
   for(let i=0;i<BRIDGE_N;i++){
-    const z=800+i*700;const _brx=roadX(z);
-    dummy.position.set(_brx,6.8,z);
+    const z=800+i*700;const _brx=roadX(z);const _bhy=roadY(z);
+    dummy.position.set(_brx,_bhy+6.8,z);
     dummy.scale.setScalar(1);
     dummy.rotation.set(0,0,0);
     dummy.updateMatrix();
     bridgeDeckInst.setMatrixAt(i,dummy.matrix);
     const pillars=[[_brx-6,z-1.5],[_brx-6,z+1.5],[_brx+6,z-1.5],[_brx+6,z+1.5]];
     for(let j=0;j<4;j++){
-      dummy.position.set(pillars[j][0],3.5,pillars[j][1]);
+      dummy.position.set(pillars[j][0],_bhy+3.5,pillars[j][1]);
       dummy.updateMatrix();
       pillarInst.setMatrixAt(i*4+j,dummy.matrix);
     }
-    dummy.position.set(_brx,7.2,z-1.8);
+    dummy.position.set(_brx,_bhy+7.2,z-1.8);
     dummy.updateMatrix();
     railInst.setMatrixAt(i*2,dummy.matrix);
-    dummy.position.set(_brx,7.2,z+1.8);
+    dummy.position.set(_brx,_bhy+7.2,z+1.8);
     dummy.updateMatrix();
     railInst.setMatrixAt(i*2+1,dummy.matrix);
-    dummy.position.set(_brx-6,6.8,z);
+    dummy.position.set(_brx-6,_bhy+6.8,z);
     dummy.rotation.set(0,Math.PI/2,0);
     dummy.updateMatrix();
     archInst.setMatrixAt(i*2,dummy.matrix);
-    dummy.position.set(_brx+6,6.8,z);
+    dummy.position.set(_brx+6,_bhy+6.8,z);
     dummy.updateMatrix();
     archInst.setMatrixAt(i*2+1,dummy.matrix);
   }
@@ -856,20 +857,20 @@ scene.add((() => {
   const tunnelPositions=[];
   for(let i=0;i<TUNNEL_N;i++){
     const z=400+i*600;
-    tunnelPositions.push(z);const _trx=roadX(z);
-    dummy.position.set(_trx-6,2.5,z);
+    tunnelPositions.push(z);const _trx=roadX(z);const _thy=roadY(z);
+    dummy.position.set(_trx-6,_thy+2.5,z);
     dummy.scale.setScalar(1);
     dummy.rotation.set(0,0,0);
     dummy.updateMatrix();
     tunnelLWall.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(_trx+6,2.5,z);
+    dummy.position.set(_trx+6,_thy+2.5,z);
     dummy.updateMatrix();
     tunnelRWall.setMatrixAt(i,dummy.matrix);
-    dummy.position.set(_trx,5,z);
+    dummy.position.set(_trx,_thy+5,z);
     dummy.updateMatrix();
     tunnelRoof.setMatrixAt(i,dummy.matrix);
     for(let j=0;j<LIGHTS_PER_TUNNEL;j++){
-      dummy.position.set(_trx,4.7,z-8+j*5.3);
+      dummy.position.set(_trx,_thy+4.7,z-8+j*5.3);
       dummy.scale.setScalar(1);
       dummy.updateMatrix();
       tunnelLightInst.setMatrixAt(i*LIGHTS_PER_TUNNEL+j,dummy.matrix);
@@ -902,7 +903,7 @@ for(let z=-100;z<=2800;z+=10){
   function biomeColor(z,i){const idx=((Math.floor(z/500)%biomes.length)+biomes.length)%biomes.length;const b=biomes[idx];return b[i%b.length]}
   const colors=[0x22c55e,0x10b981,0x059669,0x34d399,0x6ee7b7,0x14b8a6,0x0d9488,0x2dd4bf];
   bdata.forEach((b,i)=>{
-    dummy.position.set(b[0],b[3]/2,b[1]);dummy.scale.set(b[2],b[3],b[4]);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    dummy.position.set(b[0],roadY(b[1])+b[3]/2,b[1]);dummy.scale.set(b[2],b[3],b[4]);dummy.rotation.set(0,0,0);dummy.updateMatrix();
     inst.setMatrixAt(i,dummy.matrix);inst.setColorAt(i,_col.setHex(biomeColor(b[1],i)));
   });
   inst.instanceMatrix.needsUpdate=true;inst.instanceColor.needsUpdate=true;scene.add(inst);
@@ -919,7 +920,7 @@ for(let z=-100;z<=2800;z+=10){
 }
 
 // ---- TREES (lollipop style) ----
-{  const trunkGeo=new THREE.CylinderGeometry(.15,.2,2,5);  const trunkMat=new THREE.MeshBasicMaterial({color:0x5c4033});  const leafGeo=new THREE.SphereGeometry(1.2,6,5);  const leafColors=[0x16a34a,0x22c55e,0x15803d,0x4ade80,0x86efac];  const treePositions=[];  for(let z=-80;z<=2800;z+=12){    const _trx=roadX(z);if(Math.random()>.35)treePositions.push([_trx-8+(Math.random()-.5)*2,z]);    if(Math.random()>.35)treePositions.push([_trx+8+(Math.random()-.5)*2,z]);  }  const trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,treePositions.length);  const leafInst=new THREE.InstancedMesh(leafGeo,new THREE.MeshBasicMaterial(),treePositions.length);  treePositions.forEach(([x,z],i)=>{    dummy.position.set(x,1,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    trunkInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,3+Math.random()*.5,z);dummy.scale.setScalar(.7+Math.random()*.5);dummy.updateMatrix();    leafInst.setMatrixAt(i,dummy.matrix);leafInst.setColorAt(i,_col.setHex(leafColors[i%leafColors.length]));  });  trunkInst.instanceMatrix.needsUpdate=true;leafInst.instanceMatrix.needsUpdate=true;  if(leafInst.instanceColor)leafInst.instanceColor.needsUpdate=true;  scene.add(trunkInst);scene.add(leafInst);}// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=2800;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshBasicMaterial({color:0x888888});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.25,4,4);  const glowMat2=new THREE.MeshBasicMaterial({color:0xffffaa});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
+{  const trunkGeo=new THREE.CylinderGeometry(.15,.2,2,5);  const trunkMat=new THREE.MeshBasicMaterial({color:0x5c4033});  const leafGeo=new THREE.SphereGeometry(1.2,6,5);  const leafColors=[0x16a34a,0x22c55e,0x15803d,0x4ade80,0x86efac];  const treePositions=[];  for(let z=-80;z<=2800;z+=12){    const _trx=roadX(z);if(Math.random()>.35)treePositions.push([_trx-8+(Math.random()-.5)*2,z]);    if(Math.random()>.35)treePositions.push([_trx+8+(Math.random()-.5)*2,z]);  }  const trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,treePositions.length);  const leafInst=new THREE.InstancedMesh(leafGeo,new THREE.MeshBasicMaterial(),treePositions.length);  treePositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+1,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    trunkInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+3+Math.random()*.5,z);dummy.scale.setScalar(.7+Math.random()*.5);dummy.updateMatrix();    leafInst.setMatrixAt(i,dummy.matrix);leafInst.setColorAt(i,_col.setHex(leafColors[i%leafColors.length]));  });  trunkInst.instanceMatrix.needsUpdate=true;leafInst.instanceMatrix.needsUpdate=true;  if(leafInst.instanceColor)leafInst.instanceColor.needsUpdate=true;  scene.add(trunkInst);scene.add(leafInst);}// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=2800;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshBasicMaterial({color:0x888888});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.25,4,4);  const glowMat2=new THREE.MeshBasicMaterial({color:0xffffaa});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
 // Sky + Stars + Moon
 // ---- CLOUDS ----
 const cloudGeo=new THREE.SphereGeometry(1,6,4);const cloudMat=new THREE.MeshBasicMaterial({color:0x1a3a2a,transparent:true,opacity:.4});const CLOUD_N=20;const cloudInst=new THREE.InstancedMesh(cloudGeo,cloudMat,CLOUD_N);const cloudData=[];for(let i=0;i<CLOUD_N;i++){cloudData.push({x:(Math.random()-.5)*80,y:18+Math.random()*12,z:Math.random()*400-50,sx:2+Math.random()*3,sy:.5+Math.random()*.3,sz:1+Math.random()*1.5,spd:.002+Math.random()*.003})}function updateClouds(){cloudData.forEach((c,i)=>{c.x+=c.spd;if(c.x>50)c.x=-50;dummy.position.set(c.x,c.y,c.z);dummy.scale.set(c.sx,c.sy,c.sz);dummy.rotation.set(0,0,0);dummy.updateMatrix();cloudInst.setMatrixAt(i,dummy.matrix)});cloudInst.instanceMatrix.needsUpdate=true}updateClouds();scene.add(cloudInst);
@@ -1220,7 +1221,7 @@ function startGame(){
   score=0;lives=5;level=1;flow=85;greenCount=0;redCount=0;streak=0;bestStreak=0;
   spd=0;dir=0;boostTimer=0;shieldTimer=0;turboTimer=0;lastMilestone=0;scenarioActive=false;scenariosAnswered=0;
   usedScenarios=[];nextScenarioAt=100;
-  car.position.set(0,0,0);
+  car.position.set(0,roadY(0),0);
   greens.length=0;obstacles.length=0;powerups.length=0;particles.length=0;
   for(let i=0;i<FOLLOWER_N;i++){followerPos[i].x=0;followerPos[i].z=-(i+1)*6}
   spawnGreen();
@@ -1322,6 +1323,9 @@ function animate(){
     car.rotation.y=dir+curveAngle;
     car.position.x+=Math.sin(dir)*spd;
     car.position.z+=Math.cos(dir)*spd;
+    car.position.y=roadY(car.position.z);
+    const hillSlope=Math.atan2(roadY(car.position.z+2)-roadY(car.position.z-2),4);
+    car.rotation.x=-hillSlope;
 
     const roadCurve=curX;
     const leftEdge=-3.5+roadCurve;
@@ -1351,7 +1355,7 @@ function animate(){
       followerPos[i].x+=(target.x-followerPos[i].x)*.04;
       followerPos[i].z+=(target.z-6-followerPos[i].z)*.04;
       const visible=i<Math.round(lives);
-      dummy.position.set(followerPos[i].x,visible?followerPos[i].y:-100,followerPos[i].z);
+      dummy.position.set(followerPos[i].x,visible?roadY(followerPos[i].z)+followerPos[i].y:-100,followerPos[i].z);
       dummy.scale.setScalar(visible?1:0);dummy.rotation.set(0,dir*.5,0);dummy.updateMatrix();
       followerInst.setMatrixAt(i,dummy.matrix);
     }
@@ -1366,11 +1370,12 @@ function animate(){
     for(let i=powerups.length-1;i>=0;i--){if(powerups[i].z<car.position.z-50)powerups.splice(i,1)}
 
     // Bob greens & powerups
-    for(let i=0;i<greens.length;i++){greens[i].y=3+Math.sin(fc*.05+i)*.5}
-if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i].active){dummy.position.set(greens[i].x,1.5,greens[i].z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();window._beamInst.setMatrixAt(i,dummy.matrix)}else{dummy.position.set(0,-100,0);dummy.scale.setScalar(0);dummy.updateMatrix();window._beamInst.setMatrixAt(i,dummy.matrix)}}window._beamInst.instanceMatrix.needsUpdate=true}
-    if(window._ringInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i].active){const pulse=1+Math.sin(fc*0.08+i)*0.3;dummy.position.set(greens[i].x,0.1,greens[i].z);dummy.scale.setScalar(pulse);dummy.rotation.set(-Math.PI/2,0,fc*0.02+i);dummy.updateMatrix();window._ringInst.setMatrixAt(i,dummy.matrix)}else{dummy.position.set(0,-100,0);dummy.scale.setScalar(0);dummy.updateMatrix();window._ringInst.setMatrixAt(i,dummy.matrix)}}window._ringInst.instanceMatrix.needsUpdate=true}
-    if(window._obsRingInst){for(let i=0;i<MAX_OBS;i++){if(i<obstacles.length&&obstacles[i].active){dummy.position.set(obstacles[i].x,0.1,obstacles[i].z);dummy.scale.setScalar(1+Math.sin(fc*0.1+i)*0.2);dummy.rotation.set(-Math.PI/2,0,fc*0.03);dummy.updateMatrix();window._obsRingInst.setMatrixAt(i,dummy.matrix)}else{dummy.position.set(0,-100,0);dummy.scale.setScalar(0);dummy.updateMatrix();window._obsRingInst.setMatrixAt(i,dummy.matrix)}}window._obsRingInst.instanceMatrix.needsUpdate=true}
-    for(let i=0;i<powerups.length;i++){powerups[i].y=2.5+Math.sin(fc*.06+i)*.6}
+    for(let i=0;i<greens.length;i++){greens[i].y=roadY(greens[i].z)+3+Math.sin(fc*.05+i)*.5}
+if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i].active){dummy.position.set(greens[i].x,roadY(greens[i].z)+1.5,greens[i].z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();window._beamInst.setMatrixAt(i,dummy.matrix)}else{dummy.position.set(0,-100,0);dummy.scale.setScalar(0);dummy.updateMatrix();window._beamInst.setMatrixAt(i,dummy.matrix)}}window._beamInst.instanceMatrix.needsUpdate=true}
+    if(window._ringInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i].active){const pulse=1+Math.sin(fc*0.08+i)*0.3;dummy.position.set(greens[i].x,roadY(greens[i].z)+0.1,greens[i].z);dummy.scale.setScalar(pulse);dummy.rotation.set(-Math.PI/2,0,fc*0.02+i);dummy.updateMatrix();window._ringInst.setMatrixAt(i,dummy.matrix)}else{dummy.position.set(0,-100,0);dummy.scale.setScalar(0);dummy.updateMatrix();window._ringInst.setMatrixAt(i,dummy.matrix)}}window._ringInst.instanceMatrix.needsUpdate=true}
+    if(window._obsRingInst){for(let i=0;i<MAX_OBS;i++){if(i<obstacles.length&&obstacles[i].active){dummy.position.set(obstacles[i].x,roadY(obstacles[i].z)+0.1,obstacles[i].z);dummy.scale.setScalar(1+Math.sin(fc*0.1+i)*0.2);dummy.rotation.set(-Math.PI/2,0,fc*0.03);dummy.updateMatrix();window._obsRingInst.setMatrixAt(i,dummy.matrix)}else{dummy.position.set(0,-100,0);dummy.scale.setScalar(0);dummy.updateMatrix();window._obsRingInst.setMatrixAt(i,dummy.matrix)}}window._obsRingInst.instanceMatrix.needsUpdate=true}
+    for(let i=0;i<powerups.length;i++){powerups[i].y=roadY(powerups[i].z)+2.5+Math.sin(fc*.06+i)*.6}
+    for(let i=0;i<obstacles.length;i++){obstacles[i].y=roadY(obstacles[i].z)+.7}
 
     checkCollisions();
 
@@ -1418,7 +1423,7 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
     spd*=.95; // slow down during scenario
   }
 
-  if(window._tlData){const tld=window._tlData;const cycle=Math.floor(fc/120)%3;for(let i=0;i<tld.n;i++){const ph=(cycle+(i%3))%3;dummy.scale.setScalar(ph===0?1:.3);dummy.position.set(tld.positions[i].x,4.55,tld.positions[i].z);dummy.rotation.set(0,0,0);dummy.updateMatrix();tld.redInst.setMatrixAt(i,dummy.matrix);dummy.scale.setScalar(ph===1?1:.3);dummy.position.set(tld.positions[i].x,4.2,tld.positions[i].z);dummy.updateMatrix();tld.yelInst.setMatrixAt(i,dummy.matrix);dummy.scale.setScalar(ph===2?1:.3);dummy.position.set(tld.positions[i].x,3.85,tld.positions[i].z);dummy.updateMatrix();tld.grnInst.setMatrixAt(i,dummy.matrix)}tld.redInst.instanceMatrix.needsUpdate=true;tld.yelInst.instanceMatrix.needsUpdate=true;tld.grnInst.instanceMatrix.needsUpdate=true}
+  if(window._tlData){const tld=window._tlData;const cycle=Math.floor(fc/120)%3;for(let i=0;i<tld.n;i++){const ph=(cycle+(i%3))%3;dummy.scale.setScalar(ph===0?1:.3);dummy.position.set(tld.positions[i].x,roadY(tld.positions[i].z)+4.55,tld.positions[i].z);dummy.rotation.set(0,0,0);dummy.updateMatrix();tld.redInst.setMatrixAt(i,dummy.matrix);dummy.scale.setScalar(ph===1?1:.3);dummy.position.set(tld.positions[i].x,roadY(tld.positions[i].z)+4.2,tld.positions[i].z);dummy.updateMatrix();tld.yelInst.setMatrixAt(i,dummy.matrix);dummy.scale.setScalar(ph===2?1:.3);dummy.position.set(tld.positions[i].x,roadY(tld.positions[i].z)+3.85,tld.positions[i].z);dummy.updateMatrix();tld.grnInst.setMatrixAt(i,dummy.matrix)}tld.redInst.instanceMatrix.needsUpdate=true;tld.yelInst.instanceMatrix.needsUpdate=true;tld.grnInst.instanceMatrix.needsUpdate=true}
 if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.data[i];dummy.position.set(b.x+Math.sin(fc*.008+b.phase)*2,b.baseY+Math.sin(fc*b.spd+b.phase)*3,b.z);dummy.scale.setScalar(.8+Math.sin(fc*.01+b.phase)*.2);dummy.rotation.set(0,fc*.005,0);dummy.updateMatrix();bd.inst.setMatrixAt(i,dummy.matrix)}bd.inst.instanceMatrix.needsUpdate=true}
 
 
@@ -1432,9 +1437,9 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
         activeCount++;
         o.z-=o.spd;
         if(o.z<car.position.z-40){o.active=false;}
-        dummy.position.set(o.x,0.6,o.z);dummy.scale.setScalar(1);dummy.rotation.set(0,Math.PI,0);dummy.updateMatrix();
+        dummy.position.set(o.x,roadY(o.z)+0.6,o.z);dummy.scale.setScalar(1);dummy.rotation.set(0,Math.PI,0);dummy.updateMatrix();
         od.bodyInst.setMatrixAt(i,dummy.matrix);
-        dummy.position.set(o.x,1.15,o.z);dummy.updateMatrix();od.roofInst.setMatrixAt(i,dummy.matrix);
+        dummy.position.set(o.x,roadY(o.z)+1.15,o.z);dummy.updateMatrix();od.roofInst.setMatrixAt(i,dummy.matrix);
         dummy.position.set(o.x-0.5,0.6,o.z+1.6);dummy.scale.setScalar(1.2);dummy.updateMatrix();od.lightInst.setMatrixAt(i*2,dummy.matrix);
         dummy.position.set(o.x+0.5,0.6,o.z+1.6);dummy.updateMatrix();od.lightInst.setMatrixAt(i*2+1,dummy.matrix);
         if(o.z-car.position.z<25&&o.z>car.position.z){const _pr=_v.set(o.x,2,o.z).project(cam);if(_pr.z<1)showPopup('⚠️',((_pr.x*.5+.5)*innerWidth),((-_pr.y*.5+.5)*innerHeight),'#ffcc00')}
@@ -1545,12 +1550,12 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
       const p=pd.data[i];
       p.z+=p.spd*p.dir;
       const bob=Math.sin(fc*0.1+p.phase)*0.05;
-      dummy.position.set(p.x,0.5+bob,p.z);
+      dummy.position.set(p.x,roadY(p.z)+0.5+bob,p.z);
       dummy.scale.setScalar(1);
       dummy.rotation.set(0,p.dir>0?0:Math.PI,0);
       dummy.updateMatrix();
       pd.bodyInst.setMatrixAt(i,dummy.matrix);
-      dummy.position.set(p.x,1.1+bob,p.z);
+      dummy.position.set(p.x,roadY(p.z)+1.1+bob,p.z);
       dummy.updateMatrix();
       pd.headInst.setMatrixAt(i,dummy.matrix);
     }
@@ -1565,7 +1570,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
       const side=i%2===0?-8.5:8.5;
       const z=50+i*80;
       const pulse=0.6+Math.sin(fc*0.03+i*1.7)*0.4;
-      dummy.position.set(side,3.5,z);
+      dummy.position.set(side,_shy+3.5,z);
       dummy.scale.setScalar(pulse);
       dummy.rotation.set(0,0,0);
       dummy.updateMatrix();
@@ -1618,7 +1623,8 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
   // Camera
   if(!window._camX)window._camX=car.position.x;
   window._camX+=(car.position.x-window._camX)*.015;
-  _cv.set(window._camX-Math.sin(dir+cTh)*14,7+cPh*4,car.position.z-Math.cos(dir+cTh)*14);
+  const _hillCamY=roadY(car.position.z);
+  _cv.set(window._camX-Math.sin(dir+cTh)*14,_hillCamY+7+cPh*4,car.position.z-Math.cos(dir+cTh)*14);
   cam.position.lerp(_cv,.035);
   _ct.set(window._camX+Math.sin(dir)*25,2,car.position.z+Math.cos(dir)*25);cam.lookAt(_ct);
 
