@@ -1294,7 +1294,9 @@ function createRoom(){
   peer.on('open',function(){console.log('Host ready:',mpRoomCode)});
   peer.on('connection',function(c){
     conn=c;
-    conn.on('open',function(){setupConn();isMultiplayer=true;conn.send({type:'start'});startGame()});
+    function onConnOpen(){setupConn();isMultiplayer=true;conn.send({type:'start'});startGame()}
+    if(conn.open)onConnOpen();
+    else conn.on('open',onConnOpen);
   });
   peer.on('error',function(e){
     var w=document.getElementById('roomCodeDisplay').querySelector('.waiting');
@@ -1318,8 +1320,16 @@ function joinRoom(){
   peer=new Peer('tikia-'+mpRoomCode+'-guest',{debug:0});
   peer.on('open',function(){
     conn=peer.connect('tikia-'+mpRoomCode+'-host',{reliable:true});
-    conn.on('open',function(){setupConn();isMultiplayer=true;startGame()});
+    var jt=setTimeout(function(){
+      document.getElementById('joinStatus').textContent='❌ לא הצליח להתחבר — נסה שוב';
+      document.getElementById('joinStatus').style.color='#f87171';
+      if(peer){peer.destroy();peer=null}
+    },12000);
+    function onJoinOpen(){clearTimeout(jt);setupConn();isMultiplayer=true;startGame()}
+    if(conn.open)onJoinOpen();
+    else conn.on('open',onJoinOpen);
     conn.on('error',function(){
+      clearTimeout(jt);
       document.getElementById('joinStatus').textContent='❌ לא נמצא חדר';
       document.getElementById('joinStatus').style.color='#f87171';
     });
