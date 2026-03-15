@@ -1346,7 +1346,10 @@ function setupConn(){
         document.getElementById('finalRed').textContent=redCount;
         document.getElementById('mpResult').textContent='🏆 ניצחת! היריב נפל!';
         document.getElementById('mpResult').style.display='block';
-        mpGameOver();document.getElementById('gameOver').style.display='flex';
+        document.getElementById('finalStreak').textContent=bestStreak;
+        document.getElementById('finalDist').textContent=Math.floor(car.position.z);
+        document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';
+        document.getElementById('gameOver').style.display='flex';
       }
     }
   });
@@ -1358,7 +1361,10 @@ function setupConn(){
       document.getElementById('finalRed').textContent=redCount;
       document.getElementById('mpResult').textContent='🏆 ניצחת! היריב התנתק';
       document.getElementById('mpResult').style.display='block';
-      mpGameOver();document.getElementById('gameOver').style.display='flex';
+      document.getElementById('finalStreak').textContent=bestStreak;
+      document.getElementById('finalDist').textContent=Math.floor(car.position.z);
+      document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';
+      document.getElementById('gameOver').style.display='flex';
     }
     isMultiplayer=false;conn=null;
   });
@@ -1874,6 +1880,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
       opCar.visible=true;
       opCar.position.x+=(opData.x-opCar.position.x)*.12;
       opCar.position.z+=(opData.z-opCar.position.z)*.12;
+      opCar.position.y=roadY(opCar.position.z);
       opCar.rotation.y=opData.dir;
     } else if(!gameActive){
       opCar.visible=false;
