@@ -164,9 +164,15 @@
     #opponentHud .op-stat span{font-weight:900}
     #opponentHud .op-dist{color:#a7f3d0;font-size:12px;margin-top:4px;border-top:1px solid rgba(255,255,255,.1);padding-top:4px}
     #mpResult{display:none;color:#fbbf24;font-size:clamp(22px,5vw,36px);font-weight:900;margin:10px 0;text-shadow:0 0 20px rgba(251,191,36,.5)}
+    #loadScreen{position:fixed;inset:0;z-index:200;background:#020a07;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s}
+    #loadScreen.done{opacity:0;pointer-events:none}
+    #loadScreen .load-title{color:#4ade80;font-size:28px;font-weight:900;letter-spacing:4px;margin-bottom:16px;text-shadow:0 0 20px rgba(74,222,128,.4)}
+    #loadScreen .load-bar{width:200px;height:4px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}
+    #loadScreen .load-fill{height:100%;width:0%;background:#22c55e;border-radius:4px;transition:width .3s;box-shadow:0 0 8px rgba(34,197,94,.5)}
   </style>
 </head>
 <body>
+<div id="loadScreen"><div class="load-title">🟢 תיקיה ירוקה</div><div class="load-bar"><div class="load-fill" id="loadFill"></div></div></div>
 
 <!-- START SCREEN -->
 <div id="startScreen">
@@ -318,8 +324,11 @@
   <div class="ctrl-group"><button class="ctrl-btn" id="btnHonk" style="background:rgba(251,191,36,.2);border-color:rgba(251,191,36,.4)" onclick="sfxHonk()">📯</button></div>
 </div>
 
+<script>document.getElementById('loadFill').style.width='20%'</script>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>document.getElementById('loadFill').style.width='50%'</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>document.getElementById('loadFill').style.width='80%'</script>
 <script>
 'use strict';
 window.addEventListener('DOMContentLoaded',()=>{if(typeof _loadSettings==='function')_loadSettings()});
@@ -2371,6 +2380,9 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
   renderer.render(scene,cam);
 }
 animate();
+// Dismiss loading screen
+{const _lf=document.getElementById('loadFill');if(_lf)_lf.style.width='100%';
+const _ls=document.getElementById('loadScreen');if(_ls)setTimeout(()=>{_ls.classList.add('done');setTimeout(()=>_ls.remove(),600)},400)}
 
 addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 </script>
