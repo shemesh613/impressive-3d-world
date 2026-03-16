@@ -503,7 +503,7 @@ scene.add((() => {
 
 // ---- ROAD SIGNS ----
 {
-  const signN=20;
+  const signN=10;
   const poleGeo=new THREE.CylinderGeometry(.04,.04,2.5,4);
   const poleMat=new THREE.MeshPhongMaterial({color:0x999999,shininess:30});
   const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,signN);
@@ -548,7 +548,7 @@ scene.add((() => {
 
 // ---- RED DANGER EDGES ----
 {
-  const RED_EDGE_N=20;
+  const RED_EDGE_N=10;
   const redEdgeGeo=new THREE.PlaneGeometry(1.5,25);
   const redEdgeMat=new THREE.MeshBasicMaterial({color:0xff3333});
   const redEdgeL=new THREE.InstancedMesh(redEdgeGeo,redEdgeMat,RED_EDGE_N);
@@ -571,7 +571,7 @@ scene.add((() => {
 
 // ---- ROAD ARROWS (turn indicators) ----
 {
-  const ARROW_N=20;
+  const ARROW_N=10;
   const arrowGeo=new THREE.ConeGeometry(.6,1.5,3);
   const arrowMat=new THREE.MeshBasicMaterial({color:0x44ff44});
   const arrowInst=new THREE.InstancedMesh(arrowGeo,arrowMat,ARROW_N);
@@ -585,7 +585,7 @@ scene.add((() => {
 }
 // ---- SPEED BUMPS ----
 {
-  const BUMP_N=25;
+  const BUMP_N=12;
   const bumpGeo=new THREE.CylinderGeometry(2.5,.5,.2,12);
   const bumpMat=new THREE.MeshPhongMaterial({color:0xffdd00,emissive:0xffbb00,emissiveIntensity:0.3,shininess:10});
   const bumpInst=new THREE.InstancedMesh(bumpGeo,bumpMat,BUMP_N);
@@ -598,13 +598,13 @@ scene.add((() => {
 
 // ---- CROSS STREETS (intersections) ----
 {
-  const crossN=35;
+  const crossN=20;
   const crossGeo=new THREE.PlaneGeometry(40,5);
   const crossMat=new THREE.MeshBasicMaterial({color:0x4a5a70});
   const crossInst=new THREE.InstancedMesh(crossGeo,crossMat,crossN);
   const zebraGeo=new THREE.PlaneGeometry(1.4,.6);
   const zebraMat=new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.05,color:0xffffdd,emissive:0xffffaa,emissiveIntensity:0.15});
-  const zebraInst=new THREE.InstancedMesh(zebraGeo,zebraMat,crossN*10);
+  const zebraInst=new THREE.InstancedMesh(zebraGeo,zebraMat,crossN*5);
   const sideRoadGeo=new THREE.PlaneGeometry(8,30);
   const sideRoadMat=new THREE.MeshBasicMaterial({color:0x3a4565});
   const sideRoadL=new THREE.InstancedMesh(sideRoadGeo,sideRoadMat,crossN);
