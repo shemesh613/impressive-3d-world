@@ -114,6 +114,7 @@
       font-size:clamp(20px,5vw,30px);color:#fff;cursor:pointer;user-select:none;-webkit-user-select:none}
     .ctrl-btn:active{background:rgba(255,255,255,.3);transform:scale(.92)}
     .ctrl-btn.gas{background:rgba(0,255,100,.2);border-color:rgba(0,255,100,.4)}
+#speedLines{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:repeating-linear-gradient(90deg,transparent 0%,transparent 48%,rgba(255,255,255,0.03) 49%,transparent 50%,transparent 98%,rgba(255,255,255,0.03) 99%,transparent 100%);background-size:20px 100%}
     /* Screen flash */    #screenFlash{position:fixed;inset:0;z-index:15;pointer-events:none;opacity:0;transition:opacity .1s}    .flash-green{background:rgba(34,197,94,.25);opacity:1!important}    .flash-red{background:rgba(239,68,68,.25);opacity:1!important}    .flash-gold{background:rgba(251,191,36,.2);opacity:1!important}
     .ctrl-btn.brake{background:rgba(255,50,50,.2);border-color:rgba(255,50,50,.4)}
 
@@ -237,6 +238,7 @@
 
 <!-- MOBILE CONTROLS -->
 <!-- SCREEN FLASH -->
+<div id="speedLines"></div>
 <div id="screenFlash"></div>
 <div id="powerIndicators" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:22;display:flex;gap:10px;pointer-events:none"><div class="power-ind power-shield" id="shieldInd" style="display:none;padding:6px 14px;border-radius:20px;font-size:16px;font-weight:900;color:#fff;background:rgba(96,165,250,.7);border:2px solid #60a5fa;animation:pulse 1s ease-in-out infinite">🛡️ מגן</div><div class="power-ind power-turbo" id="turboInd" style="display:none;padding:6px 14px;border-radius:20px;font-size:16px;font-weight:900;color:#fff;background:rgba(251,191,36,.7);border:2px solid #fbbf24;animation:pulse 1s ease-in-out infinite">⚡ טורבו</div></div>
 <div id="mobileControls">
@@ -531,7 +533,7 @@ scene.add((() => {
 {  const TL_N=15;  const tlPoleGeo=new THREE.CylinderGeometry(.06,.06,4,6);  const tlPoleMat=new THREE.MeshPhongMaterial({color:0x444444,shininess:5});  const tlPoleInst=new THREE.InstancedMesh(tlPoleGeo,tlPoleMat,TL_N);  const tlBoxGeo=new THREE.BoxGeometry(.5,1.2,.3);  const tlBoxMat=new THREE.MeshPhongMaterial({color:0x222222,shininess:5});  const tlBoxInst=new THREE.InstancedMesh(tlBoxGeo,tlBoxMat,TL_N);  const tlLightGeo=new THREE.SphereGeometry(.15,8,8);  const tlRedMat=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0xff0000,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlYelMat=new THREE.MeshStandardMaterial({color:0xffcc00,emissive:0xffcc00,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlGrnMat=new THREE.MeshStandardMaterial({color:0x00ff00,emissive:0x00ff00,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlRedInst=new THREE.InstancedMesh(tlLightGeo,tlRedMat,TL_N);  const tlYelInst=new THREE.InstancedMesh(tlLightGeo,tlYelMat,TL_N);  const tlGrnInst=new THREE.InstancedMesh(tlLightGeo,tlGrnMat,TL_N);  const tlPositions=[];  for(let i=0;i<TL_N;i++){    const side=i%2===0?-4.5:4.5;    const z=i*200+100;    tlPositions.push({x:side,z:z});    dummy.position.set(side,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    tlPoleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,4.2,z);dummy.updateMatrix();    tlBoxInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.55,z);dummy.updateMatrix();tlRedInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,4.2,z);dummy.updateMatrix();tlYelInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+3.85,z);dummy.updateMatrix();tlGrnInst.setMatrixAt(i,dummy.matrix);  }  tlPoleInst.instanceMatrix.needsUpdate=true;tlBoxInst.instanceMatrix.needsUpdate=true;  tlRedInst.instanceMatrix.needsUpdate=true;tlYelInst.instanceMatrix.needsUpdate=true;tlGrnInst.instanceMatrix.needsUpdate=true;  scene.add(tlPoleInst);scene.add(tlBoxInst);scene.add(tlRedInst);scene.add(tlYelInst);scene.add(tlGrnInst);  window._tlData={redInst:tlRedInst,yelInst:tlYelInst,grnInst:tlGrnInst,positions:tlPositions,n:TL_N};
 }
 // ---- FLOATING BALLOONS ----
-{  const BLN_N=25;const blnColors=[0xff6b9d,0x4ecdc4,0xffe66d,0xa855f7,0x06b6d4,0xf97316];  const blnGeo=new THREE.SphereGeometry(.6,8,8);  const blnMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0xffffff});  const blnInst=new THREE.InstancedMesh(blnGeo,blnMat,BLN_N);  blnInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(BLN_N*3),3);  const blnData=[];  const _bc=new THREE.Color();  for(let i=0;i<BLN_N;i++){    const x=-20+Math.random()*40;    const z=Math.random()*2500;    const baseY=10+Math.random()*8;    blnData.push({x,z,baseY,phase:Math.random()*Math.PI*2,spd:.01+Math.random()*.02});    _bc.setHex(blnColors[i%blnColors.length]);    blnInst.instanceColor.setXYZ(i,_bc.r,_bc.g,_bc.b);    dummy.position.set(x,baseY,z);dummy.scale.setScalar(.8+Math.random()*.5);dummy.rotation.set(0,0,0);dummy.updateMatrix();    blnInst.setMatrixAt(i,dummy.matrix);  }  blnInst.instanceMatrix.needsUpdate=true;blnInst.instanceColor.needsUpdate=true;  scene.add(blnInst);  window._blnData={inst:blnInst,data:blnData,n:BLN_N};}
+{  const BLN_N=12;const blnColors=[0xff6b9d,0x4ecdc4,0xffe66d,0xa855f7,0x06b6d4,0xf97316];  const blnGeo=new THREE.SphereGeometry(.6,8,8);  const blnMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0xffffff});  const blnInst=new THREE.InstancedMesh(blnGeo,blnMat,BLN_N);  blnInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(BLN_N*3),3);  const blnData=[];  const _bc=new THREE.Color();  for(let i=0;i<BLN_N;i++){    const x=-20+Math.random()*40;    const z=Math.random()*2500;    const baseY=10+Math.random()*8;    blnData.push({x,z,baseY,phase:Math.random()*Math.PI*2,spd:.01+Math.random()*.02});    _bc.setHex(blnColors[i%blnColors.length]);    blnInst.instanceColor.setXYZ(i,_bc.r,_bc.g,_bc.b);    dummy.position.set(x,baseY,z);dummy.scale.setScalar(.8+Math.random()*.5);dummy.rotation.set(0,0,0);dummy.updateMatrix();    blnInst.setMatrixAt(i,dummy.matrix);  }  blnInst.instanceMatrix.needsUpdate=true;blnInst.instanceColor.needsUpdate=true;  scene.add(blnInst);  window._blnData={inst:blnInst,data:blnData,n:BLN_N};}
 
 // ---- ROAD BARRIERS (chicanes/turns) ----
 {
@@ -708,7 +710,7 @@ scene.add((() => {
 
 // ---- PEDESTRIANS ----
 {
-  const PED_N=35;
+  const PED_N=20;
   const pedBodyGeo=new THREE.CylinderGeometry(0.12,0.16,0.5,6);
   const pedHeadGeo=new THREE.SphereGeometry(0.2,6,6);
   const pedColors=[0xffccaa,0xddaa88,0xeebb99,0xcc9977,0xffddbb];
@@ -1057,7 +1059,7 @@ for(let z=-100;z<=2800;z+=10){
 {  const trunkGeo=new THREE.CylinderGeometry(.15,.2,2,5);  const trunkMat=new THREE.MeshStandardMaterial({roughness:0.85,metalness:0.0,color:0x4a3020});  const leafGeo=new THREE.ConeGeometry(1.4,2.8,6);  const leafColors=[0x16a34a,0x22c55e,0x15803d,0xd4a030,0xc05020,0x8a6a3a,0x2d8a4e,0x1a6a3a,0x6aaa3a];  const treePositions=[];  for(let z=-80;z<=2800;z+=12){    const _trx=roadX(z);if(Math.random()>.35)treePositions.push([_trx-8+(Math.random()-.5)*2,z]);    if(Math.random()>.35)treePositions.push([_trx+8+(Math.random()-.5)*2,z]);  }  const trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,treePositions.length);  const leafInst=new THREE.InstancedMesh(leafGeo,new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.0}),treePositions.length);  treePositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+1,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    trunkInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+3+Math.random()*.5,z);dummy.scale.setScalar(.7+Math.random()*.5);dummy.updateMatrix();    leafInst.setMatrixAt(i,dummy.matrix);leafInst.setColorAt(i,_col.setHex(leafColors[Math.floor(Math.random()*leafColors.length)]));  });  trunkInst.instanceMatrix.needsUpdate=true;leafInst.instanceMatrix.needsUpdate=true;  if(leafInst.instanceColor)leafInst.instanceColor.needsUpdate=true;  scene.add(trunkInst);scene.add(leafInst);}// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=2800;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshPhongMaterial({color:0x888888,shininess:20});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.4,6,6);  const glowMat2=new THREE.MeshStandardMaterial({color:0xffffcc,emissive:0xffdd66,emissiveIntensity:1.0,roughness:0.1,metalness:0.3});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
 // ---- ELECTRIC POLES WITH WIRES ----
 {
-  const EP_N=40;
+  const EP_N=20;
   const epPoleGeo=new THREE.CylinderGeometry(0.05,0.08,6,4);
   const epPoleMat=new THREE.MeshStandardMaterial({color:0x555555,roughness:0.5,metalness:0.6});
   const epPoleInst=new THREE.InstancedMesh(epPoleGeo,epPoleMat,EP_N);
@@ -1078,7 +1080,7 @@ for(let z=-100;z<=2800;z+=10){
 }
 // ---- ROAD FENCES/GUARDRAILS ----
 {
-  const FENCE_N=80;
+  const FENCE_N=35;
   const fencePostGeo=new THREE.BoxGeometry(0.08,0.8,0.08);
   const fenceRailGeo=new THREE.BoxGeometry(0.04,0.04,4);
   const fenceMat=new THREE.MeshStandardMaterial({color:0x888899,roughness:0.5,metalness:0.5});
@@ -1099,7 +1101,7 @@ for(let z=-100;z<=2800;z+=10){
 }
 // ---- BILLBOARDS (advertising signs) ----
 {
-  const BB_N=12;
+  const BB_N=6;
   const bbPoleGeo=new THREE.CylinderGeometry(0.1,0.12,8,4);
   const bbPoleMat=new THREE.MeshStandardMaterial({color:0x666666,roughness:0.4,metalness:0.7});
   const bbPoleInst=new THREE.InstancedMesh(bbPoleGeo,bbPoleMat,BB_N);
@@ -1617,7 +1619,7 @@ function updateHUD(){
   document.getElementById('levelVal').textContent=level;
   document.getElementById('streakVal').textContent=streak>0?'🔥'.repeat(Math.min(streak,5)):'-';
   document.getElementById('flowFill').style.width=flow+'%';document.getElementById('distVal').textContent=Math.floor(car.position.z)+'m';
-  document.getElementById('speedVal').textContent=Math.round(spd*500)+'km/h';
+  document.getElementById('speedVal').textContent=Math.round(spd*500)+'km/h';var _sl=document.getElementById('speedLines');if(_sl){_sl.style.opacity=spd>0.25?Math.min(1,(spd-0.25)*4):'0'}
 }
 
 // ---- COLLISIONS ----
