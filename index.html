@@ -190,6 +190,7 @@
     <p><span class="emoji">🟢</span> בחירה ירוקה = זרימה, בוסט, נקודות</p>
     <p><span class="emoji">🔴</span> בחירה אדומה = תקיעה, האטה, פספוס</p>
     <p><span class="emoji">🚗🚗🚗</span> חברים נוסעים אחריכם — אל תתקעו אותם!</p>
+    <p id="statsLine" style="color:#86efac;font-size:12px;margin-top:8px;opacity:.7"></p>
     <p style="margin-top:12px;color:#86efac;font-size:clamp(11px,2vw,14px)">🎮 מקלדת: WASD / חצים &nbsp;|&nbsp; 📱 נייד: כפתורים</p>
   </div>
   <div id="settingsPanel" style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;direction:rtl">
@@ -594,6 +595,8 @@ function _loadSettings(){
   try{const s=JSON.parse(localStorage.getItem('gf_settings')||'{}');
   if(s.name){const ni=document.getElementById('playerName');if(ni)ni.value=s.name}
   if(s.vol!==undefined){_masterVol=s.vol/100;const vs=document.getElementById('volumeSlider');if(vs)vs.value=s.vol}}catch(e){}
+  const tg=parseInt(localStorage.getItem('gf_totalGames')||'0');const hs=_getHighScores();
+  const sl=document.getElementById('statsLine');if(sl&&tg>0)sl.textContent='🎮 '+tg+' משחקים'+(hs.length>0?' | 🏆 שיא: '+hs[0].score:'');
 }
 function _saveSettings(){
   const name=(document.getElementById('playerName')||{}).value||'';
@@ -1846,6 +1849,7 @@ function _saveHighScore(s){
   hs.push({score:s,name:pn,date:new Date().toLocaleDateString('he-IL')});
   hs.sort((a,b)=>b.score-a.score);if(hs.length>5)hs.length=5;
   localStorage.setItem('gf_scores',JSON.stringify(hs));_showHighScores();
+  localStorage.setItem('gf_totalGames',(parseInt(localStorage.getItem('gf_totalGames')||'0')+1).toString());
   if(s>oldBest&&oldBest>0){const nb=document.createElement('div');nb.textContent='🏆 שיא חדש! '+s+' נקודות!';
     nb.style.cssText='position:fixed;top:20%;left:50%;transform:translateX(-50%);z-index:65;font-size:clamp(24px,5vw,36px);font-weight:900;color:#fbbf24;text-shadow:0 0 30px rgba(251,191,36,.7),0 0 60px rgba(251,191,36,.3);pointer-events:none;animation:newRecord 2s ease forwards;text-align:center';
     document.body.appendChild(nb);setTimeout(()=>nb.remove(),2500)}
