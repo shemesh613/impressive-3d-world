@@ -53,20 +53,21 @@
 
     /* Scenario popup */
     #scenario{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:40;display:none;
-      width:min(92vw,520px);background:rgba(0,10,20,.92);border:2px solid rgba(74,222,128,.3);border-radius:24px;
-      padding:24px;text-align:center;backdrop-filter:blur(10px);animation:popIn .3s ease}
-    @keyframes popIn{0%{transform:translate(-50%,-50%) scale(.7);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
-    #scenario .situation{color:#fff;font-size:clamp(17px,3.5vw,22px);font-weight:700;margin-bottom:18px;line-height:1.6;direction:rtl;text-shadow:0 1px 4px rgba(0,0,0,0.3)}
-    #scenario .choices{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-    .choice-btn{flex:1;min-width:140px;padding:14px 10px;border-radius:16px;border:none;cursor:pointer;
-      font-size:clamp(14px,2.8vw,19px);font-weight:800;color:#fff;transition:transform .15s;line-height:1.4;direction:rtl}
-    .choice-btn:active{transform:scale(.92);filter:brightness(1.2)}
-    .choice-green{background:linear-gradient(135deg,#22c55e,#10b981);box-shadow:0 0 20px rgba(34,197,94,.3)}
-    .choice-red{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 0 20px rgba(239,68,68,.3)}
-    .choice-green:hover{box-shadow:0 0 30px rgba(34,197,94,.5)}
-    .choice-red:hover{box-shadow:0 0 30px rgba(239,68,68,.5)}
-    #scenario .timer-bar{margin-top:14px;height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}
-    #scenario .timer-fill{height:100%;width:100%;background:#fbbf24;border-radius:3px;transition:width linear}
+      width:min(90vw,500px);background:linear-gradient(160deg,rgba(5,15,25,.94),rgba(0,8,16,.96));border:1px solid rgba(74,222,128,.2);border-radius:28px;
+      padding:28px 24px;text-align:center;backdrop-filter:blur(16px);animation:popIn .35s cubic-bezier(.34,1.56,.64,1);
+      box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(74,222,128,.08),inset 0 1px 0 rgba(255,255,255,.06)}
+    @keyframes popIn{0%{transform:translate(-50%,-50%) scale(.8);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+    #scenario .situation{color:#f0fdf4;font-size:clamp(17px,3.5vw,21px);font-weight:600;margin-bottom:20px;line-height:1.7;direction:rtl;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+    #scenario .choices{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+    .choice-btn{flex:1;min-width:140px;padding:16px 12px;border-radius:18px;border:none;cursor:pointer;
+      font-size:clamp(14px,2.8vw,18px);font-weight:700;color:#fff;transition:all .2s ease;line-height:1.4;direction:rtl}
+    .choice-btn:active{transform:scale(.93);filter:brightness(1.15)}
+    .choice-green{background:linear-gradient(145deg,#22c55e,#15803d);box-shadow:0 4px 20px rgba(34,197,94,.3),inset 0 1px 0 rgba(255,255,255,.15)}
+    .choice-red{background:linear-gradient(145deg,#ef4444,#b91c1c);box-shadow:0 4px 20px rgba(239,68,68,.3),inset 0 1px 0 rgba(255,255,255,.15)}
+    .choice-green:hover{box-shadow:0 6px 30px rgba(34,197,94,.45);transform:translateY(-2px)}
+    .choice-red:hover{box-shadow:0 6px 30px rgba(239,68,68,.45);transform:translateY(-2px)}
+    #scenario .timer-bar{margin-top:16px;height:4px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+    #scenario .timer-fill{height:100%;width:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);border-radius:4px;transition:width linear;box-shadow:0 0 8px rgba(251,191,36,.4)}
 
     /* Feedback overlay */
     #feedback{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:45;display:none;
