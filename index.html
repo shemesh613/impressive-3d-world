@@ -585,6 +585,8 @@ scene.add((() => {
     arrowInst.setMatrixAt(i,dummy.matrix);
   }
   arrowInst.instanceMatrix.needsUpdate=true;scene.add(arrowInst);
+  window._arrowData={inst:arrowInst,n:ARROW_N,positions:[]};
+  for(let i=0;i<ARROW_N;i++){const z=130+i*120;const side=i%3===0?1:(i%3===1?-1:0);window._arrowData.positions.push({x:roadX(z)+side*2,y:roadY(z)+2.5,z:z,side:side})}
 }
 // ---- SPEED BUMPS ----
 {
@@ -2057,6 +2059,9 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
       else distEl.textContent='🤝 צמוד!';
     }
   }
+
+  // Animate green arrows - float & spin
+  if(window._arrowData&&fc%2===0){const ad=window._arrowData;const t=performance.now()*.001;for(let i=0;i<ad.n;i++){const p=ad.positions[i];dummy.position.set(p.x,p.y+Math.sin(t*2+i)*0.4,p.z);dummy.rotation.set(0,t*1.5+i,p.side*Math.PI/2);dummy.scale.setScalar(0.9+Math.sin(t*3+i)*0.15);dummy.updateMatrix();ad.inst.setMatrixAt(i,dummy.matrix)}ad.inst.instanceMatrix.needsUpdate=true}
 
   renderer.render(scene,cam);
 }
