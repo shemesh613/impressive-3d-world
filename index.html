@@ -406,7 +406,7 @@ const _ct=new THREE.Vector3();
 const _col=new THREE.Color();
 
 // ---- ROAD CURVE FUNCTION ----
-function roadY(z){return Math.sin(z*.008)*2+Math.sin(z*.018)*1}
+function roadY(z){return Math.sin(z*.006)*1.2+Math.sin(z*.014)*0.6}
 function roadX(z){
   if(z<0)return 0;
   const s=z%600;
