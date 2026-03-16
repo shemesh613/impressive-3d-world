@@ -241,10 +241,38 @@
   <div class="stats" id="finalStars" style="font-size:clamp(24px,5vw,40px)"></div>
   <div class="stats" id="finalMsg"></div>
   <div id="mpResult"></div>
+  <div id="highScoreSection" style="margin-top:12px;padding:10px 16px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:12px;display:none">
+    <div style="color:#4ade80;font-weight:700;margin-bottom:6px">🏆 שיאים</div>
+    <div id="highScoreList" style="color:#d1fae5;font-size:14px;line-height:1.8"></div>
+  </div>
   <button id="restartBtn" onclick="restartGame()">נסיעה חדשה! 🔄</button>
 </div>
 
 <!-- MOBILE CONTROLS -->
+<!-- TUTORIAL -->
+<div id="tutorial" style="display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.85);display:none;flex-direction:column;align-items:center;justify-content:center;direction:rtl;font-family:'Segoe UI',Arial,sans-serif">
+  <div style="background:linear-gradient(135deg,rgba(10,30,20,.95),rgba(5,20,12,.98));border:2px solid rgba(74,222,128,.3);border-radius:24px;padding:30px 36px;max-width:420px;width:90%;text-align:center">
+    <div id="tutStep1" class="tut-step">
+      <div style="font-size:60px;margin-bottom:12px">🚗</div>
+      <h3 style="color:#4ade80;font-size:22px;margin-bottom:8px">נהג על הכביש!</h3>
+      <p style="color:#d1fae5;font-size:16px;line-height:1.7">השתמש בחצים או WASD כדי לנהוג.<br>📱 בנייד — כפתורי מגע</p>
+      <div style="color:#86efac;font-size:13px;margin-top:12px">1 מתוך 3</div>
+    </div>
+    <div id="tutStep2" class="tut-step" style="display:none">
+      <div style="font-size:60px;margin-bottom:12px">🟢</div>
+      <h3 style="color:#4ade80;font-size:22px;margin-bottom:8px">אסוף ירוקים!</h3>
+      <p style="color:#d1fae5;font-size:16px;line-height:1.7">כדורים ירוקים על הכביש = נקודות!<br>⚠️ אדומים = מכשולים — התחמק!</p>
+      <div style="color:#86efac;font-size:13px;margin-top:12px">2 מתוך 3</div>
+    </div>
+    <div id="tutStep3" class="tut-step" style="display:none">
+      <div style="font-size:60px;margin-bottom:12px">💬</div>
+      <h3 style="color:#4ade80;font-size:22px;margin-bottom:8px">ענה נכון!</h3>
+      <p style="color:#d1fae5;font-size:16px;line-height:1.7">בכל צומת תקפוץ שאלה חברתית.<br>🟢 בחירה ירוקה = בוסט וזרימה!<br>🔴 בחירה אדומה = האטה ותקיעה</p>
+      <div style="color:#86efac;font-size:13px;margin-top:12px">3 מתוך 3</div>
+    </div>
+    <button id="tutNext" style="margin-top:20px;padding:14px 50px;font-size:18px;font-weight:800;border:none;border-radius:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;cursor:pointer;transition:transform .2s" onclick="tutorialNext()">הבא ➜</button>
+  </div>
+</div>
 <!-- SCREEN FLASH -->
 <div id="vignette"></div>
 <div id="headlightGlow"></div>
@@ -1574,7 +1602,7 @@ function choose(type){
     document.getElementById('finalStreak').textContent=bestStreak;
     const ratio=greenCount/(greenCount+redCount+.001);
     document.getElementById('finalMsg').textContent=ratio>.7?'🌟 זורם מדהים! כולם רוצים לנסוע איתך!':ratio>.4?'👍 לא רע! עוד קצת אימון וזורם מושלם!':'💪 צריך עוד אימון בזרימה — ננסה שוב?';
-    document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();document.getElementById('gameOver').style.display='flex';
+    document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();_saveHighScore(score);document.getElementById('gameOver').style.display='flex';
     return;
   }
 
@@ -1605,7 +1633,7 @@ function createRoom(){
   peer.on('open',function(){console.log('Host ready:',mpRoomCode)});
   peer.on('connection',function(c){
     conn=c;
-    function onConnOpen(){setupConn();isMultiplayer=true;conn.send({type:'start'});startGame()}
+    function onConnOpen(){setupConn();isMultiplayer=true;conn.send({type:'start'});initAudio();_realStartGame()}
     if(conn.open)onConnOpen();
     else conn.on('open',onConnOpen);
   });
@@ -1636,7 +1664,7 @@ function joinRoom(){
       document.getElementById('joinStatus').style.color='#f87171';
       if(peer){peer.destroy();peer=null}
     },20000);
-    function onJoinOpen(){clearTimeout(jt);setupConn();isMultiplayer=true;startGame()}
+    function onJoinOpen(){clearTimeout(jt);setupConn();isMultiplayer=true;initAudio();_realStartGame()}
     if(conn.open)onJoinOpen();
     else conn.on('open',onJoinOpen);
     conn.on('error',function(){
@@ -1714,8 +1742,32 @@ function mpCleanup(){
 }
 
 // ---- GAME FUNCTIONS ----
+// ---- HIGH SCORES ----
+function _getHighScores(){try{return JSON.parse(localStorage.getItem('gf_scores')||'[]')}catch(e){return[]}}
+function _saveHighScore(s){
+  const hs=_getHighScores();hs.push({score:s,date:new Date().toLocaleDateString('he-IL')});
+  hs.sort((a,b)=>b.score-a.score);if(hs.length>5)hs.length=5;
+  localStorage.setItem('gf_scores',JSON.stringify(hs));_showHighScores()
+}
+function _showHighScores(){
+  const hs=_getHighScores();const el=document.getElementById('highScoreSection');const list=document.getElementById('highScoreList');
+  if(!el||!list||!hs.length)return;el.style.display='block';
+  list.innerHTML=hs.map((h,i)=>'<div>'+(i===0?'👑':'🏅')+' '+h.score+' נקודות — '+h.date+'</div>').join('')
+}
+
+let _tutStep=0;
+function tutorialNext(){
+  _tutStep++;
+  if(_tutStep===2){document.getElementById('tutStep1').style.display='none';document.getElementById('tutStep2').style.display='block'}
+  else if(_tutStep===3){document.getElementById('tutStep2').style.display='none';document.getElementById('tutStep3').style.display='block';document.getElementById('tutNext').textContent='יאללה! 🚗'}
+  else if(_tutStep>=4){document.getElementById('tutorial').style.display='none';localStorage.setItem('gf_tutorial','done');_realStartGame()}
+}
 function startGame(){
   initAudio();
+  if(!localStorage.getItem('gf_tutorial')){_tutStep=1;document.getElementById('tutorial').style.display='flex';document.getElementById('tutStep1').style.display='block';document.getElementById('tutStep2').style.display='none';document.getElementById('tutStep3').style.display='none';document.getElementById('tutNext').textContent='הבא ➜';document.getElementById('startScreen').style.display='none';return}
+  _realStartGame();
+}
+function _realStartGame(){
   document.getElementById('startScreen').style.display='none';
   document.getElementById('hud').style.display='block';
   document.getElementById('followers').style.display='block';
