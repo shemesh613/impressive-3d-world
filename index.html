@@ -146,6 +146,7 @@
     #confetti{position:fixed;inset:0;z-index:55;pointer-events:none;overflow:hidden}
     .confetti-piece{position:absolute;width:10px;height:10px;border-radius:2px;opacity:0;animation:confettiFall 1.2s ease-out forwards}
     @keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}50%{opacity:1}100%{opacity:0;transform:translateY(70vh) rotate(720deg) scale(0.3)}}
+    @keyframes newRecord{0%{opacity:0;transform:translateX(-50%) scale(.5)}15%{opacity:1;transform:translateX(-50%) scale(1.2)}30%{transform:translateX(-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-30px) scale(1)}}
     .ctrl-btn.brake{background:rgba(255,50,50,.2);border-color:rgba(255,50,50,.4)}
     .ctrl-btn.brake:active{background:rgba(255,50,50,.45);box-shadow:0 0 20px rgba(255,50,50,.4)}
 
@@ -1837,10 +1838,14 @@ function mpCleanup(){
 // ---- HIGH SCORES ----
 function _getHighScores(){try{return JSON.parse(localStorage.getItem('gf_scores')||'[]')}catch(e){return[]}}
 function _saveHighScore(s){
-  const hs=_getHighScores();const pn=(document.getElementById('playerName')||{}).value||'שחקן';
+  const hs=_getHighScores();const oldBest=hs.length>0?hs[0].score:0;
+  const pn=(document.getElementById('playerName')||{}).value||'שחקן';
   hs.push({score:s,name:pn,date:new Date().toLocaleDateString('he-IL')});
   hs.sort((a,b)=>b.score-a.score);if(hs.length>5)hs.length=5;
-  localStorage.setItem('gf_scores',JSON.stringify(hs));_showHighScores()
+  localStorage.setItem('gf_scores',JSON.stringify(hs));_showHighScores();
+  if(s>oldBest&&oldBest>0){const nb=document.createElement('div');nb.textContent='🏆 שיא חדש! '+s+' נקודות!';
+    nb.style.cssText='position:fixed;top:20%;left:50%;transform:translateX(-50%);z-index:65;font-size:clamp(24px,5vw,36px);font-weight:900;color:#fbbf24;text-shadow:0 0 30px rgba(251,191,36,.7),0 0 60px rgba(251,191,36,.3);pointer-events:none;animation:newRecord 2s ease forwards;text-align:center';
+    document.body.appendChild(nb);setTimeout(()=>nb.remove(),2500)}
 }
 function _showHighScores(){
   const hs=_getHighScores();const el=document.getElementById('highScoreSection');const list=document.getElementById('highScoreList');
