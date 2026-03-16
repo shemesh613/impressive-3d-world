@@ -603,7 +603,7 @@ function initAudio(){
 if(!audioCtx)audioCtx=new AudioCtx()}
 let _masterVol=0.7;let _muted=false;let _preMuteVol=0.7;
 function _toggleMute(){_muted=!_muted;if(_muted){_preMuteVol=_masterVol;_masterVol=0}else{_masterVol=_preMuteVol}
-  const mb=document.getElementById('muteBtn');if(mb)mb.querySelector('.icon').textContent=_muted?'🔇':'🔊'}
+  const mb=document.getElementById('muteBtn');if(mb)mb.querySelector('.icon').textContent=_muted?'🔇':'🔊';updateBgMusicVol()}
 function _loadSettings(){
   try{const s=JSON.parse(localStorage.getItem('gf_settings')||'{}');
   if(s.name){const ni=document.getElementById('playerName');if(ni)ni.value=s.name}
@@ -669,6 +669,57 @@ function sfxScenario(){
 function sfxHonk(){
   playTone(350,.12,'square',.1);setTimeout(()=>playTone(440,.18,'square',.09),80);
   setTimeout(()=>playTone(350,.1,'square',.06),200)
+}
+
+// ---- BACKGROUND MUSIC (synthesized, royalty-free) ----
+let _bgMusic=null;
+function startBgMusic(){
+  if(_bgMusic||!audioCtx)return;
+  const ctx=audioCtx;
+  // C major happy melody loop - kid-friendly
+  const notes=[262,294,330,349,392,349,330,294,262,330,392,523,392,330,294,262];
+  const bass=[131,131,165,165,175,175,196,196,131,131,165,165,175,175,196,131];
+  const tempo=0.25;// seconds per note
+  let noteIdx=0;
+  const melGain=ctx.createGain();melGain.gain.value=0;melGain.connect(ctx.destination);
+  const bassGain=ctx.createGain();bassGain.gain.value=0;bassGain.connect(ctx.destination);
+  const padGain=ctx.createGain();padGain.gain.value=0;padGain.connect(ctx.destination);
+  // Pad (sustained chord)
+  const pad1=ctx.createOscillator();pad1.type='sine';pad1.frequency.value=262;pad1.connect(padGain);pad1.start();
+  const pad2=ctx.createOscillator();pad2.type='sine';pad2.frequency.value=330;pad2.connect(padGain);pad2.start();
+  const pad3=ctx.createOscillator();pad3.type='sine';pad3.frequency.value=392;pad3.connect(padGain);pad3.start();
+  function playNote(){
+    if(!_bgMusic)return;
+    const now=ctx.currentTime;
+    // Melody
+    const mOsc=ctx.createOscillator();const mG=ctx.createGain();
+    mOsc.type='triangle';mOsc.frequency.value=notes[noteIdx%notes.length];
+    mG.gain.setValueAtTime(0.06*_masterVol,now);mG.gain.exponentialRampToValueAtTime(0.001,now+tempo*0.9);
+    mOsc.connect(mG);mG.connect(melGain);mOsc.start(now);mOsc.stop(now+tempo);
+    // Bass
+    const bOsc=ctx.createOscillator();const bG=ctx.createGain();
+    bOsc.type='sine';bOsc.frequency.value=bass[noteIdx%bass.length];
+    bG.gain.setValueAtTime(0.04*_masterVol,now);bG.gain.exponentialRampToValueAtTime(0.001,now+tempo*0.9);
+    bOsc.connect(bG);bG.connect(bassGain);bOsc.start(now);bOsc.stop(now+tempo);
+    noteIdx++;
+    _bgMusic.timer=setTimeout(playNote,tempo*1000);
+  }
+  // Fade in
+  melGain.gain.setValueAtTime(0,ctx.currentTime);melGain.gain.linearRampToValueAtTime(1,ctx.currentTime+2);
+  bassGain.gain.setValueAtTime(0,ctx.currentTime);bassGain.gain.linearRampToValueAtTime(1,ctx.currentTime+2);
+  padGain.gain.setValueAtTime(0,ctx.currentTime);padGain.gain.linearRampToValueAtTime(0.02*_masterVol,ctx.currentTime+2);
+  _bgMusic={timer:null,melGain,bassGain,padGain,pad1,pad2,pad3};
+  playNote();
+}
+function stopBgMusic(){
+  if(!_bgMusic)return;
+  clearTimeout(_bgMusic.timer);
+  try{_bgMusic.pad1.stop();_bgMusic.pad2.stop();_bgMusic.pad3.stop()}catch(e){}
+  _bgMusic=null;
+}
+function updateBgMusicVol(){
+  if(!_bgMusic)return;
+  _bgMusic.padGain.gain.value=0.02*_masterVol;
 }
 
 // ---- RENDERER ----
@@ -1708,7 +1759,7 @@ function choose(type){
 
   // Game over if flow hits 0
   if(flow<=0){
-    gameActive=false;
+    gameActive=false;stopBgMusic();
     document.getElementById('finalScore').textContent=score;
     document.getElementById('finalGreen').textContent=greenCount;
     document.getElementById('finalRed').textContent=redCount;
@@ -1894,7 +1945,7 @@ function _realStartGame(){
   const _ss=document.getElementById('startScreen');_ss.style.opacity='0';setTimeout(()=>_ss.style.display='none',400);
   const _hud=document.getElementById('hud');_hud.style.display='block';_hud.classList.remove('hud-enter');void _hud.offsetWidth;_hud.classList.add('hud-enter');
   document.getElementById('followers').style.display='block';
-  gameActive=true;
+  gameActive=true;startBgMusic();
   score=0;lives=5;level=1;flow=85;greenCount=0;redCount=0;streak=0;bestStreak=0;
   spd=0;dir=0;boostTimer=0;shieldTimer=0;turboTimer=0;lastMilestone=0;scenarioActive=false;scenariosAnswered=0;
   usedScenarios=[];nextScenarioAt=100;
