@@ -1681,7 +1681,11 @@ function choose(type){
     document.getElementById('finalRed').textContent=redCount;
     document.getElementById('finalStreak').textContent=bestStreak;
     const ratio=greenCount/(greenCount+redCount+.001);
-    document.getElementById('finalMsg').textContent=ratio>.7?'🌟 זורם מדהים! כולם רוצים לנסוע איתך!':ratio>.4?'👍 לא רע! עוד קצת אימון וזורם מושלם!':'💪 צריך עוד אימון בזרימה — ננסה שוב?';
+    const _msgs3=['🌟 זורם מדהים! כולם רוצים לנסוע איתך!','🏆 אלוף הגמישות! חברים מתמיד!','🚀 מלך הזרימה! אף אחד לא נתקע איתך!'];
+    const _msgs2=['👍 לא רע! עוד קצת ותהיה מושלם!','🌊 זורם יפה! המשך ככה!','😎 כמעט מושלם! עוד סיבוב?'];
+    const _msgs1=['💪 כל תרגול הופך אותך יותר גמיש!','🌱 ההתחלה טובה! תנסה שוב!','🎯 עוד קצת אימון וזורם כמו מים!'];
+    const _r=Math.floor(Math.random()*3);
+    document.getElementById('finalMsg').textContent=ratio>.7?_msgs3[_r]:ratio>.4?_msgs2[_r]:_msgs1[_r];
     document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();_saveHighScore(score);document.getElementById('gameOver').style.display='flex';
     return;
   }
