@@ -580,14 +580,36 @@ function playTone(freq,dur,type,vol){
   g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur);
   o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur);
 }
-function sfxGreen(){[523,659,784].forEach((f,i)=>setTimeout(()=>playTone(f,.15,'sine',.1),i*80))}
-function sfxRed(){playTone(150,.3,'sawtooth',.12);playTone(100,.4,'square',.08)}
-function sfxCollect(){playTone(880,.12,'sine',.1);setTimeout(()=>playTone(1100,.1,'sine',.08),70)}
-function sfxBoost(){[600,800,1000,1200].forEach((f,i)=>setTimeout(()=>playTone(f,.12,'sine',.08),i*60))}
-function sfxLevelUp(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.2,'sine',.1),i*100))}
+function sfxGreen(){
+  [523,659,784,1047].forEach((f,i)=>setTimeout(()=>{playTone(f,.18,'sine',.1);playTone(f*1.5,.12,'triangle',.04)},i*70));
+  setTimeout(()=>playTone(1319,.25,'sine',.06),300)
+}
+function sfxRed(){
+  playTone(150,.35,'sawtooth',.1);playTone(110,.4,'square',.07);
+  setTimeout(()=>playTone(80,.3,'sawtooth',.08),120);
+  setTimeout(()=>playTone(60,.4,'square',.05),200)
+}
+function sfxCollect(){
+  playTone(880,.1,'sine',.09);setTimeout(()=>playTone(1100,.08,'sine',.07),50);
+  setTimeout(()=>playTone(1320,.12,'triangle',.05),100)
+}
+function sfxBoost(){
+  [500,700,900,1100,1400].forEach((f,i)=>setTimeout(()=>{playTone(f,.14,'sine',.08);playTone(f*0.5,.1,'triangle',.03)},i*50));
+  setTimeout(()=>playTone(1760,.3,'sine',.05),280)
+}
+function sfxLevelUp(){
+  [523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>{playTone(f,.25,'sine',.1);playTone(f*2,.15,'triangle',.04)},i*90));
+  setTimeout(()=>{playTone(1568,.4,'sine',.08);playTone(784,.3,'triangle',.05)},500)
+}
 function screenFlash(cls){const el=document.getElementById("screenFlash");el.className=cls;el.style.opacity="1";setTimeout(()=>{el.style.opacity="0";el.className=""},300)}
-function sfxScenario(){playTone(440,.15,'triangle',.1);setTimeout(()=>playTone(554,.15,'triangle',.08),100)}
-function sfxHonk(){playTone(350,.15,"square",.12);setTimeout(()=>playTone(440,.2,"square",.1),100)}
+function sfxScenario(){
+  playTone(440,.12,'triangle',.09);setTimeout(()=>playTone(554,.12,'triangle',.07),80);
+  setTimeout(()=>playTone(659,.18,'sine',.06),160)
+}
+function sfxHonk(){
+  playTone(350,.12,'square',.1);setTimeout(()=>playTone(440,.18,'square',.09),80);
+  setTimeout(()=>playTone(350,.1,'square',.06),200)
+}
 
 // ---- RENDERER ----
 let renderer;try{
