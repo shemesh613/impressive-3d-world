@@ -2000,7 +2000,10 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
   _cv.set(_camRX-Math.sin(window._camAngle+cTh)*14,_hillCamY+7+cPh*4,_cz-Math.cos(window._camAngle+cTh)*14);
   cam.position.lerp(_cv,.045);
   _ct.set(roadX(_lookAheadZ),roadY(_lookAheadZ)+1.5,_lookAheadZ);cam.lookAt(_ct);
-
+  // Dynamic FOV - widens at high speed
+  const _targetFov=68+spd*25;
+  cam.fov+=((_targetFov-cam.fov)*.06);
+  cam.updateProjectionMatrix();
 
   // Minimap render
   if(gameActive){
