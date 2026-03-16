@@ -1926,10 +1926,14 @@ function checkCollisions(){
   for(let i=greens.length-1;i>=0;i--){
     const g=greens[i];if(!g.active)continue;
     if((cx-g.x)**2+(cz-g.z)**2<5){
-      g.active=false;score+=8;flow=Math.min(100,flow+6);lives=Math.min(5,lives+0.3);
-      sfxCollect();emitParticles(g.x,g.y,g.z,0x22c55e,6);
+      g.active=false;if(!window._collectStreak)window._collectStreak=0;if(!window._lastCollect)window._lastCollect=0;
+      const now=performance.now();window._collectStreak=now-window._lastCollect<2000?window._collectStreak+1:1;window._lastCollect=now;
+      const combo=window._collectStreak;const bonus=Math.min(combo,5);score+=8+bonus;flow=Math.min(100,flow+6);lives=Math.min(5,lives+0.3);
+      sfxCollect();emitParticles(g.x,g.y,g.z,0x22c55e,6+combo);
       const proj=_v.set(g.x,g.y+1,g.z).project(cam);
-      showPopup('🟢 תיקיה ירוקה — לזרום!',(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,'#4ade80');
+      const px=(proj.x*.5+.5)*innerWidth,py=(-(proj.y*.5)+.5)*innerHeight;
+      if(combo>=3)showPopup('🔥 x'+combo+' קומבו! +'+(8+bonus),(px),(py-30),'#fbbf24');
+      else showPopup('🟢 +'+(8+bonus),(px),(py),'#4ade80');
       greens.splice(i,1);
     }
   }
