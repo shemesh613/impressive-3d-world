@@ -12,10 +12,10 @@
 
     /* Start Screen */
     #startScreen{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:clamp(10px,3vh,40px);overflow-y:auto;
-      background:radial-gradient(ellipse at center,#0a3020 0%,#001510 70%)}
+      background:radial-gradient(ellipse at 50% 30%,#0d2818 0%,#040d08 60%,#000 100%)}
     #startScreen h1{font-size:clamp(36px,8vw,72px);color:#4ade80;
       text-shadow:0 0 25px rgba(74,222,128,.6),0 0 50px rgba(74,222,128,.3),0 2px 8px rgba(0,0,0,.8);
-      animation:pulse 2s ease-in-out infinite;margin-bottom:8px;text-align:center;font-weight:900}
+      margin-bottom:8px;text-align:center;font-weight:900}
     #startScreen .subtitle{color:#a7f3d0;font-size:clamp(14px,3vw,22px);margin-bottom:25px;text-align:center;
       text-shadow:0 0 10px rgba(74,222,128,.3)}
     #startScreen .instructions{background:rgba(255,255,255,.08);border:1px solid rgba(74,222,128,.2);border-radius:20px;
@@ -25,8 +25,8 @@
     #startScreen .instructions .emoji{font-size:24px}
     #playBtn{margin-top:28px;padding:18px 60px;font-size:clamp(20px,4.5vw,34px);font-weight:900;border:3px solid rgba(74,222,128,.4);
       border-radius:50px;cursor:pointer;background:linear-gradient(135deg,#22c55e,#10b981);color:#fff;letter-spacing:2px;
-      box-shadow:0 0 40px rgba(34,197,94,.4),0 8px 25px rgba(0,0,0,.4);transition:transform .2s,box-shadow .2s;
-      text-shadow:0 2px 4px rgba(0,0,0,.4);animation:btnGlow 1.5s ease-in-out infinite alternate}
+      box-shadow:0 4px 20px rgba(34,197,94,.3);transition:transform .2s,box-shadow .2s;
+      text-shadow:0 2px 4px rgba(0,0,0,.4);}
     #playBtn:hover,#playBtn:active{transform:scale(1.08);box-shadow:0 0 60px rgba(34,197,94,.6)}
     @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
     @keyframes btnGlow{0%{box-shadow:0 0 30px rgba(34,197,94,.3)}100%{box-shadow:0 0 50px rgba(34,197,94,.6)}}
@@ -40,8 +40,8 @@
     /* HUD */
     #hud{position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;display:none;padding:10px 15px}
     .hud-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-    .hud-item{background:rgba(0,0,20,.75);border-radius:15px;padding:8px 16px;display:flex;align-items:center;gap:6px;
-      border:2px solid rgba(255,255,255,.12);backdrop-filter:blur(4px)}
+    .hud-item{background:rgba(0,8,16,.85);border-radius:10px;padding:6px 14px;display:flex;align-items:center;gap:6px;
+      border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(4px)}
     .hud-item .icon{font-size:clamp(16px,2.5vw,24px)}
     .hud-item .val{font-size:clamp(14px,2.5vw,22px);font-weight:900;color:#fff}
     #scoreVal{color:#4ade80}
@@ -53,12 +53,12 @@
 
     /* Scenario popup */
     #scenario{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:40;display:none;
-      width:min(92vw,520px);background:rgba(0,10,20,.92);border:2px solid rgba(74,222,128,.3);border-radius:24px;
+      width:min(92vw,520px);background:rgba(4,12,20,.95);border:1px solid rgba(74,222,128,.2);border-radius:18px;
       padding:24px;text-align:center;backdrop-filter:blur(10px);animation:popIn .3s ease}
     @keyframes popIn{0%{transform:translate(-50%,-50%) scale(.7);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
     #scenario .situation{color:#fff;font-size:clamp(17px,3.5vw,24px);font-weight:700;margin-bottom:18px;line-height:1.5;direction:rtl}
     #scenario .choices{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-    .choice-btn{flex:1;min-width:140px;padding:14px 10px;border-radius:16px;border:none;cursor:pointer;
+    .choice-btn{flex:1;min-width:140px;padding:14px 10px;border-radius:12px;border:none;cursor:pointer;
       font-size:clamp(14px,2.8vw,19px);font-weight:800;color:#fff;transition:transform .15s;line-height:1.4;direction:rtl}
     .choice-btn:active{transform:scale(.95)}
     .choice-green{background:linear-gradient(135deg,#22c55e,#10b981);box-shadow:0 0 20px rgba(34,197,94,.3)}
@@ -91,7 +91,7 @@
 
     /* Game Over */
     #gameOver{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;
-      background:rgba(0,0,0,.88);backdrop-filter:blur(8px)}
+      background:rgba(0,0,0,.92);backdrop-filter:blur(12px)}
     #gameOver h2{font-size:clamp(36px,7vw,60px);color:#4ade80;margin-bottom:10px;text-shadow:0 0 20px rgba(74,222,128,.5)}
     #gameOver .stats{color:#fff;font-size:clamp(16px,3vw,24px);margin:8px 0;direction:rtl}
     #gameOver .stats span{color:#fbbf24;font-weight:900}
@@ -110,7 +110,7 @@
     #mobileControls{position:fixed;bottom:15px;left:0;right:0;z-index:30;display:none;justify-content:space-between;padding:0 15px;pointer-events:none}
     .ctrl-group{display:flex;gap:8px;pointer-events:auto}
     .ctrl-btn{width:clamp(50px,12vw,70px);height:clamp(50px,12vw,70px);border-radius:50%;border:2px solid rgba(255,255,255,.3);
-      background:rgba(255,255,255,.1);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;
+      background:rgba(255,255,255,.08);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
       font-size:clamp(20px,5vw,30px);color:#fff;cursor:pointer;user-select:none;-webkit-user-select:none}
     .ctrl-btn:active{background:rgba(255,255,255,.3);transform:scale(.92)}
     .ctrl-btn.gas{background:rgba(0,255,100,.2);border-color:rgba(0,255,100,.4)}
