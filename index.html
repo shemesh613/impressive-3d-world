@@ -296,7 +296,10 @@
     <div style="color:#4ade80;font-weight:700;margin-bottom:6px">🏆 שיאים</div>
     <div id="highScoreList" style="color:#d1fae5;font-size:14px;line-height:1.8"></div>
   </div>
-  <button id="restartBtn" onclick="restartGame()">נסיעה חדשה! 🔄</button>
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px">
+    <button id="restartBtn" onclick="restartGame()">נסיעה חדשה! 🔄</button>
+    <button onclick="_shareResult()" style="padding:12px 30px;font-size:clamp(14px,3vw,18px);font-weight:700;border:none;border-radius:40px;cursor:pointer;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;box-shadow:0 4px 15px rgba(59,130,246,.3);transition:transform .2s" onmouseenter="this.style.transform='scale(1.05)'" onmouseleave="this.style.transform=''">📤 שתף תוצאה</button>
+  </div>
 </div>
 
 <!-- MOBILE CONTROLS -->
@@ -716,6 +719,16 @@ function startBgMusic(){
   padGain.gain.setValueAtTime(0,ctx.currentTime);padGain.gain.linearRampToValueAtTime(0.02*_masterVol,ctx.currentTime+2);
   _bgMusic={timer:null,melGain,bassGain,padGain,pad1,pad2,pad3};
   playNote();
+}
+function _shareResult(){
+  const s=document.getElementById('finalScore').textContent;
+  const g=document.getElementById('finalGreen').textContent;
+  const r=document.getElementById('finalRed').textContent;
+  const stars=document.getElementById('finalStars').textContent;
+  const d=document.getElementById('finalDist').textContent;
+  const txt='🟢 תיקיה ירוקה — זרימה בכביש!\n'+stars+'\nניקוד: '+s+' | 🟢'+g+' 🔴'+r+' | מרחק: '+d+'m\nשחקו גם: https://shemesh613.github.io/impressive-3d-world/';
+  if(navigator.share){navigator.share({title:'תיקיה ירוקה',text:txt}).catch(()=>{})}
+  else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>{const b=event.target;b.textContent='✅ הועתק!';setTimeout(()=>b.textContent='📤 שתף תוצאה',2000)})}
 }
 function stopBgMusic(){
   if(!_bgMusic)return;
