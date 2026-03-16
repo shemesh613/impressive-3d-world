@@ -78,9 +78,10 @@
       text-shadow:0 0 20px rgba(0,0,0,.5)}
 
     /* Following cars indicator */
-    #followers{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:20;pointer-events:none;font-size:14px;letter-spacing:1px;font-size:14px;letter-spacing:1px;
-      display:none;color:#fff;font-size:clamp(12px,2.5vw,16px);text-align:center;
-      background:rgba(0,0,0,.5);padding:6px 16px;border-radius:20px}
+    #followers{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:20;pointer-events:none;
+      display:none;color:#e0f7e8;font-size:clamp(12px,2.5vw,15px);text-align:center;letter-spacing:1.5px;font-weight:600;
+      background:linear-gradient(135deg,rgba(5,15,25,.85),rgba(0,10,18,.9));padding:8px 20px;border-radius:24px;
+      border:1px solid rgba(74,222,128,.12);backdrop-filter:blur(8px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
 
     /* Friend notification */
     #friendNotify{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;
@@ -92,20 +93,24 @@
 
     /* Game Over */
     #gameOver{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;
-      background:rgba(0,0,0,.88);backdrop-filter:blur(8px)}
-    #gameOver h2{font-size:clamp(36px,7vw,60px);color:#4ade80;margin-bottom:10px;text-shadow:0 0 30px rgba(74,222,128,.6),0 0 60px rgba(74,222,128,.2)}
-    #gameOver .stats{color:#fff;font-size:clamp(16px,3vw,24px);margin:8px 0;direction:rtl}
-    #gameOver .stats span{color:#fbbf24;font-weight:900}
-    #restartBtn{margin-top:20px;padding:16px 50px;font-size:clamp(18px,3.5vw,28px);font-weight:900;border:2px solid rgba(74,222,128,.3);
-      border-radius:50px;cursor:pointer;background:linear-gradient(135deg,#22c55e,#10b981);color:#fff;
-      box-shadow:0 0 30px rgba(34,197,94,.3);text-shadow:0 2px 4px rgba(0,0,0,.3)}
+      background:radial-gradient(ellipse at center,rgba(10,0,0,.85),rgba(0,0,0,.95));backdrop-filter:blur(12px)}
+    #gameOver h2{font-size:clamp(40px,8vw,68px);color:#4ade80;margin-bottom:12px;font-weight:900;letter-spacing:3px;
+      text-shadow:0 0 40px rgba(74,222,128,.6),0 0 80px rgba(74,222,128,.2);animation:pulse 2s ease-in-out infinite}
+    #gameOver .stats{color:#e8f0ff;font-size:clamp(16px,3vw,24px);margin:10px 0;direction:rtl}
+    #gameOver .stats span{color:#fbbf24;font-weight:900;text-shadow:0 0 10px rgba(251,191,36,.3)}
+    #restartBtn{margin-top:24px;padding:18px 60px;font-size:clamp(20px,4vw,30px);font-weight:900;border:none;
+      border-radius:60px;cursor:pointer;background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);color:#fff;
+      box-shadow:0 0 40px rgba(34,197,94,.35),0 8px 24px rgba(0,0,0,.5),inset 0 2px 0 rgba(255,255,255,.2);
+      text-shadow:0 2px 4px rgba(0,0,0,.4);transition:all .25s ease}
+    #restartBtn:hover{transform:scale(1.06) translateY(-2px);box-shadow:0 0 60px rgba(34,197,94,.5)}
 
     /* Level Up */
     #levelUp{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
-      background:rgba(0,0,0,.6);backdrop-filter:blur(5px)}
-    #levelUp .box{text-align:center;animation:popIn .4s ease}
-    #levelUp h2{font-size:clamp(36px,7vw,60px);color:#4ade80;text-shadow:0 0 30px rgba(74,222,128,.7),0 0 80px rgba(74,222,128,.3)}
-    #levelUp p{color:#fff;font-size:clamp(16px,3vw,24px);margin-top:8px}
+      background:radial-gradient(ellipse at center,rgba(0,20,10,.7),rgba(0,0,0,.8));backdrop-filter:blur(8px)}
+    #levelUp .box{text-align:center;animation:popIn .5s cubic-bezier(.34,1.56,.64,1)}
+    #levelUp h2{font-size:clamp(42px,8vw,70px);color:#4ade80;font-weight:900;letter-spacing:4px;
+      text-shadow:0 0 40px rgba(74,222,128,.6),0 0 100px rgba(74,222,128,.25)}
+    #levelUp p{color:#d1fae5;font-size:clamp(16px,3vw,24px);margin-top:10px;letter-spacing:1px}
 
     /* Mobile Controls */
     #mobileControls{position:fixed;bottom:15px;left:0;right:0;z-index:30;display:none;justify-content:space-between;padding:0 15px;pointer-events:none}
