@@ -323,6 +323,11 @@
 </div>
 <!-- SCREEN FLASH -->
 <div id="vignette"></div>
+<div id="pauseOverlay" style="display:none;position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;flex-direction:column">
+  <div style="font-size:60px">⏸️</div>
+  <div style="color:#4ade80;font-size:28px;font-weight:900;margin-top:12px">השהייה</div>
+  <div style="color:#a7f3d0;font-size:16px;margin-top:8px">לחץ P להמשך</div>
+</div>
 <div id="dangerVignette"></div>
 <div id="flowGlow"></div>
 <div id="headlightGlow"></div>
@@ -1554,7 +1559,12 @@ let nextScenarioAt=0,scenariosAnswered=0;
 
 // ---- INPUT ----
 const keys={};
-addEventListener('keydown',e=>{if(document.activeElement&&document.activeElement.tagName==='INPUT')return;keys[e.code]=true;if(scenarioActive){if(e.code==='Digit1'||e.code==='ArrowRight')choose('green');if(e.code==='Digit2'||e.code==='ArrowLeft')choose('red')}e.preventDefault()});
+let _paused=false;
+addEventListener('keydown',e=>{if(document.activeElement&&document.activeElement.tagName==='INPUT')return;keys[e.code]=true;
+  if(scenarioActive){if(e.code==='Digit1'||e.code==='ArrowRight')choose('green');if(e.code==='Digit2'||e.code==='ArrowLeft')choose('red')}
+  if(e.code==='KeyM')_toggleMute();
+  if(e.code==='KeyP'&&gameActive){_paused=!_paused;const pe=document.getElementById('pauseOverlay');if(pe)pe.style.display=_paused?'flex':'none'}
+  e.preventDefault()});
 addEventListener('keyup',e=>{keys[e.code]=false});
 window._gkeys=keys;window._gcar=()=>typeof car!=='undefined'?car:null;
 
@@ -1994,7 +2004,9 @@ function checkCollisions(){
 
 // ---- ANIMATE ----
 function animate(){
-  requestAnimationFrame(animate);fc++;
+  requestAnimationFrame(animate);
+  if(_paused){renderer.render(scene,cam);return}
+  fc++;
 
   if(gameActive&&!scenarioActive){
     const maxSpd=turboTimer>0?.65:boostTimer>0?.5:.35;
