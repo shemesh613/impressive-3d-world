@@ -621,7 +621,9 @@ function sfxLevelUp(){
   [523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>{playTone(f,.25,'sine',.1);playTone(f*2,.15,'triangle',.04)},i*90));
   setTimeout(()=>{playTone(1568,.4,'sine',.08);playTone(784,.3,'triangle',.05)},500)
 }
-function screenFlash(cls){const el=document.getElementById("screenFlash");el.className=cls;el.style.opacity="1";setTimeout(()=>{el.style.opacity="0";el.className=""},300)}
+function screenFlash(cls){const el=document.getElementById("screenFlash");el.className=cls;el.style.opacity="1";setTimeout(()=>{el.style.opacity="0";el.className=""},300);
+  if(cls==='flash-red'){const c=document.querySelector('canvas');if(c){c.style.transition='none';c.style.transform='translateX(4px)';setTimeout(()=>{c.style.transform='translateX(-4px)';setTimeout(()=>{c.style.transform='translateX(2px)';setTimeout(()=>{c.style.transform='';},50)},50)},50)}}
+}
 function confettiBurst(){
   const c=document.getElementById('confetti');if(!c)return;
   const colors=['#4ade80','#22c55e','#86efac','#fbbf24','#60a5fa','#f472b6','#a78bfa'];
