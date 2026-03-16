@@ -40,7 +40,7 @@
     /* HUD */
     #hud{position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;display:none;padding:10px 15px}
     .hud-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-    .hud-item{background:rgba(0,0,20,.75);border-radius:15px;padding:8px 16px;display:flex;align-items:center;gap:6px;
+    .hud-item{background:rgba(0,8,16,.85);border-radius:12px;padding:8px 16px;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,0.3);
       border:2px solid rgba(255,255,255,.12);backdrop-filter:blur(4px)}
     .hud-item .icon{font-size:clamp(16px,2.5vw,24px)}
     .hud-item .val{font-size:clamp(14px,2.5vw,22px);font-weight:900;color:#fff}
@@ -1120,8 +1120,8 @@ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAtt
 // ---- CAR (player) ----
 const car=new THREE.Group();
 {
-  const body=new THREE.Mesh(new THREE.BoxGeometry(2,.7,4),new THREE.MeshStandardMaterial({color:0x22c55e,roughness:0.35,metalness:0.4}));body.position.y=.5;car.add(body);
-  const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.6,.5,2.2),new THREE.MeshStandardMaterial({color:0x0a5c2e,roughness:0.2,metalness:0.6}));cabin.position.set(0,1.1,-.1);car.add(cabin);
+  const body=new THREE.Mesh(new THREE.BoxGeometry(2,.7,4),new THREE.MeshStandardMaterial({color:0x22c55e,roughness:0.28,metalness:0.5}));body.position.y=.5;car.add(body);
+  const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.6,.5,2.2),new THREE.MeshStandardMaterial({color:0x0a4a28,roughness:0.1,metalness:0.7}));cabin.position.set(0,1.1,-.1);car.add(cabin);
   const hlGeo=new THREE.BoxGeometry(.3,.14,.04);const hlMat=new THREE.MeshStandardMaterial({color:0xffffdd,emissive:0xffff88,emissiveIntensity:0.8,roughness:0.2,metalness:0.5});
   const hlInst=new THREE.InstancedMesh(hlGeo,hlMat,2);
   [-.6,.6].forEach((x,i)=>{dummy.position.set(x,.5,2.01);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();hlInst.setMatrixAt(i,dummy.matrix)});
