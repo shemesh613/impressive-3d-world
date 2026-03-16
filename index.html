@@ -1841,6 +1841,9 @@ function _realStartGame(){
   spawnGreen();
   // obstacles spawn naturally
   updateHUD();
+  // Show random flexibility tip
+  const _tips=['💡 גמישות = כוח! מי שזורם — מגיע רחוק','💡 לא תמיד יוצא מה שתכננת — וזה בסדר!','💡 חבר גמיש = חבר שכיף להיות איתו','💡 ויתור על קטנות = ניצחון גדול','💡 שינוי תוכניות? הזדמנות להרפתקה!','💡 מי שלא נתקע — תמיד נהנה','💡 גמישות זה לא חולשה — זה גבורה!','💡 זרום עם החברים — הכיף כפול!'];
+  const _tipEl=document.getElementById('tip');if(_tipEl){_tipEl.textContent=_tips[Math.floor(Math.random()*_tips.length)];_tipEl.style.display='block';_tipEl.style.opacity='1';_tipEl.style.transition='opacity 1s';setTimeout(()=>{_tipEl.style.opacity='0';setTimeout(()=>_tipEl.style.display='none',1000)},4000)}
   if(isMultiplayer){
     opCar.visible=true;opCar.position.set(2,0,0);
     opData={x:0,z:0,dir:0,score:0,flow:50,level:1,gameActive:true};
