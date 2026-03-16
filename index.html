@@ -144,6 +144,9 @@
     #vignette{position:fixed;inset:0;z-index:13;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.45) 100%)}
     #dangerVignette{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(ellipse at center,transparent 40%,rgba(239,68,68,.25) 100%)}
     #flowGlow{position:fixed;inset:0;z-index:12;pointer-events:none;opacity:0;transition:opacity .5s;background:radial-gradient(ellipse at center,transparent 60%,rgba(74,222,128,.1) 100%)}
+    #starfield{position:fixed;top:0;left:0;right:0;height:40vh;z-index:1;pointer-events:none;opacity:.6}
+    .star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--dur) ease-in-out infinite alternate}
+    @keyframes twinkle{0%{opacity:.2;transform:scale(.8)}100%{opacity:1;transform:scale(1.2)}}
     #headlightGlow{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:60vw;height:35vh;z-index:12;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(255,245,200,.04) 0%,rgba(255,240,180,.02) 40%,transparent 70%);opacity:0;transition:opacity .5s}
     #boostTrail{position:fixed;bottom:15%;left:50%;transform:translateX(-50%);width:8px;height:0;z-index:11;pointer-events:none;background:linear-gradient(to top,rgba(74,222,128,.5),rgba(74,222,128,0));border-radius:4px;transition:height .3s,opacity .3s;opacity:0;filter:blur(3px)}
     /* Screen flash */    #speedLines{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:repeating-linear-gradient(90deg,transparent 0%,transparent 48%,rgba(255,255,255,0.03) 49%,transparent 50%,transparent 98%,rgba(255,255,255,0.03) 99%,transparent 100%);background-size:20px 100%}
@@ -330,6 +333,8 @@
 </div>
 <div id="dangerVignette"></div>
 <div id="flowGlow"></div>
+<div id="starfield"></div>
+<script>!function(){const sf=document.getElementById('starfield');if(!sf)return;for(let i=0;i<40;i++){const s=document.createElement('div');s.className='star';const sz=1+Math.random()*2;s.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;--dur:'+(2+Math.random()*3)+'s;animation-delay:'+(Math.random()*3)+'s';sf.appendChild(s)}}()</script>
 <div id="headlightGlow"></div>
 <div id="boostTrail"></div>
 <div id="speedLines"></div>
