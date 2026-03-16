@@ -1757,8 +1757,9 @@ function choose(type){
   if(scenariosAnswered>0&&scenariosAnswered%4===0){
     level++;sfxLevelUp();confettiBurst();
     const lu=document.getElementById('levelUp');
+    const _lvlTitles=['','🌱 מתחילים!','🌿 זורם יפה!','🌳 גמיש!','💪 מאסטר זרימה!','🏆 אלוף הגמישות!','⭐ כוכב חברתי!','🌟 אגדה!','👑 מלך הזרימה!'];
     document.getElementById('levelUpText').textContent='שלב '+level+'! 🎉';
-    document.getElementById('levelUpSub').textContent='המצבים נהיים מאתגרים יותר!';
+    document.getElementById('levelUpSub').textContent=_lvlTitles[Math.min(level,_lvlTitles.length-1)]||'ממשיכים!';
     lu.style.display='flex';setTimeout(()=>{lu.style.display='none'},1500);
   }
 
