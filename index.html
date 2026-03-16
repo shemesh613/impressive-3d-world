@@ -35,10 +35,10 @@
     @keyframes btnGlow{0%{box-shadow:0 0 30px rgba(34,197,94,.3)}100%{box-shadow:0 0 50px rgba(34,197,94,.6)}}
 
 
-    #minimap{position:fixed;bottom:15px;left:15px;width:130px;height:130px;z-index:25;border-radius:50%;
-      background:rgba(0,10,20,.8);border:2px solid rgba(74,222,128,.3);border-radius:12px;
-      overflow:hidden;pointer-events:none}
-    #minimap canvas{width:100%;height:100%}
+    #minimap{position:fixed;bottom:15px;left:15px;width:130px;height:130px;z-index:25;
+      background:rgba(0,10,20,.85);border:2px solid rgba(74,222,128,.3);border-radius:50%;
+      overflow:hidden;pointer-events:none;box-shadow:0 0 15px rgba(0,0,0,.5),inset 0 0 10px rgba(0,0,0,.3)}
+    #minimap canvas{width:100%;height:100%;border-radius:50%}
 
     /* HUD */
     #hud{position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;display:none;padding:10px 15px}
@@ -2347,16 +2347,20 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
     const mc=document.getElementById('minimapCanvas');
     if(mc){
       const ctx=mc.getContext('2d');
-      ctx.fillStyle='rgba(10,22,40,0.9)';
-      ctx.fillRect(0,0,120,120);
+      ctx.clearRect(0,0,120,120);
+      ctx.fillStyle='rgba(6,15,30,0.95)';
+      ctx.beginPath();ctx.arc(60,60,60,0,Math.PI*2);ctx.fill();
       const scale=0.8;
-      const cx=60,cy=90;
-      // Road
-      ctx.fillStyle='#2a3545';
-      ctx.fillRect(50,0,20,120);
-      // Car (center bottom)
-      ctx.fillStyle='#22c55e';
-      ctx.fillRect(cx-3,cy-4,6,8);
+      const cx=60,cy=75;
+      // Road curve
+      ctx.strokeStyle='#2a4050';ctx.lineWidth=14;ctx.lineCap='round';ctx.beginPath();
+      for(let dz=-60;dz<60;dz+=5){const rz=car.position.z+dz/scale;const rx=(roadX(rz)-car.position.x)*scale;ctx.lineTo(cx+rx,cy-dz)}ctx.stroke();
+      // Road center line
+      ctx.strokeStyle='#3a5a6a';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();
+      for(let dz=-60;dz<60;dz+=5){const rz=car.position.z+dz/scale;const rx=(roadX(rz)-car.position.x)*scale;ctx.lineTo(cx+rx,cy-dz)}ctx.stroke();ctx.setLineDash([]);
+      // Car (arrow)
+      ctx.fillStyle='#4ade80';ctx.shadowColor='#4ade80';ctx.shadowBlur=6;
+      ctx.beginPath();ctx.moveTo(cx,cy-6);ctx.lineTo(cx-4,cy+4);ctx.lineTo(cx+4,cy+4);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
       // Greens
       ctx.fillStyle='#55ff77';
       for(let i=0;i<greens.length;i++){
