@@ -1191,7 +1191,7 @@ function triggerScenario(){
   const tf=document.getElementById('timerFill');
   tf.style.transition='none';tf.style.width='100%';
   requestAnimationFrame(()=>{tf.style.transition='width 12s linear';tf.style.width='0%'});
-  scenarioTimeout=setTimeout(()=>{if(scenarioActive)choose('timeout')},12000);
+  scenarioTimeout=setTimeout(()=>{if(scenarioActive)choose('timeout')},20000);
 }
 
 function choose(type){
@@ -1290,7 +1290,7 @@ function createRoom(){
   document.getElementById('roomCodeDisplay').style.display='block';
   document.getElementById('joinSection').style.display='none';
   isHost=true;
-  peer=new Peer('tikia-'+mpRoomCode+'-host',{debug:0});
+  peer=new Peer('tikia-'+mpRoomCode+'-host',{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun2.l.google.com:19302'},{urls:'stun:stun3.l.google.com:19302'},{urls:'stun:stun4.l.google.com:19302'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]}});
   peer.on('open',function(){console.log('Host ready:',mpRoomCode)});
   peer.on('connection',function(c){
     conn=c;
@@ -1317,14 +1317,14 @@ function joinRoom(){
   document.getElementById('joinStatus').textContent='⏳ מתחבר...';
   document.getElementById('joinStatus').style.color='#a7f3d0';
   isHost=false;
-  peer=new Peer('tikia-'+mpRoomCode+'-guest',{debug:0});
+  peer=new Peer('tikia-'+mpRoomCode+'-guest',{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun2.l.google.com:19302'},{urls:'stun:stun3.l.google.com:19302'},{urls:'stun:stun4.l.google.com:19302'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]}});
   peer.on('open',function(){
     conn=peer.connect('tikia-'+mpRoomCode+'-host',{reliable:true});
     var jt=setTimeout(function(){
       document.getElementById('joinStatus').textContent='❌ לא הצליח להתחבר — נסה שוב';
       document.getElementById('joinStatus').style.color='#f87171';
       if(peer){peer.destroy();peer=null}
-    },12000);
+    },20000);
     function onJoinOpen(){clearTimeout(jt);setupConn();isMultiplayer=true;startGame()}
     if(conn.open)onJoinOpen();
     else conn.on('open',onJoinOpen);
