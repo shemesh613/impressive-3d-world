@@ -406,11 +406,11 @@ const _ct=new THREE.Vector3();
 const _col=new THREE.Color();
 
 // ---- ROAD CURVE FUNCTION ----
-function roadY(z){return Math.sin(z*.006)*1.2+Math.sin(z*.014)*0.6}
+function roadY(z){return Math.sin(z*.006)*2.5+Math.sin(z*.017)*1.2+Math.sin(z*.003)*1.5}
 function roadX(z){
   if(z<0)return 0;
   const s=z%600;
-  const base=Math.sin(z*.005)*12+Math.sin(z*.015)*8;
+  const base=Math.sin(z*.005)*16+Math.sin(z*.013)*10+Math.sin(z*.003)*6;
   const sharp=(s<120)?0:(s<200)?((s-120)/80)*35:(s<350)?35-((s-200)/150)*70:(s<450)?-35+((s-350)/100)*35:0;
   const twist=Math.floor(z/600)%2===0?1:-1;
   return base+sharp*twist*1.0;
@@ -1739,13 +1739,13 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
     // Dynamic scenery - colors change as you drive
     if(fc%30===0){
       const dist=car.position.z;
-      const zone=Math.floor(dist/500)%5;
-      const t=(dist%500)/500;
-      const skyColors=[0x0a1628,0x1a0525,0x051a10,0x1a1005,0x0a0a28];
-      const groundColors=[0x1a2a3a,0x2a1a2a,0x1a2a1a,0x2a2a1a,0x1a1a3a];
-      const fogColors=[0x0a1628,0x1a0525,0x051a10,0x1a1005,0x0a0a28];
-      const edgeColors=[0x22c55e,0xe040fb,0x00e5ff,0xff9100,0x536dfe];
-      const nextZone=(zone+1)%5;
+      const zone=Math.floor(dist/300)%7;
+      const t=(dist%300)/300;
+      const skyColors=[0x1a2a40,0x251530,0x0a2518,0x2a2010,0x101535,0x1a3030,0x2a1520];
+      const groundColors=[0x1a2a3a,0x2a1a2a,0x1a2a1a,0x2a2a1a,0x1a1a3a,0x1a2a2a,0x2a1a1a];
+      const fogColors=[0x1a2a40,0x251530,0x0a2518,0x2a2010,0x101535,0x1a3030,0x2a1520];
+      const edgeColors=[0x22c55e,0xe040fb,0x00e5ff,0xff9100,0x536dfe,0x40e0d0,0xff6b6b];
+      const nextZone=(zone+1)%7;
       const sc=_col.setHex(skyColors[zone]);const sn=new THREE.Color(skyColors[nextZone]);sc.lerp(sn,t);
       renderer.setClearColor(sc);
       scene.fog.color.copy(sc);
@@ -1969,13 +1969,18 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
     else{pi.style.display='none'}
     if(window._edgeMat){const fc2=flow/100;window._edgeMat.color.setRGB(1-fc2,fc2,.2)}}
 
-  // Camera
-  if(!window._camX)window._camX=car.position.x;
-  window._camX+=(car.position.x-window._camX)*.015;
-  const _hillCamY=roadY(car.position.z);
-  _cv.set(window._camX-Math.sin(dir+cTh)*14,_hillCamY+7+cPh*4,car.position.z-Math.cos(dir+cTh)*14);
-  cam.position.lerp(_cv,.035);
-  _ct.set(window._camX+Math.sin(dir)*25,2,car.position.z+Math.cos(dir)*25);cam.lookAt(_ct);
+  // Camera - follows road curves
+  const _cz=car.position.z;
+  const _roadDirX=roadX(_cz+8)-roadX(_cz-8);
+  const _roadAngle=Math.atan2(_roadDirX,16);
+  if(!window._camAngle)window._camAngle=0;
+  window._camAngle+=(_roadAngle-window._camAngle)*.04;
+  const _camRX=roadX(_cz)+car.position.x-roadX(_cz);
+  const _hillCamY=roadY(_cz);
+  const _lookAheadZ=_cz+25;
+  _cv.set(_camRX-Math.sin(window._camAngle+cTh)*14,_hillCamY+7+cPh*4,_cz-Math.cos(window._camAngle+cTh)*14);
+  cam.position.lerp(_cv,.045);
+  _ct.set(roadX(_lookAheadZ),roadY(_lookAheadZ)+1.5,_lookAheadZ);cam.lookAt(_ct);
 
 
   // Minimap render
