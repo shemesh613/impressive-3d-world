@@ -1000,14 +1000,22 @@ scene.add((() => {
   window._tunnelData={lights:tunnelLightInst,positions:tunnelPositions,n:TUNNEL_N,lpt:LIGHTS_PER_TUNNEL};
 }
 
-// ---- BUILDINGS (city-like) ----
+// ---- BUILDINGS (varied zones) ----
 const bdata=[];
 for(let z=-100;z<=2800;z+=10){
   const _rx=roadX(z);
-  bdata.push([_rx-11,z,2.5+Math.random()*2,4+Math.random()*12,2.5+Math.random()*2]);
-  bdata.push([_rx+11,z,2.5+Math.random()*2,4+Math.random()*12,2.5+Math.random()*2]);
-  if(Math.random()>.5)bdata.push([_rx-17,z,2+Math.random()*2,3+Math.random()*8,2+Math.random()*2]);
-  if(Math.random()>.5)bdata.push([_rx+17,z,2+Math.random()*2,3+Math.random()*8,2+Math.random()*2]);
+  const zone=Math.floor(z/300)%7;
+  // Zone types: 0=downtown tall, 1=suburban low, 2=mixed, 3=park(sparse), 4=industrial, 5=residential, 6=commercial
+  const zoneH=[18,6,12,4,10,7,14];
+  const zoneBase=[6,2,3,1,4,2,5];
+  const zoneSkip=[0.0,0.1,0.05,0.5,0.08,0.15,0.03];
+  if(Math.random()>zoneSkip[zone]){
+    const h=zoneBase[zone]+Math.random()*zoneH[zone];
+    bdata.push([_rx-11,z,2.5+Math.random()*2,h,2.5+Math.random()*2]);
+    bdata.push([_rx+11,z,2.5+Math.random()*2,h*(.5+Math.random()*.5),2.5+Math.random()*2]);
+  }
+  if(Math.random()>.4&&zone!==3)bdata.push([_rx-17,z,2+Math.random()*2,zoneBase[zone]+Math.random()*zoneH[zone]*.6,2+Math.random()*2]);
+  if(Math.random()>.4&&zone!==3)bdata.push([_rx+17,z,2+Math.random()*2,zoneBase[zone]+Math.random()*zoneH[zone]*.6,2+Math.random()*2]);
 }
 {
   const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05});
@@ -1988,22 +1996,21 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
     else{pi.style.display='none'}
     if(window._edgeMat){const fc2=flow/100;window._edgeMat.color.setRGB(1-fc2,fc2,.2)}}
 
-  // Camera - follows road curves
+  // Camera - stays behind car on road, never swings into buildings
   const _cz=car.position.z;
-  const _roadDirX=roadX(_cz+8)-roadX(_cz-8);
-  const _roadAngle=Math.atan2(_roadDirX,16);
-  if(!window._camAngle)window._camAngle=0;
-  window._camAngle+=(_roadAngle-window._camAngle)*.04;
-  const _camRX=roadX(_cz)+car.position.x-roadX(_cz);
-  const _hillCamY=roadY(_cz);
-  const _lookAheadZ=_cz+25;
-  // Speed shake - subtle vibration at high speed
-  const _shakeAmt=spd>0.25?((spd-0.25)*0.08):0;
-  const _shakeX=_shakeAmt*(Math.sin(fc*7.3)*.5+Math.sin(fc*13.1)*.3);
-  const _shakeY=_shakeAmt*(Math.sin(fc*9.7)*.3+Math.sin(fc*11.3)*.2);
-  _cv.set(_camRX-Math.sin(window._camAngle+cTh)*14+_shakeX,_hillCamY+7+cPh*4+_shakeY,_cz-Math.cos(window._camAngle+cTh)*14);
-  cam.position.lerp(_cv,.045);
-  _ct.set(roadX(_lookAheadZ),roadY(_lookAheadZ)+1.5,_lookAheadZ);cam.lookAt(_ct);
+  const _behindZ=_cz-12;
+  const _camRoadX=roadX(_behindZ);
+  const _carOffsetX=car.position.x-roadX(_cz);
+  const _camX=_camRoadX+_carOffsetX*0.5;
+  const _hillCamY=roadY(_behindZ);
+  const _lookAheadZ=_cz+20;
+  // Speed shake
+  const _shakeAmt=spd>0.25?((spd-0.25)*0.06):0;
+  const _shakeX=_shakeAmt*(Math.sin(fc*7.3)*.4+Math.sin(fc*13.1)*.2);
+  const _shakeY=_shakeAmt*(Math.sin(fc*9.7)*.2+Math.sin(fc*11.3)*.15);
+  _cv.set(_camX+_shakeX,_hillCamY+6.5+cPh*4+_shakeY,_behindZ);
+  cam.position.lerp(_cv,.06);
+  _ct.set(roadX(_lookAheadZ),roadY(_lookAheadZ)+1,_lookAheadZ);cam.lookAt(_ct);
   // Dynamic FOV - widens at high speed
   const _targetFov=68+spd*25;
   cam.fov+=((_targetFov-cam.fov)*.06);
