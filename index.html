@@ -1189,17 +1189,6 @@ followerInst.instanceMatrix.needsUpdate=true;
     const fEl=document.getElementById('followers');
     fEl.textContent='🚗🚗🚗🚗🚗 חברים נוסעים אחריך!';followerInst.instanceColor.needsUpdate=true;
 followerInst.frustumCulled=false;scene.add(followerInst);
-
-// ---- CAR TRAIL PARTICLES ----
-const _TRAIL_N=60;
-const _trailPos=new Float32Array(_TRAIL_N*3);
-const _trailAlpha=new Float32Array(_TRAIL_N);
-const _trailGeo=new THREE.BufferGeometry();
-_trailGeo.setAttribute("position",new THREE.BufferAttribute(_trailPos,3));
-const _trailMat=new THREE.PointsMaterial({color:0x22c55e,size:0.3,transparent:true,opacity:0.5,depthWrite:false,sizeAttenuation:true});
-const _trailPts=new THREE.Points(_trailGeo,_trailMat);
-_trailPts.frustumCulled=false;scene.add(_trailPts);
-let _trailIdx=0;
 const followerPos=[];
 for(let i=0;i<FOLLOWER_N;i++)followerPos.push({x:0,z:-(i+1)*6,y:.4});
 
@@ -2079,16 +2068,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
     }
   }
 
-  // Update car trail
-if(gameActive&&spd>0.05){
-  _trailPos[_trailIdx*3]=car.position.x+(Math.random()-0.5)*0.5;
-  _trailPos[_trailIdx*3+1]=car.position.y+0.2;
-  _trailPos[_trailIdx*3+2]=car.position.z-3;
-  _trailIdx=(_trailIdx+1)%_TRAIL_N;
-  _trailGeo.attributes.position.needsUpdate=true;
-  _trailMat.opacity=Math.min(0.5,spd*2);
-}
-renderer.render(scene,cam);
+  renderer.render(scene,cam);
 }
 animate();
 
