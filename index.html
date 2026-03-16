@@ -140,6 +140,7 @@
     .ctrl-btn.gas{background:rgba(0,255,100,.2);border-color:rgba(0,255,100,.4)}
     .ctrl-btn.gas:active{background:rgba(0,255,100,.45);box-shadow:0 0 20px rgba(0,255,100,.4)}
     #vignette{position:fixed;inset:0;z-index:13;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.45) 100%)}
+    #dangerVignette{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(ellipse at center,transparent 40%,rgba(239,68,68,.25) 100%)}
     #headlightGlow{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:60vw;height:35vh;z-index:12;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(255,245,200,.04) 0%,rgba(255,240,180,.02) 40%,transparent 70%);opacity:0;transition:opacity .5s}
     /* Screen flash */    #speedLines{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:repeating-linear-gradient(90deg,transparent 0%,transparent 48%,rgba(255,255,255,0.03) 49%,transparent 50%,transparent 98%,rgba(255,255,255,0.03) 99%,transparent 100%);background-size:20px 100%}
     #screenFlash{position:fixed;inset:0;z-index:15;pointer-events:none;opacity:0;transition:opacity .1s}    .flash-green{background:rgba(34,197,94,.25);opacity:1!important}    .flash-red{background:rgba(239,68,68,.25);opacity:1!important}    .flash-gold{background:rgba(251,191,36,.2);opacity:1!important}
@@ -318,6 +319,7 @@
 </div>
 <!-- SCREEN FLASH -->
 <div id="vignette"></div>
+<div id="dangerVignette"></div>
 <div id="headlightGlow"></div>
 <div id="speedLines"></div>
 <div id="confetti"></div>
@@ -2003,6 +2005,8 @@ function animate(){
     const aheadX=roadX(car.position.z+30);
     const curvePull=(curX-car.position.x)*.003;
     car.position.x+=curvePull;
+    const _offRoad=Math.abs(car.position.x-curX);
+    const _dv=document.getElementById('dangerVignette');if(_dv)_dv.style.opacity=_offRoad>3?String(Math.min(1,(_offRoad-3)*0.15)):'0';
     // Visual tilt only - slight lean into curves for feel
     const curveAngle=Math.atan2(aheadX-curX,30)*.12;
     car.rotation.y=dir+curveAngle;
