@@ -45,10 +45,10 @@
     .hud-item .icon{font-size:clamp(16px,2.5vw,24px)}
     .hud-item .val{font-size:clamp(14px,2.5vw,22px);font-weight:900;color:#fff}
     #scoreVal{color:#4ade80}
-    #livesVal{color:#60a5fa;font-size:13px}
+    #livesVal{color:#60a5fa;font-size:16px;letter-spacing:3px}
     #flowVal{color:#fbbf24}
     #levelVal{color:#60a5fa}
-    #flowBar{width:130px;height:14px;background:rgba(255,255,255,.12);border-radius:5px;overflow:hidden}
+    #flowBar{width:160px;height:16px;background:rgba(255,255,255,.12);border-radius:5px;overflow:hidden}
     #flowFill{height:100%;width:50%;background:linear-gradient(90deg,#ef4444,#fbbf24,#22c55e);box-shadow:0 0 8px rgba(34,197,94,.4);border-radius:5px;transition:width .3s}
 
     /* Scenario popup */
@@ -56,11 +56,11 @@
       width:min(92vw,520px);background:rgba(0,10,20,.92);border:2px solid rgba(74,222,128,.3);border-radius:24px;
       padding:24px;text-align:center;backdrop-filter:blur(10px);animation:popIn .3s ease}
     @keyframes popIn{0%{transform:translate(-50%,-50%) scale(.7);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
-    #scenario .situation{color:#fff;font-size:clamp(17px,3.5vw,24px);font-weight:700;margin-bottom:18px;line-height:1.5;direction:rtl}
+    #scenario .situation{color:#fff;font-size:clamp(17px,3.5vw,22px);font-weight:700;margin-bottom:18px;line-height:1.6;direction:rtl;text-shadow:0 1px 4px rgba(0,0,0,0.3)}
     #scenario .choices{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
     .choice-btn{flex:1;min-width:140px;padding:14px 10px;border-radius:16px;border:none;cursor:pointer;
       font-size:clamp(14px,2.8vw,19px);font-weight:800;color:#fff;transition:transform .15s;line-height:1.4;direction:rtl}
-    .choice-btn:active{transform:scale(.95)}
+    .choice-btn:active{transform:scale(.92);filter:brightness(1.2)}
     .choice-green{background:linear-gradient(135deg,#22c55e,#10b981);box-shadow:0 0 20px rgba(34,197,94,.3)}
     .choice-red{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 0 20px rgba(239,68,68,.3)}
     .choice-green:hover{box-shadow:0 0 30px rgba(34,197,94,.5)}
@@ -77,7 +77,7 @@
       text-shadow:0 0 20px rgba(0,0,0,.5)}
 
     /* Following cars indicator */
-    #followers{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:20;pointer-events:none;
+    #followers{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:20;pointer-events:none;font-size:14px;letter-spacing:1px;
       display:none;color:#fff;font-size:clamp(12px,2.5vw,16px);text-align:center;
       background:rgba(0,0,0,.5);padding:6px 16px;border-radius:20px}
 
@@ -92,7 +92,7 @@
     /* Game Over */
     #gameOver{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;
       background:rgba(0,0,0,.88);backdrop-filter:blur(8px)}
-    #gameOver h2{font-size:clamp(36px,7vw,60px);color:#4ade80;margin-bottom:10px;text-shadow:0 0 20px rgba(74,222,128,.5)}
+    #gameOver h2{font-size:clamp(36px,7vw,60px);color:#4ade80;margin-bottom:10px;text-shadow:0 0 30px rgba(74,222,128,.6),0 0 60px rgba(74,222,128,.2)}
     #gameOver .stats{color:#fff;font-size:clamp(16px,3vw,24px);margin:8px 0;direction:rtl}
     #gameOver .stats span{color:#fbbf24;font-weight:900}
     #restartBtn{margin-top:20px;padding:16px 50px;font-size:clamp(18px,3.5vw,28px);font-weight:900;border:2px solid rgba(74,222,128,.3);
@@ -103,13 +103,13 @@
     #levelUp{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
       background:rgba(0,0,0,.6);backdrop-filter:blur(5px)}
     #levelUp .box{text-align:center;animation:popIn .4s ease}
-    #levelUp h2{font-size:clamp(36px,7vw,60px);color:#4ade80;text-shadow:0 0 25px rgba(74,222,128,.5)}
+    #levelUp h2{font-size:clamp(36px,7vw,60px);color:#4ade80;text-shadow:0 0 30px rgba(74,222,128,.7),0 0 80px rgba(74,222,128,.3)}
     #levelUp p{color:#fff;font-size:clamp(16px,3vw,24px);margin-top:8px}
 
     /* Mobile Controls */
     #mobileControls{position:fixed;bottom:15px;left:0;right:0;z-index:30;display:none;justify-content:space-between;padding:0 15px;pointer-events:none}
     .ctrl-group{display:flex;gap:8px;pointer-events:auto}
-    .ctrl-btn{width:clamp(50px,12vw,70px);height:clamp(50px,12vw,70px);border-radius:50%;border:2px solid rgba(255,255,255,.3);
+    .ctrl-btn{width:clamp(56px,14vw,76px);height:clamp(56px,14vw,76px);border-radius:50%;border:2px solid rgba(255,255,255,.3);
       background:rgba(255,255,255,.1);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;
       font-size:clamp(20px,5vw,30px);color:#fff;cursor:pointer;user-select:none;-webkit-user-select:none}
     .ctrl-btn:active{background:rgba(255,255,255,.3);transform:scale(.92)}
@@ -388,9 +388,9 @@ renderer.toneMappingExposure=1.25;
 document.body.prepend(renderer.domElement);}catch(e){document.getElementById('startScreen').innerHTML='<h1 style="color:#ef4444;margin:20px">😔 WebGL לא נתמך</h1><p style="color:#fff;font-size:20px;text-align:center">נסו דפדפן אחר או הפעילו האצת חומרה</p>';throw e}
 
 const scene=new THREE.Scene();
-const cam=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,1,400);
+const cam=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,0.5,600);
 cam.position.set(0,10,18);
-scene.fog=new THREE.FogExp2(0x0a1628,.0010);
+scene.fog=new THREE.FogExp2(0x0a1628,.0008);
 const ambLight=new THREE.AmbientLight(0x334466,0.45);scene.add(ambLight);
 const dirLight=new THREE.DirectionalLight(0xffeedd,1.1);dirLight.position.set(30,50,40);scene.add(dirLight);
 const hemiLight=new THREE.HemisphereLight(0x87ceeb,0x3a5a40,0.35);scene.add(hemiLight);
@@ -527,7 +527,7 @@ scene.add((() => {
 // ---- ROAD BARRIERS (chicanes/turns) ----
 {
   const BARRIER_N=30;
-  const barrierGeo=new THREE.BoxGeometry(3,.8,1);
+  const barrierGeo=new THREE.BoxGeometry(3,.6,.8);
   const barrierMat=new THREE.MeshStandardMaterial({color:0xff6600,emissive:0xff4400,emissiveIntensity:0.3,roughness:0.6,metalness:0.1});
   const barrierInst=new THREE.InstancedMesh(barrierGeo,barrierMat,BARRIER_N);
   const barrierData=[];
@@ -583,7 +583,7 @@ scene.add((() => {
 // ---- SPEED BUMPS ----
 {
   const BUMP_N=25;
-  const bumpGeo=new THREE.CylinderGeometry(3,.01,.3,8);
+  const bumpGeo=new THREE.CylinderGeometry(2.5,.5,.2,12);
   const bumpMat=new THREE.MeshStandardMaterial({color:0xffdd00,emissive:0xffbb00,emissiveIntensity:0.3,roughness:0.6,metalness:0.1});
   const bumpInst=new THREE.InstancedMesh(bumpGeo,bumpMat,BUMP_N);
   for(let i=0;i<BUMP_N;i++){
@@ -1032,7 +1032,7 @@ for(let z=-100;z<=2800;z+=10){
 {
   const wp=[];
   bdata.forEach(b=>{for(let y=0;y<Math.floor(b[3]/2);y++){for(let x=-1;x<=1;x++){if(Math.random()>.25)wp.push(b[0]+x*.8,y*1.2+1.2,b[1]+b[4]/2+.01)}}});
-  const n=wp.length/3;const geo=new THREE.PlaneGeometry(.55,.7);const mat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffcc55,emissiveIntensity:1.2,roughness:0.1,metalness:0.0});
+  const n=wp.length/3;const geo=new THREE.PlaneGeometry(.4,.5);const mat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffcc55,emissiveIntensity:1.2,roughness:0.1,metalness:0.0});
   const inst=new THREE.InstancedMesh(geo,mat,n);
   for(let i=0;i<n;i++){dummy.position.set(wp[i*3],wp[i*3+1],wp[i*3+2]);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix)}
   inst.instanceMatrix.needsUpdate=true;scene.add(inst);
@@ -1090,7 +1090,7 @@ scene.add(opCar);
 // ---- FOLLOWER CARS ----
 const FOLLOWER_N=5;
 const followerColors=[0x60a5fa,0xfbbf24,0xf472b6,0xa78bfa,0x34d399];
-const followerInst=new THREE.InstancedMesh(new THREE.BoxGeometry(1.6,.5,3),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05}),FOLLOWER_N);
+const followerInst=new THREE.InstancedMesh(new THREE.BoxGeometry(1.6,.5,3),new THREE.MeshStandardMaterial({roughness:0.35,metalness:0.4}),FOLLOWER_N);
 for(let i=0;i<FOLLOWER_N;i++){
   dummy.position.set(0,-100,0);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
   followerInst.setMatrixAt(i,dummy.matrix);followerInst.setColorAt(i,_col.setHex(followerColors[i]));
@@ -1132,15 +1132,15 @@ function spawnGreen(){
 }
 
 // ---- POWER-UPS (golden diamonds) ----
-const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.8,1),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0xfbbf24}),MAX_POWERUPS);powerupInst.frustumCulled=false;scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const z=car.position.z+(60+Math.random()*40);const rx=roadX(z);const x=rx+(Math.random()-.5)*7;  powerups.push({x,z,y:2.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
+const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.8,1),new THREE.MeshStandardMaterial({color:0xfbbf24,emissive:0xffaa00,emissiveIntensity:0.5,roughness:0.2,metalness:0.5}),MAX_POWERUPS);powerupInst.frustumCulled=false;scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const z=car.position.z+(60+Math.random()*40);const rx=roadX(z);const x=rx+(Math.random()-.5)*7;  powerups.push({x,z,y:2.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
 // ---- OBSTACLES (red) ----
 const MAX_OBS=2;
 const obstacles=[];
-const obsInst=new THREE.InstancedMesh(new THREE.BoxGeometry(2,2,2),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0xff2222,transparent:true,opacity:0.9}),MAX_OBS);
+const obsInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1.2,0),new THREE.MeshStandardMaterial({color:0xff3333,emissive:0xff1111,emissiveIntensity:0.6,roughness:0.3,metalness:0.2,transparent:true,opacity:0.9}),MAX_OBS);
 obsInst.frustumCulled=false;scene.add(obsInst);
 
 const obsRingGeo=new THREE.RingGeometry(1.2,1.8,16);
-const obsRingMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0xff4444,transparent:true,opacity:0.4,side:THREE.DoubleSide});
+const obsRingMat=new THREE.MeshBasicMaterial({color:0xff4444,transparent:true,opacity:0.25,side:THREE.DoubleSide});
 const obsRingInst=new THREE.InstancedMesh(obsRingGeo,obsRingMat,MAX_OBS);
 obsRingInst.frustumCulled=false;scene.add(obsRingInst);
 window._obsRingInst=obsRingInst;
@@ -1523,9 +1523,9 @@ function updateHUD(){
   _lastFriendCount=curFriends;
   document.getElementById('scoreVal').textContent=score;
   const friendsN=Math.max(0,Math.round(lives));
-  document.getElementById('livesVal').textContent='🧒'.repeat(friendsN)+(lives<5?' 😢'.repeat(5-friendsN):'');
+  document.getElementById('livesVal').innerHTML='<span style="color:#4ade80">'+('●').repeat(friendsN)+'</span>'+(lives<5?'<span style="color:#333">'+('●').repeat(5-friendsN)+'</span>':'');
   const fEl=document.getElementById('followers');
-  if(fEl)fEl.textContent='🚗'.repeat(friendsN)+(friendsN>=5?' חברים נוסעים אחריך!':friendsN>0?' '+friendsN+' חברים נשארו... שמרו עליהם!':' 😢 אין חברים... נסו שוב!');
+  if(fEl)fEl.innerHTML=friendsN>=5?'<span style="color:#4ade80">●●●●●</span> 5 חברים נוסעים אחריך!':friendsN>0?'<span style="color:#fbbf24">'+('●').repeat(friendsN)+'</span> '+friendsN+' חברים נשארו':'<span style="color:#ef4444">אין חברים...</span>';
   document.getElementById('levelVal').textContent=level;
   document.getElementById('streakVal').textContent=streak>0?'🔥'.repeat(Math.min(streak,5)):'-';
   document.getElementById('flowFill').style.width=flow+'%';document.getElementById('distVal').textContent=Math.floor(car.position.z)+'m';
