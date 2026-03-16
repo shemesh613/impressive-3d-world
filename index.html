@@ -114,7 +114,8 @@
       font-size:clamp(20px,5vw,30px);color:#fff;cursor:pointer;user-select:none;-webkit-user-select:none}
     .ctrl-btn:active{background:rgba(255,255,255,.3);transform:scale(.92)}
     .ctrl-btn.gas{background:rgba(0,255,100,.2);border-color:rgba(0,255,100,.4)}
-    /* Screen flash */    #screenFlash{position:fixed;inset:0;z-index:15;pointer-events:none;opacity:0;transition:opacity .1s}    .flash-green{background:rgba(34,197,94,.25);opacity:1!important}    .flash-red{background:rgba(239,68,68,.25);opacity:1!important}    .flash-gold{background:rgba(251,191,36,.2);opacity:1!important}
+    /* Screen flash */    #speedLines{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:repeating-linear-gradient(90deg,transparent 0%,transparent 48%,rgba(255,255,255,0.03) 49%,transparent 50%,transparent 98%,rgba(255,255,255,0.03) 99%,transparent 100%);background-size:20px 100%}
+    #screenFlash{position:fixed;inset:0;z-index:15;pointer-events:none;opacity:0;transition:opacity .1s}    .flash-green{background:rgba(34,197,94,.25);opacity:1!important}    .flash-red{background:rgba(239,68,68,.25);opacity:1!important}    .flash-gold{background:rgba(251,191,36,.2);opacity:1!important}
     .ctrl-btn.brake{background:rgba(255,50,50,.2);border-color:rgba(255,50,50,.4)}
 
     /* Multiplayer Lobby */
@@ -237,6 +238,7 @@
 
 <!-- MOBILE CONTROLS -->
 <!-- SCREEN FLASH -->
+<div id="speedLines"></div>
 <div id="screenFlash"></div>
 <div id="powerIndicators" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:22;display:flex;gap:10px;pointer-events:none"><div class="power-ind power-shield" id="shieldInd" style="display:none;padding:6px 14px;border-radius:20px;font-size:16px;font-weight:900;color:#fff;background:rgba(96,165,250,.7);border:2px solid #60a5fa;animation:pulse 1s ease-in-out infinite">🛡️ מגן</div><div class="power-ind power-turbo" id="turboInd" style="display:none;padding:6px 14px;border-radius:20px;font-size:16px;font-weight:900;color:#fff;background:rgba(251,191,36,.7);border:2px solid #fbbf24;animation:pulse 1s ease-in-out infinite">⚡ טורבו</div></div>
 <div id="mobileControls">
@@ -1600,6 +1602,7 @@ function updateHUD(){
   document.getElementById('streakVal').textContent=streak>0?'🔥'.repeat(Math.min(streak,5)):'-';
   document.getElementById('flowFill').style.width=flow+'%';document.getElementById('distVal').textContent=Math.floor(car.position.z)+'m';
   document.getElementById('speedVal').textContent=Math.round(spd*500)+'km/h';
+  var _sl=document.getElementById('speedLines');if(_sl)_sl.style.opacity=spd>0.25?String(Math.min(1,(spd-0.25)*4)):'0';
 }
 
 // ---- COLLISIONS ----
