@@ -71,8 +71,11 @@
     .choice-btn:active{transform:scale(.93);filter:brightness(1.15)}
     .choice-green:hover{box-shadow:0 6px 30px rgba(34,197,94,.5),0 0 15px rgba(74,222,128,.3);transform:translateY(-3px) scale(1.02)}
     .choice-red:hover{box-shadow:0 6px 30px rgba(239,68,68,.5),0 0 15px rgba(248,113,113,.3);transform:translateY(-3px) scale(1.02)}
-    #scenario .timer-bar{margin-top:16px;height:4px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
-    #scenario .timer-fill{height:100%;width:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);border-radius:4px;transition:width linear;box-shadow:0 0 8px rgba(251,191,36,.4)}
+    #scenario .timer-bar{margin-top:16px;height:6px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden}
+    #scenario .timer-fill{height:100%;width:100%;background:#22c55e;border-radius:6px;transition:width linear,background .5s;box-shadow:0 0 8px rgba(34,197,94,.4)}
+    #scenario .timer-fill.timer-warn{background:#fbbf24;box-shadow:0 0 12px rgba(251,191,36,.6)}
+    #scenario .timer-fill.timer-danger{background:#ef4444;box-shadow:0 0 14px rgba(239,68,68,.7);animation:timerPulse .4s ease-in-out infinite}
+    @keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.5}}
 
     /* Feedback overlay */
     #feedback{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:45;display:none;
@@ -1589,8 +1592,11 @@ function triggerScenario(){
 
   // Timer (8 seconds)
   const tf=document.getElementById('timerFill');
-  tf.style.transition='none';tf.style.width='100%';
+  tf.style.transition='none';tf.style.width='100%';tf.className='timer-fill';
   requestAnimationFrame(()=>{tf.style.transition='width 12s linear';tf.style.width='0%'});
+  clearTimeout(window._timerWarn);clearTimeout(window._timerDanger);
+  window._timerWarn=setTimeout(()=>{tf.className='timer-fill timer-warn'},6000);
+  window._timerDanger=setTimeout(()=>{tf.className='timer-fill timer-danger'},10000);
   scenarioTimeout=setTimeout(()=>{if(scenarioActive)choose('timeout')},20000);
 }
 
