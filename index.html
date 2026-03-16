@@ -121,11 +121,14 @@
 
     /* Level Up */
     #levelUp{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
-      background:radial-gradient(ellipse at center,rgba(0,20,10,.7),rgba(0,0,0,.8));backdrop-filter:blur(8px)}
-    #levelUp .box{text-align:center;animation:popIn .5s cubic-bezier(.34,1.56,.64,1)}
+      background:radial-gradient(ellipse at center,rgba(0,20,10,.7),rgba(0,0,0,.8));backdrop-filter:blur(8px);animation:lvlBg .8s ease}
+    @keyframes lvlBg{0%{opacity:0}100%{opacity:1}}
+    #levelUp .box{text-align:center;animation:lvlBox .6s cubic-bezier(.22,1,.36,1)}
+    @keyframes lvlBox{0%{transform:scale(.5) rotate(-5deg);opacity:0}60%{transform:scale(1.1) rotate(2deg)}100%{transform:scale(1) rotate(0);opacity:1}}
     #levelUp h2{font-size:clamp(42px,8vw,70px);color:#4ade80;font-weight:900;letter-spacing:4px;
-      text-shadow:0 0 40px rgba(74,222,128,.6),0 0 100px rgba(74,222,128,.25)}
-    #levelUp p{color:#d1fae5;font-size:clamp(16px,3vw,24px);margin-top:10px;letter-spacing:1px}
+      text-shadow:0 0 40px rgba(74,222,128,.6),0 0 100px rgba(74,222,128,.25);animation:lvlGlow 1s ease-in-out infinite alternate}
+    @keyframes lvlGlow{0%{text-shadow:0 0 40px rgba(74,222,128,.6),0 0 100px rgba(74,222,128,.25)}100%{text-shadow:0 0 60px rgba(74,222,128,.9),0 0 120px rgba(74,222,128,.4),0 0 200px rgba(74,222,128,.15)}}
+    #levelUp p{color:#d1fae5;font-size:clamp(16px,3vw,24px);margin-top:10px;letter-spacing:1px;opacity:0;animation:startFade .5s ease .3s forwards}
 
     /* Mobile Controls */
     #mobileControls{position:fixed;bottom:15px;left:0;right:0;z-index:30;display:none;justify-content:space-between;padding:0 15px;pointer-events:none}
