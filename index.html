@@ -162,6 +162,16 @@
     <p><span class="emoji">🚗🚗🚗</span> חברים נוסעים אחריכם — אל תתקעו אותם!</p>
     <p style="margin-top:12px;color:#86efac;font-size:clamp(11px,2vw,14px)">🎮 מקלדת: WASD / חצים &nbsp;|&nbsp; 📱 נייד: כפתורים</p>
   </div>
+  <div id="settingsPanel" style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;direction:rtl">
+    <div style="display:flex;align-items:center;gap:6px;background:rgba(10,30,20,.6);border:1px solid rgba(74,222,128,.15);border-radius:10px;padding:6px 12px">
+      <label style="color:#a7f3d0;font-size:13px">👤</label>
+      <input id="playerName" placeholder="השם שלך" maxlength="12" dir="rtl" style="background:rgba(0,0,0,.3);border:1px solid rgba(74,222,128,.2);border-radius:8px;color:#fff;padding:4px 8px;font-size:14px;width:100px;text-align:center">
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;background:rgba(10,30,20,.6);border:1px solid rgba(74,222,128,.15);border-radius:10px;padding:6px 12px">
+      <label style="color:#a7f3d0;font-size:13px">🔊</label>
+      <input id="volumeSlider" type="range" min="0" max="100" value="70" style="width:80px;accent-color:#22c55e">
+    </div>
+  </div>
   <button id="playBtn" onclick="startGame()">משחק יחיד 🚗</button>
   <div class="mp-divider">— או —</div>
   <div id="mpLobby">
@@ -293,6 +303,7 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 'use strict';
+window.addEventListener('DOMContentLoaded',()=>{if(typeof _loadSettings==='function')_loadSettings()});
 
 // ---- SCENARIOS DATABASE ----
 const SCENARIOS = [
@@ -549,11 +560,23 @@ function initAudio(){
     window._engineAudio={ctx:eng,osc:osc,gain:gain};
   }catch(e){}
 if(!audioCtx)audioCtx=new AudioCtx()}
+let _masterVol=0.7;
+function _loadSettings(){
+  try{const s=JSON.parse(localStorage.getItem('gf_settings')||'{}');
+  if(s.name){const ni=document.getElementById('playerName');if(ni)ni.value=s.name}
+  if(s.vol!==undefined){_masterVol=s.vol/100;const vs=document.getElementById('volumeSlider');if(vs)vs.value=s.vol}}catch(e){}
+}
+function _saveSettings(){
+  const name=(document.getElementById('playerName')||{}).value||'';
+  const vol=parseInt((document.getElementById('volumeSlider')||{}).value)||70;
+  _masterVol=vol/100;localStorage.setItem('gf_settings',JSON.stringify({name:name,vol:vol}))
+}
 function playTone(freq,dur,type,vol){
-  if(!audioCtx)return;
+  if(!audioCtx||_masterVol<=0)return;
   const o=audioCtx.createOscillator(),g=audioCtx.createGain();
   o.type=type||'sine';o.frequency.value=freq;
-  g.gain.setValueAtTime(vol||.12,audioCtx.currentTime);
+  const v=(vol||.12)*_masterVol;
+  g.gain.setValueAtTime(v,audioCtx.currentTime);
   g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur);
   o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur);
 }
@@ -1745,14 +1768,15 @@ function mpCleanup(){
 // ---- HIGH SCORES ----
 function _getHighScores(){try{return JSON.parse(localStorage.getItem('gf_scores')||'[]')}catch(e){return[]}}
 function _saveHighScore(s){
-  const hs=_getHighScores();hs.push({score:s,date:new Date().toLocaleDateString('he-IL')});
+  const hs=_getHighScores();const pn=(document.getElementById('playerName')||{}).value||'שחקן';
+  hs.push({score:s,name:pn,date:new Date().toLocaleDateString('he-IL')});
   hs.sort((a,b)=>b.score-a.score);if(hs.length>5)hs.length=5;
   localStorage.setItem('gf_scores',JSON.stringify(hs));_showHighScores()
 }
 function _showHighScores(){
   const hs=_getHighScores();const el=document.getElementById('highScoreSection');const list=document.getElementById('highScoreList');
   if(!el||!list||!hs.length)return;el.style.display='block';
-  list.innerHTML=hs.map((h,i)=>'<div>'+(i===0?'👑':'🏅')+' '+h.score+' נקודות — '+h.date+'</div>').join('')
+  list.innerHTML=hs.map((h,i)=>'<div>'+(i===0?'👑':'🏅')+' '+(h.name||'שחקן')+' — '+h.score+' נקודות ('+h.date+')</div>').join('')
 }
 
 let _tutStep=0;
@@ -1763,7 +1787,7 @@ function tutorialNext(){
   else if(_tutStep>=4){document.getElementById('tutorial').style.display='none';localStorage.setItem('gf_tutorial','done');_realStartGame()}
 }
 function startGame(){
-  initAudio();
+  initAudio();_saveSettings();
   if(!localStorage.getItem('gf_tutorial')){_tutStep=1;document.getElementById('tutorial').style.display='flex';document.getElementById('tutStep1').style.display='block';document.getElementById('tutStep2').style.display='none';document.getElementById('tutStep3').style.display='none';document.getElementById('tutNext').textContent='הבא ➜';document.getElementById('startScreen').style.display='none';return}
   _realStartGame();
 }
@@ -2097,7 +2121,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
   if(window._engineAudio){
     const ea=window._engineAudio;
     ea.osc.frequency.value=60+spd*400;
-    ea.gain.gain.value=Math.min(0.04,spd*0.15);
+    ea.gain.gain.value=Math.min(0.04,spd*0.15)*_masterVol;
   }
 
   // Update curve markers around car
