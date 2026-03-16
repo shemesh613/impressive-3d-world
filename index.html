@@ -403,12 +403,12 @@ const _ct=new THREE.Vector3();
 const _col=new THREE.Color();
 
 // ---- ROAD CURVE FUNCTION ----
-function roadY(z){return Math.sin(z*.012)*3+Math.sin(z*.025)*1.5}
+function roadY(z){return Math.sin(z*.008)*2+Math.sin(z*.018)*1}
 function roadX(z){
   if(z<0)return 0;
   const s=z%600;
-  const base=Math.sin(z*.004)*10+Math.sin(z*.013)*6;
-  const sharp=(s<120)?0:(s<200)?((s-120)/80)*28:(s<350)?28-((s-200)/150)*56:(s<450)?-28+((s-350)/100)*28:0;
+  const base=Math.sin(z*.005)*12+Math.sin(z*.015)*8;
+  const sharp=(s<120)?0:(s<200)?((s-120)/80)*35:(s<350)?35-((s-200)/150)*70:(s<450)?-35+((s-350)/100)*35:0;
   const twist=Math.floor(z/600)%2===0?1:-1;
   return base+sharp*twist*1.0;
 }
@@ -416,12 +416,12 @@ function roadX(z){
 // ---- GROUND ----
 scene.add((() => {
   const m=new THREE.Mesh(new THREE.PlaneGeometry(400,6000),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x0d1a2d}));
-  m.rotation.x=-Math.PI/2;m.position.y=-5;return m;
+  m.rotation.x=-Math.PI/2;m.position.y=-2;return m;
 })());
 
 // ---- CURVED ROAD ----
 {
-  const RSEGS=550,SLEN=6;
+  const RSEGS=650,SLEN=6;
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(11,SLEN),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x2a3050}),RSEGS);
   const edgeMat=new THREE.MeshStandardMaterial({color:0x22c55e,emissive:0x22c55e,emissiveIntensity:0.7,roughness:0.3,metalness:0.1});window._edgeMat=edgeMat;
   const edgeGeo=new THREE.PlaneGeometry(.3,SLEN);
@@ -1040,6 +1040,75 @@ for(let z=-100;z<=2800;z+=10){
 
 // ---- TREES (lollipop style) ----
 {  const trunkGeo=new THREE.CylinderGeometry(.15,.2,2,5);  const trunkMat=new THREE.MeshStandardMaterial({roughness:0.85,metalness:0.0,color:0x4a3020});  const leafGeo=new THREE.ConeGeometry(1.4,2.8,6);  const leafColors=[0x16a34a,0x22c55e,0x15803d,0xd4a030,0xc05020,0x8a6a3a,0x2d8a4e,0x1a6a3a,0x6aaa3a];  const treePositions=[];  for(let z=-80;z<=2800;z+=12){    const _trx=roadX(z);if(Math.random()>.35)treePositions.push([_trx-8+(Math.random()-.5)*2,z]);    if(Math.random()>.35)treePositions.push([_trx+8+(Math.random()-.5)*2,z]);  }  const trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,treePositions.length);  const leafInst=new THREE.InstancedMesh(leafGeo,new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.0}),treePositions.length);  treePositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+1,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    trunkInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+3+Math.random()*.5,z);dummy.scale.setScalar(.7+Math.random()*.5);dummy.updateMatrix();    leafInst.setMatrixAt(i,dummy.matrix);leafInst.setColorAt(i,_col.setHex(leafColors[Math.floor(Math.random()*leafColors.length)]));  });  trunkInst.instanceMatrix.needsUpdate=true;leafInst.instanceMatrix.needsUpdate=true;  if(leafInst.instanceColor)leafInst.instanceColor.needsUpdate=true;  scene.add(trunkInst);scene.add(leafInst);}// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=2800;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x888888});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.4,6,6);  const glowMat2=new THREE.MeshStandardMaterial({color:0xffffcc,emissive:0xffdd66,emissiveIntensity:1.0,roughness:0.1,metalness:0.3});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
+// ---- ELECTRIC POLES WITH WIRES ----
+{
+  const EP_N=40;
+  const epPoleGeo=new THREE.CylinderGeometry(0.05,0.08,6,4);
+  const epPoleMat=new THREE.MeshStandardMaterial({color:0x555555,roughness:0.5,metalness:0.6});
+  const epPoleInst=new THREE.InstancedMesh(epPoleGeo,epPoleMat,EP_N);
+  const epArmGeo=new THREE.BoxGeometry(2,0.06,0.06);
+  const epArmMat=new THREE.MeshStandardMaterial({color:0x444444,roughness:0.5,metalness:0.6});
+  const epArmInst=new THREE.InstancedMesh(epArmGeo,epArmMat,EP_N);
+  for(let i=0;i<EP_N;i++){
+    const z=i*75+20;
+    const side=roadX(z)+(i%2===0?-12:12);
+    const hy=roadY(z);
+    dummy.position.set(side,hy+3,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    epPoleInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(side,hy+6.2,z);dummy.updateMatrix();
+    epArmInst.setMatrixAt(i,dummy.matrix);
+  }
+  epPoleInst.instanceMatrix.needsUpdate=true;epArmInst.instanceMatrix.needsUpdate=true;
+  scene.add(epPoleInst);scene.add(epArmInst);
+}
+// ---- ROAD FENCES/GUARDRAILS ----
+{
+  const FENCE_N=80;
+  const fencePostGeo=new THREE.BoxGeometry(0.08,0.8,0.08);
+  const fenceRailGeo=new THREE.BoxGeometry(0.04,0.04,4);
+  const fenceMat=new THREE.MeshStandardMaterial({color:0x888899,roughness:0.5,metalness:0.5});
+  const fencePostInst=new THREE.InstancedMesh(fencePostGeo,fenceMat,FENCE_N);
+  const fenceRailInst=new THREE.InstancedMesh(fenceRailGeo,fenceMat,FENCE_N);
+  for(let i=0;i<FENCE_N;i++){
+    const z=i*40+10;
+    const rx=roadX(z);
+    const side=i%2===0?rx-6.5:rx+6.5;
+    const hy=roadY(z);
+    dummy.position.set(side,hy+0.5,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    fencePostInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(side,hy+0.8,z);dummy.updateMatrix();
+    fenceRailInst.setMatrixAt(i,dummy.matrix);
+  }
+  fencePostInst.instanceMatrix.needsUpdate=true;fenceRailInst.instanceMatrix.needsUpdate=true;
+  scene.add(fencePostInst);scene.add(fenceRailInst);
+}
+// ---- BILLBOARDS (advertising signs) ----
+{
+  const BB_N=12;
+  const bbPoleGeo=new THREE.CylinderGeometry(0.1,0.12,8,4);
+  const bbPoleMat=new THREE.MeshStandardMaterial({color:0x666666,roughness:0.4,metalness:0.7});
+  const bbPoleInst=new THREE.InstancedMesh(bbPoleGeo,bbPoleMat,BB_N);
+  const bbBoardGeo=new THREE.BoxGeometry(4,2.5,0.15);
+  const bbBoardMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.6,metalness:0.1});
+  const bbBoardInst=new THREE.InstancedMesh(bbBoardGeo,bbBoardMat,BB_N);
+  bbBoardInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(BB_N*3),3);
+  const bbColors=[0x2563eb,0x059669,0xd97706,0x7c3aed,0xdc2626,0x0891b2];
+  const _bbc=new THREE.Color();
+  for(let i=0;i<BB_N;i++){
+    const z=i*250+100;
+    const side=roadX(z)+(i%2===0?-16:16);
+    const hy=roadY(z);
+    _bbc.setHex(bbColors[i%bbColors.length]);
+    bbBoardInst.instanceColor.setXYZ(i,_bbc.r,_bbc.g,_bbc.b);
+    dummy.position.set(side,hy+4,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    bbPoleInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(side,hy+9,z);dummy.rotation.set(0,i%2===0?0.3:-0.3,0);dummy.updateMatrix();
+    bbBoardInst.setMatrixAt(i,dummy.matrix);
+  }
+  bbPoleInst.instanceMatrix.needsUpdate=true;bbBoardInst.instanceMatrix.needsUpdate=true;
+  bbBoardInst.instanceColor.needsUpdate=true;
+  scene.add(bbPoleInst);scene.add(bbBoardInst);
+}
 // Sky + Stars + Moon
 // ---- CLOUDS ----
 const cloudGeo=new THREE.SphereGeometry(1,6,4);const cloudMat=new THREE.MeshBasicMaterial({color:0x1a3a2a,transparent:true,opacity:.4});const CLOUD_N=20;const cloudInst=new THREE.InstancedMesh(cloudGeo,cloudMat,CLOUD_N);const cloudData=[];for(let i=0;i<CLOUD_N;i++){cloudData.push({x:(Math.random()-.5)*80,y:18+Math.random()*12,z:Math.random()*400-50,sx:2+Math.random()*3,sy:.5+Math.random()*.3,sz:1+Math.random()*1.5,spd:.002+Math.random()*.003})}function updateClouds(){cloudData.forEach((c,i)=>{c.x+=c.spd;if(c.x>50)c.x=-50;dummy.position.set(c.x,c.y,c.z);dummy.scale.set(c.sx,c.sy,c.sz);dummy.rotation.set(0,0,0);dummy.updateMatrix();cloudInst.setMatrixAt(i,dummy.matrix)});cloudInst.instanceMatrix.needsUpdate=true}updateClouds();scene.add(cloudInst);
@@ -1578,8 +1647,8 @@ function animate(){
   requestAnimationFrame(animate);fc++;
 
   if(gameActive&&!scenarioActive){
-    const maxSpd=turboTimer>0?.5:boostTimer>0?.4:.28;
-    if(keys.ArrowUp||keys.KeyW)spd=Math.min(maxSpd,spd+.014);
+    const maxSpd=turboTimer>0?.65:boostTimer>0?.5:.35;
+    if(keys.ArrowUp||keys.KeyW)spd=Math.min(maxSpd,spd+.018);
     else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.12,spd-.012);
     else{spd*=.975;if(spd<.04)spd=.04}
 
