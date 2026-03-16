@@ -56,9 +56,10 @@
     /* Scenario popup */
     #scenario{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:40;display:none;
       width:min(90vw,500px);background:linear-gradient(160deg,rgba(5,15,25,.94),rgba(0,8,16,.96));border:1px solid rgba(74,222,128,.2);border-radius:28px;
-      padding:28px 24px;text-align:center;backdrop-filter:blur(16px);animation:popIn .35s cubic-bezier(.34,1.56,.64,1);
+      padding:28px 24px;text-align:center;backdrop-filter:blur(16px);animation:scenarioSlide .45s cubic-bezier(.22,1,.36,1);
       box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(74,222,128,.08),inset 0 1px 0 rgba(255,255,255,.06)}
     @keyframes popIn{0%{transform:translate(-50%,-50%) scale(.8);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+    @keyframes scenarioSlide{0%{transform:translate(-50%,-30%) scale(.9);opacity:0;filter:blur(8px)}60%{filter:blur(0)}100%{transform:translate(-50%,-50%) scale(1);opacity:1;filter:blur(0)}}
     #scenario .situation{color:#f0fdf4;font-size:clamp(17px,3.5vw,21px);font-weight:600;margin-bottom:20px;line-height:1.7;direction:rtl;text-shadow:0 1px 3px rgba(0,0,0,.4)}
     #scenario .choices{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
     .choice-btn{flex:1;min-width:140px;padding:16px 12px;border-radius:18px;border:none;cursor:pointer;
