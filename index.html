@@ -234,6 +234,7 @@
     <div class="hud-item"><span class="icon">🔥</span><span class="val" id="streakVal">0</span></div>
     <div class="hud-item"><span class="icon">🛣️</span><span class="val" id="distVal">0m</span></div>
     <div class="hud-item"><span class="val" id="choiceCounter" style="font-size:11px;letter-spacing:0">🟢0 🔴0</span></div>
+    <div class="hud-item" style="cursor:pointer;padding:8px 10px" onclick="_toggleMute()" id="muteBtn"><span class="icon">🔊</span></div>
   </div>
 </div>
 
@@ -586,7 +587,9 @@ function initAudio(){
     window._engineAudio={ctx:eng,osc:osc,gain:gain};
   }catch(e){}
 if(!audioCtx)audioCtx=new AudioCtx()}
-let _masterVol=0.7;
+let _masterVol=0.7;let _muted=false;let _preMuteVol=0.7;
+function _toggleMute(){_muted=!_muted;if(_muted){_preMuteVol=_masterVol;_masterVol=0}else{_masterVol=_preMuteVol}
+  const mb=document.getElementById('muteBtn');if(mb)mb.querySelector('.icon').textContent=_muted?'🔇':'🔊'}
 function _loadSettings(){
   try{const s=JSON.parse(localStorage.getItem('gf_settings')||'{}');
   if(s.name){const ni=document.getElementById('playerName');if(ni)ni.value=s.name}
