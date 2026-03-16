@@ -100,7 +100,9 @@
       background:radial-gradient(ellipse at center,rgba(10,0,0,.85),rgba(0,0,0,.95));backdrop-filter:blur(12px)}
     #gameOver h2{font-size:clamp(40px,8vw,68px);color:#4ade80;margin-bottom:12px;font-weight:900;letter-spacing:3px;
       text-shadow:0 0 40px rgba(74,222,128,.6),0 0 80px rgba(74,222,128,.2);animation:pulse 2s ease-in-out infinite}
-    #gameOver .stats{color:#e8f0ff;font-size:clamp(16px,3vw,24px);margin:10px 0;direction:rtl}
+    #gameOver .stats{color:#e8f0ff;font-size:clamp(16px,3vw,24px);margin:10px 0;direction:rtl;opacity:0;animation:statReveal .5s ease forwards}
+    #gameOver .stats:nth-child(2){animation-delay:.15s}#gameOver .stats:nth-child(3){animation-delay:.3s}#gameOver .stats:nth-child(4){animation-delay:.45s}#gameOver .stats:nth-child(5){animation-delay:.6s}#gameOver .stats:nth-child(6){animation-delay:.75s}#gameOver .stats:nth-child(7){animation-delay:.9s}
+    @keyframes statReveal{0%{opacity:0;transform:translateX(30px)}100%{opacity:1;transform:translateX(0)}}
     #gameOver .stats span{color:#fbbf24;font-weight:900;text-shadow:0 0 10px rgba(251,191,36,.3)}
     #restartBtn{margin-top:24px;padding:18px 60px;font-size:clamp(20px,4vw,30px);font-weight:900;border:none;
       border-radius:60px;cursor:pointer;background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);color:#fff;
