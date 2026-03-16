@@ -457,6 +457,7 @@ scene.add((() => {
 }
 
 
+// ---- CENTER DOUBLE YELLOW ----{const _cdG=new THREE.PlaneGeometry(0.06,5);const _cdM=new THREE.MeshStandardMaterial({color:0xfbbf24,emissive:0xfbbf24,emissiveIntensity:0.15,roughness:0.5});const _cdL=new THREE.InstancedMesh(_cdG,_cdM,200);const _cdR=new THREE.InstancedMesh(_cdG,_cdM,200);for(let i=0;i<200;i++){const _z=-50+i*15;dummy.position.set(roadX(_z)-0.12,roadY(_z)+0.03,_z);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();_cdL.setMatrixAt(i,dummy.matrix);dummy.position.set(roadX(_z)+0.12,roadY(_z)+0.03,_z);dummy.updateMatrix();_cdR.setMatrixAt(i,dummy.matrix)}_cdL.instanceMatrix.needsUpdate=true;_cdR.instanceMatrix.needsUpdate=true;scene.add(_cdL);scene.add(_cdR)}
 // ---- PARKS ----
 {
   const parkGeo=new THREE.PlaneGeometry(4,6);
