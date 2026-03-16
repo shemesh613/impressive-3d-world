@@ -2306,9 +2306,11 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
   updateInstances(obstacles,obsInst,MAX_OBS,false);updateInstances(powerups,powerupInst,MAX_POWERUPS,true);
   updateParticles();
   if(fc%6===0){updateHUD();const pi=document.getElementById('powerIndicator');
-    if(shieldTimer>0){pi.style.display='flex';document.getElementById('powerIcon').innerHTML='&#128737;';document.getElementById('powerTimer').textContent=Math.ceil(shieldTimer/60)+'s'}
-    else if(turboTimer>0){pi.style.display='flex';document.getElementById('powerIcon').innerHTML='&#9889;';document.getElementById('powerTimer').textContent=Math.ceil(turboTimer/60)+'s'}
-    else{pi.style.display='none'}
+    if(shieldTimer>0){pi.style.display='flex';pi.style.borderColor='rgba(96,165,250,.6)';pi.style.boxShadow='0 0 '+(10+Math.sin(fc*.1)*5)+'px rgba(96,165,250,.4)';document.getElementById('powerIcon').innerHTML='&#128737;';document.getElementById('powerTimer').textContent=Math.ceil(shieldTimer/60)+'s';
+      const si=document.getElementById('shieldInd');if(si){si.style.display='block';si.textContent='🛡️ מגן '+Math.ceil(shieldTimer/60)+'s'}}
+    else if(turboTimer>0){pi.style.display='flex';pi.style.borderColor='rgba(251,191,36,.6)';pi.style.boxShadow='0 0 '+(10+Math.sin(fc*.1)*5)+'px rgba(251,191,36,.4)';document.getElementById('powerIcon').innerHTML='&#9889;';document.getElementById('powerTimer').textContent=Math.ceil(turboTimer/60)+'s';
+      const ti=document.getElementById('turboInd');if(ti){ti.style.display='block';ti.textContent='⚡ טורבו '+Math.ceil(turboTimer/60)+'s'}}
+    else{pi.style.display='none';pi.style.boxShadow='';const si=document.getElementById('shieldInd');if(si)si.style.display='none';const ti=document.getElementById('turboInd');if(ti)ti.style.display='none'}
     if(window._edgeMat){const fc2=flow/100;window._edgeMat.color.setRGB(1-fc2,fc2,.2)}}
 
   // Camera - stays behind car on road, never swings into buildings
