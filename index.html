@@ -1688,6 +1688,12 @@ function animate(){
     car.position.y=roadY(car.position.z);
     const hillSlope=Math.atan2(roadY(car.position.z+2)-roadY(car.position.z-2),4);
     car.rotation.x=-hillSlope;
+    // Body roll - lean into turns
+    const steerInput=(keys.ArrowLeft||keys.KeyA)?1:(keys.ArrowRight||keys.KeyD)?-1:0;
+    if(!window._carLean)window._carLean=0;
+    const targetLean=steerInput*0.12+curveAngle*0.8;
+    window._carLean+=(targetLean-window._carLean)*0.08;
+    car.rotation.z=window._carLean;
 
     const roadCurve=curX;
     const leftEdge=-3.5+roadCurve;
