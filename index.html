@@ -1680,9 +1680,9 @@ function choose(type){
 // ---- POPUP TEXT ----
 function showPopup(text,x,y,color){
   const el=document.createElement('div');el.textContent=text;
-  el.style.cssText=`position:fixed;left:${x}px;top:${y}px;z-index:35;font-size:24px;font-weight:900;color:${color};pointer-events:none;transition:all .8s ease-out;text-shadow:0 0 10px ${color}`;
-  document.body.appendChild(el);requestAnimationFrame(()=>{el.style.transform='translateY(-50px)';el.style.opacity='0'});
-  setTimeout(()=>el.remove(),800);
+  el.style.cssText=`position:fixed;left:${x}px;top:${y}px;z-index:35;font-size:clamp(20px,4vw,28px);font-weight:900;color:${color};pointer-events:none;transition:all 1s cubic-bezier(.22,1,.36,1);text-shadow:0 0 15px ${color},0 0 30px ${color}44;transform:scale(0.5);opacity:1;white-space:nowrap`;
+  document.body.appendChild(el);requestAnimationFrame(()=>{el.style.transform='translateY(-60px) scale(1.1)';el.style.opacity='0'});
+  setTimeout(()=>el.remove(),1000);
 }
 
 // ---- MULTIPLAYER ----
