@@ -144,6 +144,7 @@
     #vignette{position:fixed;inset:0;z-index:13;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.45) 100%)}
     #dangerVignette{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(ellipse at center,transparent 40%,rgba(239,68,68,.25) 100%)}
     #headlightGlow{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:60vw;height:35vh;z-index:12;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(255,245,200,.04) 0%,rgba(255,240,180,.02) 40%,transparent 70%);opacity:0;transition:opacity .5s}
+    #boostTrail{position:fixed;bottom:15%;left:50%;transform:translateX(-50%);width:8px;height:0;z-index:11;pointer-events:none;background:linear-gradient(to top,rgba(74,222,128,.5),rgba(74,222,128,0));border-radius:4px;transition:height .3s,opacity .3s;opacity:0;filter:blur(3px)}
     /* Screen flash */    #speedLines{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:repeating-linear-gradient(90deg,transparent 0%,transparent 48%,rgba(255,255,255,0.03) 49%,transparent 50%,transparent 98%,rgba(255,255,255,0.03) 99%,transparent 100%);background-size:20px 100%}
     #screenFlash{position:fixed;inset:0;z-index:15;pointer-events:none;opacity:0;transition:opacity .1s}    .flash-green{background:rgba(34,197,94,.25);opacity:1!important}    .flash-red{background:rgba(239,68,68,.25);opacity:1!important}    .flash-gold{background:rgba(251,191,36,.2);opacity:1!important}
     #confetti{position:fixed;inset:0;z-index:55;pointer-events:none;overflow:hidden}
@@ -323,6 +324,7 @@
 <div id="vignette"></div>
 <div id="dangerVignette"></div>
 <div id="headlightGlow"></div>
+<div id="boostTrail"></div>
 <div id="speedLines"></div>
 <div id="confetti"></div>
 <div id="screenFlash"></div>
@@ -1939,6 +1941,7 @@ function updateHUD(){
   document.getElementById('speedVal').textContent=Math.round(spd*500)+'km/h';
   var _sl=document.getElementById('speedLines');if(_sl)_sl.style.opacity=spd>0.25?String(Math.min(1,(spd-0.25)*4)):'0';
   var _hl=document.getElementById('headlightGlow');if(_hl)_hl.style.opacity=spd>0.05?String(Math.min(1,spd*3)):'0';
+  var _bt=document.getElementById('boostTrail');if(_bt){if(boostTimer>0||turboTimer>0){_bt.style.opacity='1';_bt.style.height=Math.min(25,spd*80)+'vh';_bt.style.background=turboTimer>0?'linear-gradient(to top,rgba(251,191,36,.5),rgba(251,191,36,0))':'linear-gradient(to top,rgba(74,222,128,.5),rgba(74,222,128,0))'}else{_bt.style.opacity='0';_bt.style.height='0'}}
 }
 
 // ---- COLLISIONS ----
