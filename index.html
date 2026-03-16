@@ -422,7 +422,7 @@ scene.add((() => {
 
 // ---- CURVED ROAD ----
 {
-  const RSEGS=650,SLEN=6;
+  const RSEGS=400,SLEN=6;
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(11,SLEN),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x2a3050}),RSEGS);
   const edgeMat=new THREE.MeshStandardMaterial({color:0x22c55e,emissive:0x22c55e,emissiveIntensity:0.7,roughness:0.3,metalness:0.1});window._edgeMat=edgeMat;
   const edgeGeo=new THREE.PlaneGeometry(.3,SLEN);
@@ -673,7 +673,7 @@ scene.add((() => {
 
 // ---- CURVE MARKERS ----
 {
-  const CMARK_N=100;
+  const CMARK_N=50;
   const cmarkGeo=new THREE.BoxGeometry(0.3,0.1,2);
   const cmarkMatL=new THREE.MeshBasicMaterial({color:0xffcc00});
   const cmarkMatR=new THREE.MeshBasicMaterial({color:0xffffff});
@@ -749,7 +749,7 @@ scene.add((() => {
 
 // ---- PARKED CARS ----
 {
-  const PARKED_N=45;
+  const PARKED_N=25;
   const pCarBodyGeo=new THREE.BoxGeometry(1.1,0.55,2);
   const pCarRoofGeo=new THREE.BoxGeometry(0.85,0.35,1.1);
   const pCarColors=[0x2c3e50,0x7f8c8d,0xbdc3c7,0x34495e,0x95a5a6,0xc0392b,0x2980b9,0x27ae60,0xf1c40f,0x8e44ad];
@@ -795,7 +795,7 @@ scene.add((() => {
 
 // ---- COLORFUL SHOPS ----
 {
-  const SHOP_N=35;
+  const SHOP_N=20;
   const shopColors=[0xe63946,0x457b9d,0xf4a261,0x2a9d8f,0xe76f51,0x6d6875,0x48cae4,0xf72585];
   const awningGeo=new THREE.BoxGeometry(2.5,0.2,1.5);
   const awningMat=new THREE.MeshPhongMaterial({color:0xffffff,shininess:5});
@@ -842,7 +842,7 @@ scene.add((() => {
 
 // ---- TWINKLING STARS ----
 {
-  const STAR_N=150;
+  const STAR_N=50;
   const starGeo=new THREE.SphereGeometry(0.12,4,4);
   const starMat=new THREE.MeshBasicMaterial({color:0xffffff});
   const starInst=new THREE.InstancedMesh(starGeo,starMat,STAR_N);
