@@ -1139,6 +1139,10 @@ const car=new THREE.Group();
     dummy.position.set(p[0],p[1],p[2]);dummy.rotation.set(0,0,Math.PI/2);dummy.scale.setScalar(1);dummy.updateMatrix();wInst.setMatrixAt(i,dummy.matrix)});
   wInst.instanceMatrix.needsUpdate=true;car.add(wInst);
 }
+car.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(2.1,0.2,0.25),new THREE.MeshPhongMaterial({color:0x111111,shininess:20})),{position:new THREE.Vector3(0,0.25,2.15)}));
+car.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(2.1,0.2,0.25),new THREE.MeshPhongMaterial({color:0x111111,shininess:20})),{position:new THREE.Vector3(0,0.25,-2.15)}));
+car.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.12,0.08,0.15),new THREE.MeshPhongMaterial({color:0x22c55e,shininess:30})),{position:new THREE.Vector3(-1.1,0.85,0.5)}));
+car.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.12,0.08,0.15),new THREE.MeshPhongMaterial({color:0x22c55e,shininess:30})),{position:new THREE.Vector3(1.1,0.85,0.5)}));
 scene.add(car);
 
 // ---- OPPONENT CAR (multiplayer) ----
