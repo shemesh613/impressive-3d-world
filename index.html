@@ -785,13 +785,7 @@ const moonGeo=new THREE.SphereGeometry(8,12,12);
 const moonMat=new THREE.MeshBasicMaterial({color:0xeeeeff});
 const moon=new THREE.Mesh(moonGeo,moonMat);
 moon.position.set(-80,120,500);scene.add(moon);
-// Trail marks mesh
-const _trailGeo=new THREE.PlaneGeometry(1,1);
-const _trailMat=new THREE.MeshBasicMaterial({color:0x22c55e,transparent:true,opacity:0.4,side:THREE.DoubleSide});
-const _trailInst=new THREE.InstancedMesh(_trailGeo,_trailMat,30);
-_trailInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(30*3),3);
-for(let i=0;i<30;i++){dummy.position.set(0,-100,0);dummy.updateMatrix();_trailInst.setMatrixAt(i,dummy.matrix)}
-_trailInst.instanceMatrix.needsUpdate=true;scene.add(_trailInst);window._trailInst=_trailInst;
+// Trail marks mesh (initialized after dummy)
 // Moon glow (larger transparent sphere)
 const moonGlowGeo=new THREE.SphereGeometry(14,12,12);
 const moonGlowMat=new THREE.MeshBasicMaterial({color:0xaabbdd,transparent:true,opacity:0.08});
@@ -805,6 +799,14 @@ const _v=new THREE.Vector3();
 const _cv=new THREE.Vector3();
 const _ct=new THREE.Vector3();
 const _col=new THREE.Color();
+
+// Trail marks mesh
+const _trailGeo=new THREE.PlaneGeometry(1,1);
+const _trailMat=new THREE.MeshBasicMaterial({color:0x22c55e,transparent:true,opacity:0.4,side:THREE.DoubleSide});
+const _trailInst=new THREE.InstancedMesh(_trailGeo,_trailMat,30);
+_trailInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(30*3),3);
+for(let i=0;i<30;i++){dummy.position.set(0,-100,0);dummy.updateMatrix();_trailInst.setMatrixAt(i,dummy.matrix)}
+_trailInst.instanceMatrix.needsUpdate=true;scene.add(_trailInst);window._trailInst=_trailInst;
 
 // ---- ROAD CURVE FUNCTION ----
 function roadY(z){return Math.sin(z*.006)*3.5+Math.sin(z*.017)*1.8+Math.sin(z*.003)*2.0+Math.sin(z*.04)*0.6}
