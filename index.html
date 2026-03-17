@@ -253,7 +253,7 @@
 </div>
 
 <!-- GATE LABELS -->
-<div id="gateSituation" style="display:none;position:fixed;top:12%;left:50%;transform:translateX(-50%);z-index:38;background:rgba(5,15,25,.9);border:1px solid rgba(74,222,128,.3);border-radius:16px;padding:12px 24px;color:#fff;font-size:clamp(16px,3vw,22px);font-weight:700;text-align:center;direction:rtl;max-width:500px;backdrop-filter:blur(8px);pointer-events:none"></div>
+<div id="gateSituation" style="display:none;position:fixed;bottom:12%;left:50%;transform:translateX(-50%);z-index:38;background:rgba(5,15,25,.88);border:1px solid rgba(74,222,128,.3);border-radius:16px;padding:10px 20px;color:#fff;font-size:clamp(14px,2.5vw,20px);font-weight:700;text-align:center;direction:rtl;max-width:450px;backdrop-filter:blur(8px);pointer-events:none"></div>
 <div id="gateLabel1" style="display:none;position:fixed;z-index:37;background:rgba(100,120,140,.85);border:2px solid rgba(200,210,220,.4);border-radius:14px;padding:8px 16px;color:#fff;font-size:clamp(13px,2.5vw,17px);font-weight:700;text-align:center;direction:rtl;max-width:220px;pointer-events:none;white-space:normal;line-height:1.3"></div>
 <div id="gateLabel2" style="display:none;position:fixed;z-index:37;background:rgba(100,120,140,.85);border:2px solid rgba(200,210,220,.4);border-radius:14px;padding:8px 16px;color:#fff;font-size:clamp(13px,2.5vw,17px);font-weight:700;text-align:center;direction:rtl;max-width:220px;pointer-events:none;white-space:normal;line-height:1.3"></div>
 
@@ -1706,19 +1706,19 @@ addEventListener('mousemove',e=>{if(!drag)return;cTh+=(e.clientX-mx)*.005;cPh=Ma
 const _gateMat=new THREE.MeshPhongMaterial({color:0x667788,shininess:15,transparent:true,opacity:0.85});
 const _gateGreenMat=new THREE.MeshPhongMaterial({color:0x22c55e,shininess:20,emissive:0x115522,transparent:true,opacity:0.9});
 const _gateRedMat=new THREE.MeshPhongMaterial({color:0xef4444,shininess:20,emissive:0x551111,transparent:true,opacity:0.9});
-const _pillarGeo=new THREE.BoxGeometry(0.3,4,0.3);
-const _topGeo=new THREE.BoxGeometry(3.5,0.4,0.3);
+const _pillarGeo=new THREE.BoxGeometry(0.4,5.5,0.4);
+const _topGeo=new THREE.BoxGeometry(4.2,0.5,0.4);
 // Left gate
 const _gateL=new THREE.Group();
-const _pillarL1=new THREE.Mesh(_pillarGeo,_gateMat);_pillarL1.position.set(-1.5,2,0);_gateL.add(_pillarL1);
-const _pillarL2=new THREE.Mesh(_pillarGeo,_gateMat);_pillarL2.position.set(1.5,2,0);_gateL.add(_pillarL2);
-const _topL=new THREE.Mesh(_topGeo,_gateMat);_topL.position.set(0,4.1,0);_gateL.add(_topL);
+const _pillarL1=new THREE.Mesh(_pillarGeo,_gateMat);_pillarL1.position.set(-1.8,2.75,0);_gateL.add(_pillarL1);
+const _pillarL2=new THREE.Mesh(_pillarGeo,_gateMat);_pillarL2.position.set(1.8,2.75,0);_gateL.add(_pillarL2);
+const _topL=new THREE.Mesh(_topGeo,_gateMat);_topL.position.set(0,5.6,0);_gateL.add(_topL);
 _gateL.visible=false;scene.add(_gateL);
 // Right gate
 const _gateR=new THREE.Group();
-const _pillarR1=new THREE.Mesh(new THREE.BoxGeometry(0.3,4,0.3),_gateMat);_pillarR1.position.set(-1.5,2,0);_gateR.add(_pillarR1);
-const _pillarR2=new THREE.Mesh(new THREE.BoxGeometry(0.3,4,0.3),_gateMat);_pillarR2.position.set(1.5,2,0);_gateR.add(_pillarR2);
-const _topR=new THREE.Mesh(new THREE.BoxGeometry(3.5,0.4,0.3),_gateMat);_topR.position.set(0,4.1,0);_gateR.add(_topR);
+const _pillarR1=new THREE.Mesh(new THREE.BoxGeometry(0.4,5.5,0.4),_gateMat);_pillarR1.position.set(-1.8,2.75,0);_gateR.add(_pillarR1);
+const _pillarR2=new THREE.Mesh(new THREE.BoxGeometry(0.4,5.5,0.4),_gateMat);_pillarR2.position.set(1.8,2.75,0);_gateR.add(_pillarR2);
+const _topR=new THREE.Mesh(new THREE.BoxGeometry(4.2,0.5,0.4),_gateMat);_topR.position.set(0,5.6,0);_gateR.add(_topR);
 _gateR.visible=false;scene.add(_gateR);
 
 let _gateActive=false,_gateZ=0,_gateIsGreenLeft=true,_gateScenarioIdx=0;
@@ -1733,10 +1733,10 @@ function triggerScenario(){
   _gateScenarioIdx=idx;
 
   // Place gates 60m ahead
-  _gateZ=car.position.z+60;
+  _gateZ=car.position.z+80;
   const rx=roadX(_gateZ);const ry=roadY(_gateZ);
-  _gateL.position.set(rx-2.5,ry,_gateZ);_gateL.visible=true;
-  _gateR.position.set(rx+2.5,ry,_gateZ);_gateR.visible=true;
+  _gateL.position.set(rx-3,ry,_gateZ);_gateL.visible=true;
+  _gateR.position.set(rx+3,ry,_gateZ);_gateR.visible=true;
   // Reset to neutral color
   _pillarL1.material=_gateMat;_pillarL2.material=_gateMat;_topL.material=_gateMat;
   _pillarR1.material=_gateMat;_pillarR2.material=_gateMat;_topR.material=_gateMat;
