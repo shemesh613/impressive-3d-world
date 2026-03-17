@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">  <meta http-equiv="Pragma" content="no-cache">  <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🟢</text></svg>">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#22c55e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="משחק נהיגה תלת-ממדי שמלמד גמישות וזרימה חברתית לילדים">
   <title>🟢 תיקיה ירוקה — זרימה בכביש!</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -363,6 +369,7 @@
 <script>
 'use strict';
 window.addEventListener('DOMContentLoaded',()=>{if(typeof _loadSettings==='function')_loadSettings()});
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
 
 // ---- SCENARIOS DATABASE ----
 const SCENARIOS = [
