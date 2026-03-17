@@ -778,6 +778,16 @@ cam.position.set(0,10,18);
 scene.fog=new THREE.FogExp2(0x1a2a40,.00065);
 const ambLight=new THREE.AmbientLight(0x6688aa,1.1);scene.add(ambLight);
 const dirLight=new THREE.DirectionalLight(0xffeedd,1.5);dirLight.position.set(30,50,40);scene.add(dirLight);
+// Moon
+const moonGeo=new THREE.SphereGeometry(8,12,12);
+const moonMat=new THREE.MeshBasicMaterial({color:0xeeeeff});
+const moon=new THREE.Mesh(moonGeo,moonMat);
+moon.position.set(-80,120,500);scene.add(moon);
+// Moon glow (larger transparent sphere)
+const moonGlowGeo=new THREE.SphereGeometry(14,12,12);
+const moonGlowMat=new THREE.MeshBasicMaterial({color:0xaabbdd,transparent:true,opacity:0.08});
+const moonGlow=new THREE.Mesh(moonGlowGeo,moonGlowMat);
+moonGlow.position.copy(moon.position);scene.add(moonGlow);
 // hemi removed// hemi removed
 // moon removed// moon removed// moon removed
 
@@ -2307,6 +2317,7 @@ function updateHUD(){
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.2?String(Math.min(0.8,(spd-0.2)*2)):'0';
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
   scene.fog.density=0.00075-spd*0.0005;// fog clears at speed
+  moon.position.z=car.position.z+500;moonGlow.position.z=moon.position.z;// moon follows
   // Tire sparks on sharp turns at speed
   const _steerAmt=Math.abs((keys.ArrowLeft||keys.KeyA)?1:(keys.ArrowRight||keys.KeyD)?-1:0);
   if(_steerAmt>0&&spd>0.2&&fc%4===0){
