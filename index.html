@@ -1416,6 +1416,29 @@ for(let z=-100;z<=2800;z+=10){
     inst.setMatrixAt(i,dummy.matrix);inst.setColorAt(i,_col.setHex(biomeColor(b[1],i)));
   });
   inst.instanceMatrix.needsUpdate=true;inst.instanceColor.needsUpdate=true;scene.add(inst);
+  // Building windows (emissive glow)
+  const WIN_N=Math.min(300,bdata.length*2);
+  const winGeo=new THREE.PlaneGeometry(0.4,0.5);
+  const winMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd55,emissiveIntensity:0.9,roughness:0.1,side:THREE.DoubleSide});
+  const winInst=new THREE.InstancedMesh(winGeo,winMat,WIN_N);
+  let wi=0;
+  for(let i=0;i<bdata.length&&wi<WIN_N;i++){
+    const b=bdata[i];if(b[3]<3)continue;// skip short buildings
+    const bx=b[0],bz=b[1],bh=b[3],bw=b[2];
+    const ry=roadY(bz);
+    const facing=bx<roadX(bz)?1:-1;// face toward road
+    for(let row=0;row<Math.min(3,Math.floor(bh/3));row++){
+      if(Math.random()>.6)continue;// some windows dark
+      const wy=ry+2+row*2.5;
+      const wx=bx+facing*(bw/2+0.01);
+      dummy.position.set(wx,wy,bz+(Math.random()-.5)*b[4]*.6);
+      dummy.rotation.set(0,facing>0?-Math.PI/2:Math.PI/2,0);
+      dummy.scale.setScalar(1);dummy.updateMatrix();
+      winInst.setMatrixAt(wi,dummy.matrix);wi++;
+      if(wi>=WIN_N)break;
+    }
+  }
+  winInst.count=wi;winInst.instanceMatrix.needsUpdate=true;scene.add(winInst);
 }
 
 // Building roof accents + antennas
