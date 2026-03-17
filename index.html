@@ -2161,7 +2161,7 @@ function createRoom(){
   document.getElementById('mpStartBtn').style.display='block';
   document.getElementById('joinSection').style.display='none';
   isHost=true;
-  peer=new Peer('tikia-'+mpRoomCode+'-host',{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun2.l.google.com:19302'},{urls:'stun:stun3.l.google.com:19302'},{urls:'stun:stun4.l.google.com:19302'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]}});
+  peer=new Peer('tikia-'+mpRoomCode+'-host',{debug:2,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun.relay.metered.ca:80'},{urls:'turn:global.relay.metered.ca:80',username:'e8dd65e92de6315a1e54fce9',credential:'XY+Ga0FEJbGq88aS'},{urls:'turn:global.relay.metered.ca:443',username:'e8dd65e92de6315a1e54fce9',credential:'XY+Ga0FEJbGq88aS'},{urls:'turn:global.relay.metered.ca:443?transport=tcp',username:'e8dd65e92de6315a1e54fce9',credential:'XY+Ga0FEJbGq88aS'}]}});
   peer.on('open',function(){console.log('Host ready:',mpRoomCode)});
   peer.on('connection',function(c){
     conn=c;mpConns.push(c);
@@ -2178,7 +2178,7 @@ function createRoom(){
   });
   peer.on('error',function(e){
     var w=document.getElementById('roomCodeDisplay').querySelector('.waiting');
-    if(w)w.textContent='❌ שגיאה — נסה שוב';
+    if(w)w.textContent='❌ שגיאה: '+(e.type||e.message||e)+' — נסה שוב';
     console.error('Peer error:',e);
   });
 }
@@ -2196,7 +2196,7 @@ function joinRoom(){
   document.getElementById('joinStatus').style.color='#a7f3d0';
   isHost=false;
   const guestId='tikia-'+mpRoomCode+'-g'+Math.floor(Math.random()*9999);
-  peer=new Peer(guestId,{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun2.l.google.com:19302'},{urls:'stun:stun3.l.google.com:19302'},{urls:'stun:stun4.l.google.com:19302'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]}});
+  peer=new Peer(guestId,{debug:2,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun.relay.metered.ca:80'},{urls:'turn:global.relay.metered.ca:80',username:'e8dd65e92de6315a1e54fce9',credential:'XY+Ga0FEJbGq88aS'},{urls:'turn:global.relay.metered.ca:443',username:'e8dd65e92de6315a1e54fce9',credential:'XY+Ga0FEJbGq88aS'},{urls:'turn:global.relay.metered.ca:443?transport=tcp',username:'e8dd65e92de6315a1e54fce9',credential:'XY+Ga0FEJbGq88aS'}]}});
   peer.on('open',function(){
     conn=peer.connect('tikia-'+mpRoomCode+'-host',{reliable:true});
     var jt=setTimeout(function(){
