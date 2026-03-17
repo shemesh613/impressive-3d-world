@@ -92,9 +92,9 @@
     @keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.5}}
 
     /* Feedback overlay */
-    #feedback{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:45;display:none;
+    #feedback{position:fixed;bottom:15%;left:50%;transform:translateX(-50%);z-index:45;display:none;
       text-align:center;pointer-events:none;animation:feedSlide .5s cubic-bezier(.22,1,.36,1);
-      background:rgba(5,15,25,.9);border-radius:20px;padding:20px 30px;border:1px solid rgba(74,222,128,.2);backdrop-filter:blur(10px);max-width:400px}
+      background:rgba(5,15,25,.9);border-radius:20px;padding:16px 24px;border:1px solid rgba(74,222,128,.2);backdrop-filter:blur(10px);max-width:380px}
     @keyframes feedSlide{0%{transform:translate(-50%,-30%) scale(.7);opacity:0;filter:blur(6px)}100%{transform:translate(-50%,-50%) scale(1);opacity:1;filter:blur(0)}}
     #feedback .fb-icon{font-size:clamp(40px,10vw,70px)}
     #feedback .fb-text{color:#fff;font-size:clamp(16px,3.5vw,22px);font-weight:700;margin-top:8px;line-height:1.5;direction:rtl}
@@ -274,7 +274,7 @@
 <div id="multiplier" style="display:none;position:fixed;top:25%;right:15%;z-index:40;font-size:clamp(40px,8vw,70px);font-weight:900;color:#fbbf24;text-shadow:0 0 30px rgba(251,191,36,.7),0 0 60px rgba(251,191,36,.3);pointer-events:none"></div>
 
 <!-- GATE LABELS -->
-<div id="gateSituation" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:38;background:rgba(5,15,25,.92);border:2px solid rgba(74,222,128,.4);border-radius:18px;padding:16px 28px;color:#fff;font-size:clamp(18px,3.5vw,28px);font-weight:800;text-align:center;direction:rtl;max-width:550px;pointer-events:none;backdrop-filter:blur(8px);text-shadow:0 2px 4px rgba(0,0,0,.5)"></div>
+<div id="gateSituation" style="display:none;position:fixed;top:8%;left:50%;transform:translateX(-50%);z-index:38;background:rgba(5,15,25,.92);border:2px solid rgba(74,222,128,.4);border-radius:16px;padding:12px 24px;color:#fff;font-size:clamp(16px,3vw,24px);font-weight:800;text-align:center;direction:rtl;max-width:500px;pointer-events:none;backdrop-filter:blur(8px)"></div>
 <div id="gateLabel1" style="display:none;position:fixed;z-index:37;background:rgba(10,25,45,.95);border:3px solid rgba(96,165,250,.5);border-radius:18px;padding:16px 24px;color:#fff;font-size:clamp(20px,4vw,30px);font-weight:900;text-align:center;direction:rtl;max-width:340px;pointer-events:none;white-space:normal;line-height:1.5;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 6px 25px rgba(0,0,0,.6)"></div>
 <div id="gateLabel2" style="display:none;position:fixed;z-index:37;background:rgba(10,25,45,.95);border:3px solid rgba(96,165,250,.5);border-radius:18px;padding:16px 24px;color:#fff;font-size:clamp(20px,4vw,30px);font-weight:900;text-align:center;direction:rtl;max-width:340px;pointer-events:none;white-space:normal;line-height:1.5;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 6px 25px rgba(0,0,0,.6)"></div>
 
@@ -841,7 +841,7 @@ scene.add((() => {
 
 // ---- CURVED ROAD ----
 {
-  const RSEGS=400,SLEN=6;
+  const RSEGS=600,SLEN=6;
   const _roadMat=new THREE.MeshStandardMaterial({roughness:0.55,metalness:0.15,color:0x2a3050});window._roadMat=_roadMat;
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(11.5,SLEN+0.5),_roadMat,RSEGS);
   const edgeMat=new THREE.MeshStandardMaterial({color:0x22c55e,emissive:0x22c55e,emissiveIntensity:0.7,roughness:0.3,metalness:0.1});window._edgeMat=edgeMat;
@@ -1465,7 +1465,7 @@ scene.add((() => {
 
 // ---- BUILDINGS (varied zones) ----
 const bdata=[];
-for(let z=-100;z<=2800;z+=10){
+for(let z=-100;z<=3600;z+=10){
   const _rx=roadX(z);
   const zone=Math.floor(z/300)%7;
   // Zone types: 0=downtown tall, 1=suburban low, 2=mixed, 3=park(sparse), 4=industrial, 5=residential, 6=commercial
@@ -1931,13 +1931,13 @@ function _updateGateLabels(){
   if(distToGate>55||distToGate<-2){
     gl1.style.display='none';gl2.style.display='none';if(gs)gs.style.display='none';return;
   }
-  // Show question in center when far, hide when close
-  if(gs){gs.style.display=distToGate>20?'block':'none'}
-  // Labels at sides, grow as approach
+  // Question always visible at top center
+  if(gs){gs.style.display='block';gs.style.top='8%';gs.style.left='50%';gs.style.transform='translateX(-50%)'}
+  // Labels — LEFT label at left 25%, RIGHT label at right 25% (matching gate sides)
   const opacity=distToGate<5?Math.max(0,distToGate/5):1;
-  gl1.style.left='8px';gl1.style.top='30%';gl1.style.transform='none';
+  gl1.style.left='5%';gl1.style.right='auto';gl1.style.top='22%';gl1.style.transform='none';
   gl1.style.display='block';gl1.style.opacity=String(opacity);
-  gl2.style.right='8px';gl2.style.left='auto';gl2.style.top='30%';gl2.style.transform='none';
+  gl2.style.left='auto';gl2.style.right='5%';gl2.style.top='22%';gl2.style.transform='none';
   gl2.style.display='block';gl2.style.opacity=String(opacity);
 
   // Check if car passed through a gate
@@ -2628,7 +2628,7 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
       const dist=car.position.z;
       const zone=Math.floor(dist/300)%7;
       const t=(dist%300)/300;
-      const skyColors=[0x1a2a40,0x201a35,0x122a20,0x2a2515,0x15183a,0x1a2a2a,0x281a22];
+      const skyColors=[0x1a2a40,0x1a2040,0x152a22,0x2a2818,0x182040,0x1a2a2a,0x241a25];
       const groundColors=[0x1a2a3a,0x2a1a2a,0x1a2a1a,0x2a2a1a,0x1a1a3a,0x1a2a2a,0x2a1a1a];
       const fogColors=[0x1a2a40,0x201a35,0x122a20,0x2a2515,0x15183a,0x1a2a2a,0x281a22];
       const edgeColors=[0x22c55e,0xe040fb,0x00e5ff,0xff9100,0x536dfe,0x40e0d0,0xff6b6b];
