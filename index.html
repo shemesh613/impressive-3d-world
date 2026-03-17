@@ -2307,6 +2307,12 @@ function updateHUD(){
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.2?String(Math.min(0.8,(spd-0.2)*2)):'0';
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
   scene.fog.density=0.00075-spd*0.0005;// fog clears at speed
+  // Tire sparks on sharp turns at speed
+  const _steerAmt=Math.abs((keys.ArrowLeft||keys.KeyA)?1:(keys.ArrowRight||keys.KeyD)?-1:0);
+  if(_steerAmt>0&&spd>0.2&&fc%4===0){
+    const sparkX=car.position.x+((keys.ArrowLeft||keys.KeyA)?1.1:-1.1);
+    emitParticles(sparkX,car.position.y+0.2,car.position.z-1,0xffaa33,1);
+  }
   // Brake lights — glow when decelerating or pressing brake
   if(window._brakeMat){const braking=(keys.ArrowDown||keys.KeyS)||(!keys.ArrowUp&&!keys.KeyW&&spd>0.05);
     window._brakeMat.emissiveIntensity=braking?1.5:0.3;window._brakeMat.color.setHex(braking?0xff2222:0xff4444)}
