@@ -768,7 +768,7 @@ renderer.domElement.addEventListener('webglcontextlost',function(e){e.preventDef
 const scene=new THREE.Scene();
 const cam=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,0.5,700);
 cam.position.set(0,10,18);
-scene.fog=new THREE.FogExp2(0x1a2a40,.0005);
+scene.fog=new THREE.FogExp2(0x1a2a40,.00065);
 const ambLight=new THREE.AmbientLight(0x6688aa,1.1);scene.add(ambLight);
 const dirLight=new THREE.DirectionalLight(0xffeedd,1.5);dirLight.position.set(30,50,40);scene.add(dirLight);
 // hemi removed// hemi removed
@@ -2279,6 +2279,7 @@ function updateHUD(){
   if(window._roadMat){window._roadMat.roughness=0.55-spd*0.3;window._roadMat.metalness=0.15+spd*0.25}
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.2?String(Math.min(0.8,(spd-0.2)*2)):'0';
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
+  scene.fog.density=0.00075-spd*0.0005;// fog clears at speed
   var _bt=document.getElementById('boostTrail');if(_bt){if(boostTimer>0||turboTimer>0){_bt.style.opacity='1';_bt.style.height=Math.min(25,spd*80)+'vh';_bt.style.background=turboTimer>0?'linear-gradient(to top,rgba(251,191,36,.5),rgba(251,191,36,0))':'linear-gradient(to top,rgba(74,222,128,.5),rgba(74,222,128,0))'}else{_bt.style.opacity='0';_bt.style.height='0'}}
 }
 
