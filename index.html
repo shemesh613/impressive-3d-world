@@ -92,10 +92,10 @@
     @keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.5}}
 
     /* Feedback overlay */
-    #feedback{position:fixed;bottom:15%;left:50%;transform:translateX(-50%);z-index:45;display:none;
+    #feedback{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:45;display:none;
       text-align:center;pointer-events:none;animation:feedSlide .5s cubic-bezier(.22,1,.36,1);
-      background:rgba(5,15,25,.9);border-radius:20px;padding:16px 24px;border:1px solid rgba(74,222,128,.2);backdrop-filter:blur(10px);max-width:380px}
-    @keyframes feedSlide{0%{transform:translate(-50%,-30%) scale(.7);opacity:0;filter:blur(6px)}100%{transform:translate(-50%,-50%) scale(1);opacity:1;filter:blur(0)}}
+      background:rgba(5,15,25,.92);border-radius:18px;padding:14px 22px;border:1px solid rgba(74,222,128,.2);backdrop-filter:blur(10px);max-width:340px}
+    @keyframes feedSlide{0%{transform:translateX(-50%) translateY(20px) scale(.9);opacity:0}100%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}}
     #feedback .fb-icon{font-size:clamp(40px,10vw,70px)}
     #feedback .fb-text{color:#fff;font-size:clamp(16px,3.5vw,22px);font-weight:700;margin-top:8px;line-height:1.5;direction:rtl}
 
@@ -106,13 +106,13 @@
       border:1px solid rgba(74,222,128,.12);backdrop-filter:blur(8px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
 
     /* Friend notification */
-    #friendNotify{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);z-index:100;
-      font-size:clamp(20px,4vw,32px);font-weight:bold;text-align:center;pointer-events:none;
-      opacity:0;text-shadow:0 2px 8px rgba(0,0,0,.7);padding:12px 24px;border-radius:16px;transition:opacity .3s}
+    #friendNotify{position:fixed;top:80px;right:15px;z-index:50;
+      font-size:clamp(14px,2.5vw,20px);font-weight:bold;text-align:center;pointer-events:none;
+      opacity:0;text-shadow:0 2px 8px rgba(0,0,0,.7);padding:10px 18px;border-radius:14px;transition:opacity .3s}
     #friendNotify.show{opacity:1;animation:friendSlide .5s cubic-bezier(.22,1,.36,1)}
-    @keyframes friendSlide{0%{transform:translate(-50%,-30%);opacity:0}100%{transform:translate(-50%,-50%);opacity:1}}
-    #friendNotify.lost{color:#ff6b6b;background:rgba(127,29,29,.4);border:1px solid rgba(239,68,68,.3)}
-    #friendNotify.gained{color:#4ade80;background:rgba(5,46,22,.4);border:1px solid rgba(74,222,128,.3)}
+    @keyframes friendSlide{0%{transform:translateX(30px);opacity:0}100%{transform:translateX(0);opacity:1}}
+    #friendNotify.lost{color:#ff6b6b;background:rgba(127,29,29,.7);border:1px solid rgba(239,68,68,.3)}
+    #friendNotify.gained{color:#4ade80;background:rgba(5,46,22,.7);border:1px solid rgba(74,222,128,.3)}
 
     /* Game Over */
     #gameOver{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;
