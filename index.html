@@ -274,9 +274,9 @@
 <div id="multiplier" style="display:none;position:fixed;top:25%;right:15%;z-index:40;font-size:clamp(40px,8vw,70px);font-weight:900;color:#fbbf24;text-shadow:0 0 30px rgba(251,191,36,.7),0 0 60px rgba(251,191,36,.3);pointer-events:none"></div>
 
 <!-- GATE LABELS -->
-<div id="gateSituation" style="display:none;position:fixed;top:6%;left:50%;transform:translateX(-50%);z-index:38;background:rgba(5,15,25,.92);border:2px solid;border-radius:16px;padding:10px 22px;color:#fff;font-size:clamp(16px,3vw,24px);font-weight:800;text-align:center;direction:rtl;max-width:500px;pointer-events:none;backdrop-filter:blur(8px);transition:border-color .5s"></div>
-<div id="gateLabel1" style="display:none;position:fixed;z-index:37;background:rgba(10,25,45,.95);border:3px solid rgba(96,165,250,.5);border-radius:18px;padding:16px 24px;color:#fff;font-size:clamp(20px,4vw,30px);font-weight:900;text-align:center;direction:rtl;max-width:340px;pointer-events:none;white-space:normal;line-height:1.5;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 6px 25px rgba(0,0,0,.6)"></div>
-<div id="gateLabel2" style="display:none;position:fixed;z-index:37;background:rgba(10,25,45,.95);border:3px solid rgba(96,165,250,.5);border-radius:18px;padding:16px 24px;color:#fff;font-size:clamp(20px,4vw,30px);font-weight:900;text-align:center;direction:rtl;max-width:340px;pointer-events:none;white-space:normal;line-height:1.5;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 6px 25px rgba(0,0,0,.6)"></div>
+<div id="gateSituation" style="display:none;position:fixed;top:8%;left:50%;transform:translateX(-50%);z-index:38;background:rgba(5,15,25,.92);border:2px solid;border-radius:14px;padding:8px 18px;color:#fff;font-size:clamp(14px,2.5vw,20px);font-weight:700;text-align:center;direction:rtl;max-width:420px;pointer-events:none;backdrop-filter:blur(8px);transition:border-color .5s"></div>
+<div id="gateLabel1" style="display:none;position:fixed;left:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(10,25,45,.92);border:2px solid rgba(74,222,128,.5);border-radius:16px;padding:14px 18px;color:#4ade80;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
+<div id="gateLabel2" style="display:none;position:fixed;right:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(10,25,45,.92);border:2px solid rgba(239,68,68,.5);border-radius:16px;padding:14px 18px;color:#f87171;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
 
 <!-- OPPONENT HUD -->
 <div id="opponentHud">
@@ -1946,12 +1946,16 @@ function triggerScenario(){
   const gs=document.getElementById('gateSituation');
   gs.textContent=s.situation;gs.style.display='block';
 
-  // Set label texts
+  // Set label texts — LEFT side = LEFT gate, RIGHT side = RIGHT gate
   const gl1=document.getElementById('gateLabel1');
   const gl2=document.getElementById('gateLabel2');
-  // LEFT label = LEFT gate, RIGHT label = RIGHT gate
-  gl1.textContent=(_gateIsGreenLeft?greenText:redText)+' ⬅️';
-  gl2.textContent='➡️ '+(_gateIsGreenLeft?redText:greenText);
+  if(_gateIsGreenLeft){
+    gl1.textContent='🟢 '+greenText;gl1.style.borderColor='rgba(74,222,128,.5)';gl1.style.color='#4ade80';
+    gl2.textContent='🔴 '+redText;gl2.style.borderColor='rgba(239,68,68,.5)';gl2.style.color='#f87171';
+  } else {
+    gl1.textContent='🔴 '+redText;gl1.style.borderColor='rgba(239,68,68,.5)';gl1.style.color='#f87171';
+    gl2.textContent='🟢 '+greenText;gl2.style.borderColor='rgba(74,222,128,.5)';gl2.style.color='#4ade80';
+  }
   gl1.style.display='block';gl2.style.display='block';
 
   _gateActive=true;
@@ -1980,26 +1984,12 @@ function _updateGateLabels(){
     const pulse=Math.sin(performance.now()*.003)*.5+.5;
     gs.style.borderColor='rgba('+(Math.round(34+205*pulse))+','+(Math.round(197-130*pulse))+','+(Math.round(94-60*pulse))+',.5)';
   }
-  // Labels — project 3D gate positions to screen (ABOVE each gate)
+  // Labels — fixed LEFT and RIGHT sides of screen
   const opacity=distToGate<5?Math.max(0,distToGate/5):Math.min(1,(55-distToGate)/15);
-  const sz=Math.round(16+14*(1-Math.max(0,distToGate-10)/45));// 16→30px
-  const _pv=new THREE.Vector3();
-  // Left gate label
-  _pv.set(_gateL.position.x,_gateL.position.y+7,_gateL.position.z).project(cam);
-  if(_pv.z>0&&_pv.z<1){
-    const sx=(_pv.x*.5+.5)*innerWidth;const sy=(-_pv.y*.5+.5)*innerHeight;
-    gl1.style.left=Math.max(10,sx-150)+'px';gl1.style.right='auto';
-    gl1.style.top=Math.max(60,sy-30)+'px';gl1.style.transform='none';
-    gl1.style.display='block';gl1.style.opacity=String(opacity);gl1.style.fontSize=sz+'px';
-  } else gl1.style.display='none';
-  // Right gate label
-  _pv.set(_gateR.position.x,_gateR.position.y+7,_gateR.position.z).project(cam);
-  if(_pv.z>0&&_pv.z<1){
-    const sx=(_pv.x*.5+.5)*innerWidth;const sy=(-_pv.y*.5+.5)*innerHeight;
-    gl2.style.left=Math.min(innerWidth-160,sx-150)+'px';gl2.style.right='auto';
-    gl2.style.top=Math.max(60,sy-30)+'px';gl2.style.transform='none';
-    gl2.style.display='block';gl2.style.opacity=String(opacity);gl2.style.fontSize=sz+'px';
-  } else gl2.style.display='none';
+  gl1.style.display='block';gl1.style.opacity=String(opacity);
+  gl1.style.left='12px';gl1.style.right='auto';gl1.style.top='40%';gl1.style.transform='translateY(-50%)';
+  gl2.style.display='block';gl2.style.opacity=String(opacity);
+  gl2.style.right='12px';gl2.style.left='auto';gl2.style.top='40%';gl2.style.transform='translateY(-50%)';
 
   // Check if car passed through a gate
   const dz=car.position.z-_gateZ;
@@ -2053,9 +2043,13 @@ function _processGateChoice(isGreen){
     fbIcon.textContent='🔴';fbText.textContent=s.redFeedback;fbText.style.color='#f87171';
   }
 
+  // Hide gate labels immediately when showing feedback
+  document.getElementById('gateLabel1').style.display='none';
+  document.getElementById('gateLabel2').style.display='none';
+  document.getElementById('gateSituation').style.display='none';
   fb.style.display='block';fb.style.animation='none';
   requestAnimationFrame(()=>{fb.style.animation='feedSlide .5s cubic-bezier(.22,1,.36,1)'});
-  setTimeout(()=>{fb.style.display='none';document.getElementById('gateSituation').style.display='none'},2200);
+  setTimeout(()=>{fb.style.display='none'},2000);
 
   scenarioActive=false;
   nextScenarioAt=car.position.z+80+Math.random()*40;
