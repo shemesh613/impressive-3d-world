@@ -1749,7 +1749,7 @@ const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh
 // ---- OBSTACLES (red) ----
 const MAX_OBS=2;
 const obstacles=[];
-const obsInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1.2,0),new THREE.MeshStandardMaterial({color:0xff3333,emissive:0xff1111,emissiveIntensity:0.6,roughness:0.3,metalness:0.2,transparent:true,opacity:0.9}),MAX_OBS);
+const obsInst=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.7,1),new THREE.MeshStandardMaterial({color:0xff2222,emissive:0xff0000,emissiveIntensity:1.0,roughness:0.05,metalness:0.6,transparent:true,opacity:0.85}),MAX_OBS);
 obsInst.frustumCulled=false;scene.add(obsInst);
 
 const obsRingGeo=new THREE.RingGeometry(1.2,1.8,16);
