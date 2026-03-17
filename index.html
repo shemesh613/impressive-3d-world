@@ -874,6 +874,31 @@ scene.add((() => {
   swL.instanceMatrix.needsUpdate=true;swR.instanceMatrix.needsUpdate=true;scene.add(swL);scene.add(swR);
 }
 
+// ---- STREET LAMPS (emissive glow, no PointLight = zero GPU cost) ----
+{
+  const LAMP_N=25;
+  const lampPoleGeo=new THREE.CylinderGeometry(.05,.07,5,4);
+  const lampPoleMat=new THREE.MeshPhongMaterial({color:0x555566,shininess:10});
+  const lampPoleInst=new THREE.InstancedMesh(lampPoleGeo,lampPoleMat,LAMP_N);
+  const lampGlowGeo=new THREE.SphereGeometry(.2,6,6);
+  const lampGlowMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd66,emissiveIntensity:1.2,roughness:0.1});
+  const lampGlowInst=new THREE.InstancedMesh(lampGlowGeo,lampGlowMat,LAMP_N);
+  const lampArmGeo=new THREE.BoxGeometry(1.2,.06,.06);
+  const lampArmInst=new THREE.InstancedMesh(lampArmGeo,lampPoleMat,LAMP_N);
+  for(let i=0;i<LAMP_N;i++){
+    const z=30+i*110;const rx=roadX(z);const ry=roadY(z);
+    const side=i%2===0?-5.5:5.5;
+    dummy.position.set(rx+side,ry+2.5,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();
+    lampPoleInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(rx+side+(side>0?-0.5:0.5),ry+5.1,z);dummy.updateMatrix();
+    lampGlowInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(rx+side+(side>0?-0.3:0.3),ry+5,z);dummy.updateMatrix();
+    lampArmInst.setMatrixAt(i,dummy.matrix);
+  }
+  lampPoleInst.instanceMatrix.needsUpdate=true;lampGlowInst.instanceMatrix.needsUpdate=true;lampArmInst.instanceMatrix.needsUpdate=true;
+  scene.add(lampPoleInst);scene.add(lampGlowInst);scene.add(lampArmInst);
+}
+
 // ---- ROAD SIGNS ----
 {
   const signN=10;
