@@ -252,6 +252,11 @@
   </div>
 </div>
 
+<!-- GATE LABELS -->
+<div id="gateSituation" style="display:none;position:fixed;top:12%;left:50%;transform:translateX(-50%);z-index:38;background:rgba(5,15,25,.9);border:1px solid rgba(74,222,128,.3);border-radius:16px;padding:12px 24px;color:#fff;font-size:clamp(16px,3vw,22px);font-weight:700;text-align:center;direction:rtl;max-width:500px;backdrop-filter:blur(8px);pointer-events:none"></div>
+<div id="gateLabel1" style="display:none;position:fixed;z-index:37;background:rgba(100,120,140,.85);border:2px solid rgba(200,210,220,.4);border-radius:14px;padding:8px 16px;color:#fff;font-size:clamp(13px,2.5vw,17px);font-weight:700;text-align:center;direction:rtl;max-width:220px;pointer-events:none;white-space:normal;line-height:1.3"></div>
+<div id="gateLabel2" style="display:none;position:fixed;z-index:37;background:rgba(100,120,140,.85);border:2px solid rgba(200,210,220,.4);border-radius:14px;padding:8px 16px;color:#fff;font-size:clamp(13px,2.5vw,17px);font-weight:700;text-align:center;direction:rtl;max-width:220px;pointer-events:none;white-space:normal;line-height:1.3"></div>
+
 <!-- OPPONENT HUD -->
 <div id="opponentHud">
   <div class="op-label">🏎️ יריב</div>
@@ -774,7 +779,7 @@ const _ct=new THREE.Vector3();
 const _col=new THREE.Color();
 
 // ---- ROAD CURVE FUNCTION ----
-function roadY(z){return Math.sin(z*.006)*2.5+Math.sin(z*.017)*1.2+Math.sin(z*.003)*1.5}
+function roadY(z){return Math.sin(z*.006)*3.5+Math.sin(z*.017)*1.8+Math.sin(z*.003)*2.0+Math.sin(z*.04)*0.6}
 function roadX(z){
   if(z<0)return 0;
   const s=z%600;
@@ -1501,8 +1506,18 @@ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAtt
 // ---- CAR (player) ----
 const car=new THREE.Group();
 {
-  const body=new THREE.Mesh(new THREE.BoxGeometry(2,.7,4),new THREE.MeshStandardMaterial({color:0x22c55e,roughness:0.28,metalness:0.5}));body.position.y=.5;car.add(body);
-  const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.6,.5,2.2),new THREE.MeshStandardMaterial({color:0x0a4a28,roughness:0.1,metalness:0.7}));cabin.position.set(0,1.1,-.1);car.add(cabin);
+  // Body - main chassis
+  const body=new THREE.Mesh(new THREE.BoxGeometry(2,.7,4.2),new THREE.MeshStandardMaterial({color:0x22c55e,roughness:0.2,metalness:0.6}));body.position.y=.5;car.add(body);
+  // Hood (angled front)
+  const hood=new THREE.Mesh(new THREE.BoxGeometry(1.8,.15,1.2),new THREE.MeshStandardMaterial({color:0x1fa855,roughness:0.15,metalness:0.7}));hood.position.set(0,.88,1.2);hood.rotation.x=-.1;car.add(hood);
+  // Cabin (windowed)
+  const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.5,.55,1.8),new THREE.MeshStandardMaterial({color:0x0a4a28,roughness:0.05,metalness:0.8}));cabin.position.set(0,1.15,-.2);car.add(cabin);
+  // Windshield (angled glass)
+  const windshield=new THREE.Mesh(new THREE.BoxGeometry(1.4,.45,.05),new THREE.MeshStandardMaterial({color:0x88ccff,roughness:0.0,metalness:0.9,transparent:true,opacity:0.6}));windshield.position.set(0,1.2,.85);windshield.rotation.x=-.35;car.add(windshield);
+  // Rear windshield
+  const rearWind=new THREE.Mesh(new THREE.BoxGeometry(1.3,.35,.05),new THREE.MeshStandardMaterial({color:0x88ccff,roughness:0.0,metalness:0.9,transparent:true,opacity:0.5}));rearWind.position.set(0,1.15,-1.15);rearWind.rotation.x=.3;car.add(rearWind);
+  // Spoiler
+  const spoiler=new THREE.Mesh(new THREE.BoxGeometry(1.6,.06,.4),new THREE.MeshStandardMaterial({color:0x115533,roughness:0.3,metalness:0.5}));spoiler.position.set(0,1.1,-2.0);car.add(spoiler);
   const hlGeo=new THREE.BoxGeometry(.3,.14,.04);const hlMat=new THREE.MeshStandardMaterial({color:0xffffdd,emissive:0xffff88,emissiveIntensity:0.8,roughness:0.2,metalness:0.5});
   const hlInst=new THREE.InstancedMesh(hlGeo,hlMat,2);
   [-.6,.6].forEach((x,i)=>{dummy.position.set(x,.5,2.01);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();hlInst.setMatrixAt(i,dummy.matrix)});
@@ -1686,41 +1701,152 @@ renderer.domElement.addEventListener('mousedown',e=>{drag=true;mx=e.clientX;my=e
 addEventListener('mouseup',()=>drag=false);
 addEventListener('mousemove',e=>{if(!drag)return;cTh+=(e.clientX-mx)*.005;cPh=Math.max(.15,Math.min(1.3,cPh-(e.clientY-my)*.005));mx=e.clientX;my=e.clientY});
 
-// ---- SCENARIO SYSTEM ----
+// ---- GATE SYSTEM (replaces popup scenarios) ----
+// 3D gates: two arches on the road, player drives through one
+const _gateMat=new THREE.MeshPhongMaterial({color:0x667788,shininess:15,transparent:true,opacity:0.85});
+const _gateGreenMat=new THREE.MeshPhongMaterial({color:0x22c55e,shininess:20,emissive:0x115522,transparent:true,opacity:0.9});
+const _gateRedMat=new THREE.MeshPhongMaterial({color:0xef4444,shininess:20,emissive:0x551111,transparent:true,opacity:0.9});
+const _pillarGeo=new THREE.BoxGeometry(0.3,4,0.3);
+const _topGeo=new THREE.BoxGeometry(3.5,0.4,0.3);
+// Left gate
+const _gateL=new THREE.Group();
+const _pillarL1=new THREE.Mesh(_pillarGeo,_gateMat);_pillarL1.position.set(-1.5,2,0);_gateL.add(_pillarL1);
+const _pillarL2=new THREE.Mesh(_pillarGeo,_gateMat);_pillarL2.position.set(1.5,2,0);_gateL.add(_pillarL2);
+const _topL=new THREE.Mesh(_topGeo,_gateMat);_topL.position.set(0,4.1,0);_gateL.add(_topL);
+_gateL.visible=false;scene.add(_gateL);
+// Right gate
+const _gateR=new THREE.Group();
+const _pillarR1=new THREE.Mesh(new THREE.BoxGeometry(0.3,4,0.3),_gateMat);_pillarR1.position.set(-1.5,2,0);_gateR.add(_pillarR1);
+const _pillarR2=new THREE.Mesh(new THREE.BoxGeometry(0.3,4,0.3),_gateMat);_pillarR2.position.set(1.5,2,0);_gateR.add(_pillarR2);
+const _topR=new THREE.Mesh(new THREE.BoxGeometry(3.5,0.4,0.3),_gateMat);_topR.position.set(0,4.1,0);_gateR.add(_topR);
+_gateR.visible=false;scene.add(_gateR);
+
+let _gateActive=false,_gateZ=0,_gateIsGreenLeft=true,_gateScenarioIdx=0;
+
 function triggerScenario(){
-  if(scenarioActive||!gameActive)return;
+  if(scenarioActive||!gameActive||_gateActive)return;
   let available=SCENARIOS.filter((_,i)=>!usedScenarios.includes(i));
   if(available.length===0){usedScenarios=[];available=SCENARIOS}
   const idx=SCENARIOS.indexOf(available[Math.floor(Math.random()*available.length)]);
   usedScenarios.push(idx);
   const s=SCENARIOS[idx];
+  _gateScenarioIdx=idx;
 
+  // Place gates 60m ahead
+  _gateZ=car.position.z+60;
+  const rx=roadX(_gateZ);const ry=roadY(_gateZ);
+  _gateL.position.set(rx-2.5,ry,_gateZ);_gateL.visible=true;
+  _gateR.position.set(rx+2.5,ry,_gateZ);_gateR.visible=true;
+  // Reset to neutral color
+  _pillarL1.material=_gateMat;_pillarL2.material=_gateMat;_topL.material=_gateMat;
+  _pillarR1.material=_gateMat;_pillarR2.material=_gateMat;_topR.material=_gateMat;
+
+  // Randomize which side is green
+  _gateIsGreenLeft=Math.random()>0.5;
+  const greenText=s.green.text.replace('🟢 ','');
+  const redText=s.red.text.replace('🔴 ','');
+
+  // Show situation text
+  const gs=document.getElementById('gateSituation');
+  gs.textContent=s.situation;gs.style.display='block';
+
+  // Set label texts
+  const gl1=document.getElementById('gateLabel1');
+  const gl2=document.getElementById('gateLabel2');
+  gl1.textContent=_gateIsGreenLeft?greenText:redText;
+  gl2.textContent=_gateIsGreenLeft?redText:greenText;
+  gl1.style.display='block';gl2.style.display='block';
+
+  _gateActive=true;
   scenarioActive=true;
-  window._preScenarioSpd=spd;spd=0;// Car stops during scenario
   sfxScenario();
-  document.getElementById('situationText').textContent=s.situation;
-  // Randomize button positions
-  if(Math.random()>.5){
-    document.getElementById('choiceGreen').textContent=s.green.text;
-    document.getElementById('choiceRed').textContent=s.red.text;
-    document.getElementById('choiceGreen').className='choice-btn choice-green';
-    document.getElementById('choiceRed').className='choice-btn choice-red';
-  } else {
-    document.getElementById('choiceGreen').textContent=s.red.text;
-    document.getElementById('choiceRed').textContent=s.green.text;
-    document.getElementById('choiceGreen').className='choice-btn choice-red';
-    document.getElementById('choiceRed').className='choice-btn choice-green';
-  }
-  document.getElementById('scenario').style.display='block';
 
-  // Timer (8 seconds)
-  const tf=document.getElementById('timerFill');
-  tf.style.transition='none';tf.style.width='100%';tf.className='timer-fill';
-  requestAnimationFrame(()=>{tf.style.transition='width 12s linear';tf.style.width='0%'});
-  clearTimeout(window._timerWarn);clearTimeout(window._timerDanger);
-  window._timerWarn=setTimeout(()=>{tf.className='timer-fill timer-warn'},6000);
-  window._timerDanger=setTimeout(()=>{tf.className='timer-fill timer-danger'},10000);
-  scenarioTimeout=setTimeout(()=>{if(scenarioActive)choose('timeout')},20000);
+  // Hide old popup scenario
+  document.getElementById('scenario').style.display='none';
+}
+
+// Update gate label positions (called in animate)
+function _updateGateLabels(){
+  if(!_gateActive)return;
+  const _v2=new THREE.Vector3();
+  // Left gate label
+  _v2.set(_gateL.position.x,_gateL.position.y+4.8,_gateL.position.z).project(cam);
+  const gl1=document.getElementById('gateLabel1');
+  if(_v2.z<1&&_v2.z>0){const sx=(_v2.x*.5+.5)*innerWidth;const sy=(-_v2.y*.5+.5)*innerHeight;
+    gl1.style.left=sx+'px';gl1.style.top=sy+'px';gl1.style.transform='translate(-50%,-50%)';gl1.style.display='block'}
+  else gl1.style.display='none';
+  // Right gate label
+  _v2.set(_gateR.position.x,_gateR.position.y+4.8,_gateR.position.z).project(cam);
+  const gl2=document.getElementById('gateLabel2');
+  if(_v2.z<1&&_v2.z>0){const sx=(_v2.x*.5+.5)*innerWidth;const sy=(-_v2.y*.5+.5)*innerHeight;
+    gl2.style.left=sx+'px';gl2.style.top=sy+'px';gl2.style.transform='translate(-50%,-50%)';gl2.style.display='block'}
+  else gl2.style.display='none';
+
+  // Check if car passed through a gate
+  const dz=car.position.z-_gateZ;
+  if(dz>-1&&dz<3&&_gateActive){
+    const rx=roadX(_gateZ);
+    const dx=car.position.x-rx;
+    const wentLeft=dx<0;
+    const isGreen=(wentLeft&&_gateIsGreenLeft)||(!wentLeft&&!_gateIsGreenLeft);
+    // Color the gates
+    const greenMat=_gateGreenMat;const redMat=_gateRedMat;
+    if(_gateIsGreenLeft){
+      _pillarL1.material=greenMat;_pillarL2.material=greenMat;_topL.material=greenMat;
+      _pillarR1.material=redMat;_pillarR2.material=redMat;_topR.material=redMat;
+    } else {
+      _pillarL1.material=redMat;_pillarL2.material=redMat;_topL.material=redMat;
+      _pillarR1.material=greenMat;_pillarR2.material=greenMat;_topR.material=greenMat;
+    }
+    _gateActive=false;
+    // Process choice
+    _processGateChoice(isGreen);
+  }
+
+  // Hide gates when far behind
+  if(car.position.z-_gateZ>30){
+    _gateL.visible=false;_gateR.visible=false;
+    document.getElementById('gateLabel1').style.display='none';
+    document.getElementById('gateLabel2').style.display='none';
+    document.getElementById('gateSituation').style.display='none';
+  }
+}
+
+function _processGateChoice(isGreen){
+  scenariosAnswered++;
+  const s=SCENARIOS[_gateScenarioIdx];
+  const fb=document.getElementById('feedback');
+  const fbIcon=document.getElementById('fbIcon');
+  const fbText=document.getElementById('fbText');
+
+  if(isGreen){
+    greenCount++;score+=s.green.points;flow=Math.min(100,flow+20);boostTimer=120;streak++;if(streak>bestStreak)bestStreak=streak;lives=Math.min(5,lives+0.5);
+    sfxGreen();screenFlash("flash-green");confettiBurst();
+    emitParticles(car.position.x,2,car.position.z,0x22c55e,12);
+    fbIcon.textContent='🟢';fbText.textContent=s.greenFeedback;fbText.style.color='#4ade80';
+  } else {
+    redCount++;score+=s.red.points;streak=0;if(score<0)score=0;flow=Math.max(0,flow-8);spd*=.5;lives=Math.max(0,lives-0.7);
+    sfxRed();screenFlash("flash-red");
+    emitParticles(car.position.x,2,car.position.z,0xef4444,12);
+    fbIcon.textContent='🔴';fbText.textContent=s.redFeedback;fbText.style.color='#f87171';
+  }
+
+  fb.style.display='block';fb.style.animation='none';
+  requestAnimationFrame(()=>{fb.style.animation='feedSlide .5s cubic-bezier(.22,1,.36,1)'});
+  setTimeout(()=>{fb.style.display='none';document.getElementById('gateSituation').style.display='none'},2200);
+
+  scenarioActive=false;
+  nextScenarioAt=car.position.z+80+Math.random()*40;
+
+  // Level up check
+  if(scenariosAnswered>0&&scenariosAnswered%4===0){
+    const _lvlTitles=['','🌱 מתחילים!','🌿 זורם יפה!','🌳 גמיש!','💪 מאסטר זרימה!','🏆 אלוף הגמישות!','⭐ כוכב חברתי!','🌟 אגדה!','👑 מלך הזרימה!'];
+    level++;sfxLevelUp();confettiBurst();
+    document.getElementById('levelUpText').textContent='שלב '+level+'! 🎉';
+    document.getElementById('levelUpSub').textContent=_lvlTitles[Math.min(level,_lvlTitles.length-1)]||'ממשיכים!';
+    document.getElementById('levelUp').style.display='flex';
+    setTimeout(()=>{document.getElementById('levelUp').style.display='none'},2500);
+  }
 }
 
 function choose(type){
@@ -2406,7 +2532,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   updateClouds();updateInstances(greens,greenInst,MAX_GREENS,true);
   updateInstances(obstacles,obsInst,MAX_OBS,false);updateInstances(powerups,powerupInst,MAX_POWERUPS,true);
-  updateParticles();
+  updateParticles();_updateGateLabels();
   if(fc%6===0){updateHUD();const pi=document.getElementById('powerIndicator');
     if(shieldTimer>0){pi.style.display='flex';pi.style.borderColor='rgba(96,165,250,.6)';pi.style.boxShadow='0 0 '+(10+Math.sin(fc*.1)*5)+'px rgba(96,165,250,.4)';document.getElementById('powerIcon').innerHTML='&#128737;';document.getElementById('powerTimer').textContent=Math.ceil(shieldTimer/60)+'s';
       const si=document.getElementById('shieldInd');if(si){si.style.display='block';si.textContent='🛡️ מגן '+Math.ceil(shieldTimer/60)+'s'}}
