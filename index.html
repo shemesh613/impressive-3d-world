@@ -1718,7 +1718,7 @@ for(let i=0;i<FOLLOWER_N;i++)followerPos.push({x:0,z:-(i+1)*6,y:.4});
 // ---- GREEN COLLECTIBLES ----
 const MAX_GREENS=3;
 const greens=[];
-const greenInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1.3,0),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x55ff77,transparent:true,opacity:1.0}),MAX_GREENS);
+const greenInst=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.8,1),new THREE.MeshStandardMaterial({color:0x22ff66,emissive:0x11cc44,emissiveIntensity:0.8,roughness:0.1,metalness:0.5,transparent:true,opacity:0.9}),MAX_GREENS);
 greenInst.frustumCulled=false;scene.add(greenInst);
 
 // ---- COLLECTIBLE BEAMS ----
