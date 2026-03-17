@@ -783,6 +783,13 @@ const moonGeo=new THREE.SphereGeometry(8,12,12);
 const moonMat=new THREE.MeshBasicMaterial({color:0xeeeeff});
 const moon=new THREE.Mesh(moonGeo,moonMat);
 moon.position.set(-80,120,500);scene.add(moon);
+// Trail marks mesh
+const _trailGeo=new THREE.PlaneGeometry(1,1);
+const _trailMat=new THREE.MeshBasicMaterial({color:0x22c55e,transparent:true,opacity:0.4,side:THREE.DoubleSide});
+const _trailInst=new THREE.InstancedMesh(_trailGeo,_trailMat,30);
+_trailInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(30*3),3);
+for(let i=0;i<30;i++){dummy.position.set(0,-100,0);dummy.updateMatrix();_trailInst.setMatrixAt(i,dummy.matrix)}
+_trailInst.instanceMatrix.needsUpdate=true;scene.add(_trailInst);window._trailInst=_trailInst;
 // Moon glow (larger transparent sphere)
 const moonGlowGeo=new THREE.SphereGeometry(14,12,12);
 const moonGlowMat=new THREE.MeshBasicMaterial({color:0xaabbdd,transparent:true,opacity:0.08});
@@ -2318,6 +2325,23 @@ function updateHUD(){
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
   scene.fog.density=0.00075-spd*0.0005;// fog clears at speed
   moon.position.z=car.position.z+500;moonGlow.position.z=moon.position.z;// moon follows
+  // Trail marks on road at high speed
+  if(spd>0.15&&fc%8===0&&!window._trailMarks)window._trailMarks=[];
+  if(window._trailMarks&&spd>0.15&&fc%8===0){
+    window._trailMarks.push({x:car.position.x,y:car.position.y+0.04,z:car.position.z,life:1});
+    if(window._trailMarks.length>30)window._trailMarks.shift();
+  }
+  if(window._trailMarks&&window._trailInst){
+    const ti=window._trailInst;
+    for(let i=0;i<30;i++){
+      if(i<window._trailMarks.length){const t=window._trailMarks[i];t.life-=0.015;
+        dummy.position.set(t.x,t.y,t.z);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.set(0.3,1.5,1);dummy.updateMatrix();
+        ti.setMatrixAt(i,dummy.matrix);ti.setColorAt(i,_col.setRGB(0.13*t.life,0.77*t.life,0.37*t.life));
+      } else {dummy.position.set(0,-100,0);dummy.updateMatrix();ti.setMatrixAt(i,dummy.matrix)}
+    }
+    ti.instanceMatrix.needsUpdate=true;if(ti.instanceColor)ti.instanceColor.needsUpdate=true;
+    window._trailMarks=window._trailMarks.filter(t=>t.life>0);
+  }
   // Tire sparks on sharp turns at speed
   const _steerAmt=Math.abs((keys.ArrowLeft||keys.KeyA)?1:(keys.ArrowRight||keys.KeyD)?-1:0);
   if(_steerAmt>0&&spd>0.2&&fc%4===0){
