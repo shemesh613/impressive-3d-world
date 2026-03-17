@@ -2372,6 +2372,10 @@ function updateHUD(){
     ti.instanceMatrix.needsUpdate=true;if(ti.instanceColor)ti.instanceColor.needsUpdate=true;
     window._trailMarks=window._trailMarks.filter(t=>t.life>0);
   }
+  // Dust puff behind car at speed
+  if(spd>0.12&&fc%10===0){
+    emitParticles(car.position.x+(Math.random()-.5)*1.5,car.position.y+0.1,car.position.z-2.5,0x888877,1);
+  }
   // Tire sparks on sharp turns at speed
   const _steerAmt=Math.abs((keys.ArrowLeft||keys.KeyA)?1:(keys.ArrowRight||keys.KeyD)?-1:0);
   if(_steerAmt>0&&spd>0.2&&fc%4===0){
