@@ -274,7 +274,7 @@
 <div id="multiplier" style="display:none;position:fixed;top:25%;right:15%;z-index:40;font-size:clamp(40px,8vw,70px);font-weight:900;color:#fbbf24;text-shadow:0 0 30px rgba(251,191,36,.7),0 0 60px rgba(251,191,36,.3);pointer-events:none"></div>
 
 <!-- GATE LABELS -->
-<div id="gateSituation" style="display:none;position:fixed;top:8%;left:50%;transform:translateX(-50%);z-index:38;background:rgba(5,15,25,.92);border:2px solid rgba(74,222,128,.4);border-radius:16px;padding:12px 24px;color:#fff;font-size:clamp(16px,3vw,24px);font-weight:800;text-align:center;direction:rtl;max-width:500px;pointer-events:none;backdrop-filter:blur(8px)"></div>
+<div id="gateSituation" style="display:none;position:fixed;top:6%;left:50%;transform:translateX(-50%);z-index:38;background:rgba(5,15,25,.92);border:2px solid;border-radius:16px;padding:10px 22px;color:#fff;font-size:clamp(16px,3vw,24px);font-weight:800;text-align:center;direction:rtl;max-width:500px;pointer-events:none;backdrop-filter:blur(8px);transition:border-color .5s"></div>
 <div id="gateLabel1" style="display:none;position:fixed;z-index:37;background:rgba(10,25,45,.95);border:3px solid rgba(96,165,250,.5);border-radius:18px;padding:16px 24px;color:#fff;font-size:clamp(20px,4vw,30px);font-weight:900;text-align:center;direction:rtl;max-width:340px;pointer-events:none;white-space:normal;line-height:1.5;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 6px 25px rgba(0,0,0,.6)"></div>
 <div id="gateLabel2" style="display:none;position:fixed;z-index:37;background:rgba(10,25,45,.95);border:3px solid rgba(96,165,250,.5);border-radius:18px;padding:16px 24px;color:#fff;font-size:clamp(20px,4vw,30px);font-weight:900;text-align:center;direction:rtl;max-width:340px;pointer-events:none;white-space:normal;line-height:1.5;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 6px 25px rgba(0,0,0,.6)"></div>
 
@@ -1932,8 +1932,9 @@ function triggerScenario(){
   // Set label texts
   const gl1=document.getElementById('gateLabel1');
   const gl2=document.getElementById('gateLabel2');
-  gl1.textContent='⬅️ '+(_gateIsGreenLeft?greenText:redText);
-  gl2.textContent=(_gateIsGreenLeft?redText:greenText)+' ➡️';
+  // LEFT label = LEFT gate, RIGHT label = RIGHT gate
+  gl1.textContent=(_gateIsGreenLeft?greenText:redText)+' ⬅️';
+  gl2.textContent='➡️ '+(_gateIsGreenLeft?redText:greenText);
   gl1.style.display='block';gl2.style.display='block';
 
   _gateActive=true;
@@ -1956,14 +1957,20 @@ function _updateGateLabels(){
   if(distToGate>55||distToGate<-2){
     gl1.style.display='none';gl2.style.display='none';if(gs)gs.style.display='none';return;
   }
-  // Question always visible at top center
-  if(gs){gs.style.display='block';gs.style.top='8%';gs.style.left='50%';gs.style.transform='translateX(-50%)'}
-  // Labels — LEFT label at left 25%, RIGHT label at right 25% (matching gate sides)
-  const opacity=distToGate<5?Math.max(0,distToGate/5):1;
-  gl1.style.left='5%';gl1.style.right='auto';gl1.style.top='22%';gl1.style.transform='none';
-  gl1.style.display='block';gl1.style.opacity=String(opacity);
-  gl2.style.left='auto';gl2.style.right='5%';gl2.style.top='22%';gl2.style.transform='none';
-  gl2.style.display='block';gl2.style.opacity=String(opacity);
+  // Question at top — color pulses green↔red
+  if(gs){
+    gs.style.display='block';
+    const pulse=Math.sin(performance.now()*.003)*.5+.5;
+    gs.style.borderColor='rgba('+(Math.round(34+205*pulse))+','+(Math.round(197-130*pulse))+','+(Math.round(94-60*pulse))+',.5)';
+  }
+  // Labels below question — grow as car approaches
+  const opacity=distToGate<5?Math.max(0,distToGate/5):Math.min(1,(55-distToGate)/15);
+  const sz=Math.round(18+12*(1-Math.max(0,distToGate-10)/45));// 18→30px
+  // LEFT label at left 25%, RIGHT label at right 25%
+  gl1.style.left='8%';gl1.style.right='auto';gl1.style.top='18%';gl1.style.transform='none';
+  gl1.style.display='block';gl1.style.opacity=String(opacity);gl1.style.fontSize=sz+'px';
+  gl2.style.left='auto';gl2.style.right='8%';gl2.style.top='18%';gl2.style.transform='none';
+  gl2.style.display='block';gl2.style.opacity=String(opacity);gl2.style.fontSize=sz+'px';
 
   // Check if car passed through a gate
   const dz=car.position.z-_gateZ;
