@@ -1703,7 +1703,7 @@ addEventListener('mousemove',e=>{if(!drag)return;cTh+=(e.clientX-mx)*.005;cPh=Ma
 
 // ---- GATE SYSTEM (replaces popup scenarios) ----
 // 3D gates: two arches on the road, player drives through one
-const _gateMat=new THREE.MeshPhongMaterial({color:0x667788,shininess:15,transparent:true,opacity:0.85});
+const _gateMat=new THREE.MeshPhongMaterial({color:0x8899aa,shininess:25,emissive:0x334455,emissiveIntensity:0.3});
 const _gateGreenMat=new THREE.MeshPhongMaterial({color:0x22c55e,shininess:20,emissive:0x115522,transparent:true,opacity:0.9});
 const _gateRedMat=new THREE.MeshPhongMaterial({color:0xef4444,shininess:20,emissive:0x551111,transparent:true,opacity:0.9});
 const _pillarGeo=new THREE.BoxGeometry(0.4,5.5,0.4);
