@@ -90,12 +90,11 @@
 
     /* Feedback overlay */
     #feedback{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:45;display:none;
-      text-align:center;pointer-events:none;animation:feedSlide .5s cubic-bezier(.22,1,.36,1)}
+      text-align:center;pointer-events:none;animation:feedSlide .5s cubic-bezier(.22,1,.36,1);
+      background:rgba(5,15,25,.9);border-radius:20px;padding:20px 30px;border:1px solid rgba(74,222,128,.2);backdrop-filter:blur(10px);max-width:400px}
     @keyframes feedSlide{0%{transform:translate(-50%,-30%) scale(.7);opacity:0;filter:blur(6px)}100%{transform:translate(-50%,-50%) scale(1);opacity:1;filter:blur(0)}}
-    #feedback .fb-icon{font-size:clamp(60px,15vw,100px);animation:iconSpin .6s cubic-bezier(.34,1.56,.64,1)}
-    @keyframes iconSpin{0%{transform:rotate(-20deg) scale(0)}50%{transform:rotate(10deg) scale(1.2)}100%{transform:rotate(0deg) scale(1)}}
-    #feedback .fb-text{color:#fff;font-size:clamp(22px,5vw,36px);font-weight:900;margin-top:8px;
-      text-shadow:0 0 20px rgba(0,0,0,.5)}
+    #feedback .fb-icon{font-size:clamp(40px,10vw,70px)}
+    #feedback .fb-text{color:#fff;font-size:clamp(16px,3.5vw,22px);font-weight:700;margin-top:8px;line-height:1.5;direction:rtl}
 
     /* Following cars indicator */
     #followers{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:20;pointer-events:none;
@@ -915,11 +914,11 @@ scene.add((() => {
   window._barrierData={inst:barrierInst,data:barrierData,n:BARRIER_N};
 }
 
-// ---- RED DANGER EDGES ----
+// ---- ROAD CURB EDGES (subtle) ----
 {
   const RED_EDGE_N=10;
-  const redEdgeGeo=new THREE.PlaneGeometry(1.5,25);
-  const redEdgeMat=new THREE.MeshBasicMaterial({color:0xff3333});
+  const redEdgeGeo=new THREE.PlaneGeometry(0.3,25);
+  const redEdgeMat=new THREE.MeshBasicMaterial({color:0x555566});
   const redEdgeL=new THREE.InstancedMesh(redEdgeGeo,redEdgeMat,RED_EDGE_N);
   const redEdgeR=new THREE.InstancedMesh(redEdgeGeo,redEdgeMat,RED_EDGE_N);
   const redEdgeData=[];
@@ -1697,6 +1696,7 @@ function triggerScenario(){
   const s=SCENARIOS[idx];
 
   scenarioActive=true;
+  window._preScenarioSpd=spd;spd=0;// Car stops during scenario
   sfxScenario();
   document.getElementById('situationText').textContent=s.situation;
   // Randomize button positions
@@ -1771,8 +1771,8 @@ function choose(type){
 
   fb.style.display='block';
   fb.style.animation='none';
-  requestAnimationFrame(()=>{fb.style.animation='feedPop .6s ease'});
-  setTimeout(()=>{fb.style.display='none'},2200);const tipEl=document.getElementById('tip');const tips=['💡 טיפ: דברים קטנים — לא שווה לריב עליהם!','💡 טיפ: כשמתגמשים — כולם נהנים יותר!','💡 טיפ: לפעמים ויתור = ניצחון!','💡 טיפ: חברים אוהבים מי שזורם!','💡 טיפ: מה שחשוב — עוצרים. מה שלא — ממשיכים!','💡 טיפ: בכביש ובחיים — זרימה זה הכוח!'];tipEl.textContent=tips[Math.floor(Math.random()*tips.length)];tipEl.style.display='block';setTimeout(()=>{tipEl.style.display='none'},3500);
+  requestAnimationFrame(()=>{fb.style.animation='feedSlide .5s cubic-bezier(.22,1,.36,1)'});
+  setTimeout(()=>{fb.style.display='none';spd=window._preScenarioSpd||0.15},2200);const tipEl=document.getElementById('tip');const tips=['💡 טיפ: דברים קטנים — לא שווה לריב עליהם!','💡 טיפ: כשמתגמשים — כולם נהנים יותר!','💡 טיפ: לפעמים ויתור = ניצחון!','💡 טיפ: חברים אוהבים מי שזורם!','💡 טיפ: מה שחשוב — עוצרים. מה שלא — ממשיכים!','💡 טיפ: בכביש ובחיים — זרימה זה הכוח!'];tipEl.textContent=tips[Math.floor(Math.random()*tips.length)];tipEl.style.display='block';setTimeout(()=>{tipEl.style.display='none'},3500);
 
   // Level up check
   if(scenariosAnswered>0&&scenariosAnswered%4===0){
@@ -2185,9 +2185,9 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
       const dist=car.position.z;
       const zone=Math.floor(dist/300)%7;
       const t=(dist%300)/300;
-      const skyColors=[0x1a2a40,0x251530,0x0a2518,0x2a2010,0x101535,0x1a3030,0x2a1520];
+      const skyColors=[0x1a2a40,0x201a35,0x122a20,0x2a2515,0x15183a,0x1a2a2a,0x281a22];
       const groundColors=[0x1a2a3a,0x2a1a2a,0x1a2a1a,0x2a2a1a,0x1a1a3a,0x1a2a2a,0x2a1a1a];
-      const fogColors=[0x1a2a40,0x251530,0x0a2518,0x2a2010,0x101535,0x1a3030,0x2a1520];
+      const fogColors=[0x1a2a40,0x201a35,0x122a20,0x2a2515,0x15183a,0x1a2a2a,0x281a22];
       const edgeColors=[0x22c55e,0xe040fb,0x00e5ff,0xff9100,0x536dfe,0x40e0d0,0xff6b6b];
       const nextZone=(zone+1)%7;
       const sc=_col.setHex(skyColors[zone]);const sn=new THREE.Color(skyColors[nextZone]);sc.lerp(sn,t);
