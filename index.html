@@ -2343,7 +2343,10 @@ function updateHUD(){
   document.getElementById('levelVal').textContent=level;
   const _pt=document.getElementById('playerTag');if(_pt){const pn=(document.getElementById('playerName')||{}).value||'';if(pn)_pt.textContent=pn+' | שלב '+level}
   const _sv=document.getElementById('streakVal');_sv.textContent=streak>0?'🔥'.repeat(Math.min(streak,5)):'-';
-  const _sp=_sv.parentElement;if(_sp){if(streak>=3){_sp.style.boxShadow='0 0 '+(8+streak*3)+'px rgba(251,191,36,'+(0.3+streak*0.08)+')';_sp.style.transform='scale('+(1+streak*0.02)+')';_sp.style.borderColor='rgba(251,191,36,0.5)'}else{_sp.style.boxShadow='';_sp.style.transform='';_sp.style.borderColor=''}}
+  const _sp=_sv.parentElement;if(_sp){if(streak>=5){_sp.style.boxShadow='0 0 20px rgba(255,100,0,.6)';_sp.style.transform='scale(1.1)';_sp.style.borderColor='rgba(255,100,0,0.6)';
+    if(!window._streakTurbo){window._streakTurbo=true;turboTimer=Math.max(turboTimer,180);sfxBoost()}}
+    else if(streak>=3){_sp.style.boxShadow='0 0 '+(8+streak*3)+'px rgba(251,191,36,'+(0.3+streak*0.08)+')';_sp.style.transform='scale('+(1+streak*0.02)+')';_sp.style.borderColor='rgba(251,191,36,0.5)';window._streakTurbo=false}
+    else{_sp.style.boxShadow='';_sp.style.transform='';_sp.style.borderColor='';window._streakTurbo=false}}
   const _ff=document.getElementById('flowFill');_ff.style.width=flow+'%';_ff.className=flow>70?'flow-high':'';
   const _fg=document.getElementById('flowGlow');if(_fg)_fg.style.opacity=flow>=95?String((flow-95)/5*0.8):'0';document.getElementById('distVal').textContent=Math.floor(car.position.z)+'m';
   const _cc=document.getElementById('choiceCounter');if(_cc)_cc.textContent='🟢'+greenCount+' 🔴'+redCount;
