@@ -2443,7 +2443,14 @@ function checkCollisions(){
   for(let i=powerups.length-1;i>=0;i--){    const p=powerups[i];if(!p.active)continue;    if((cx-p.x)**2+(cz-p.z)**2<3){      p.active=false;screenFlash("flash-gold");      sfxBoost();emitParticles(p.x,p.y,p.z,0xfbbf24,10);      const proj=_v.set(p.x,p.y+1,p.z).project(cam);      if(p.type==="shield"){shieldTimer=300;showPopup("🛡️ מגן!",(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,"#60a5fa")}      else{turboTimer=180;showPopup("⚡ טורבו!",(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,"#fbbf24")}      powerups.splice(i,1);    }  }
   for(let i=obstacles.length-1;i>=0;i--){
     const o=obstacles[i];if(!o.active)continue;
-    if((cx-o.x)**2+(cz-o.z)**2<4){
+    const oDist2=(cx-o.x)**2+(cz-o.z)**2;
+    // Near miss detection (close but not hit)
+    if(oDist2>4&&oDist2<12&&cz>o.z&&!o._nearMissed){
+      o._nearMissed=true;score+=5;
+      showPopup('😎 כמעט! +5',innerWidth/2,innerHeight*0.3,'#60a5fa');
+      sfxCollect();emitParticles(car.position.x,1.5,car.position.z,0x60a5fa,4);
+    }
+    if(oDist2<4){
       o.active=false;if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,o.y,o.z,0x60a5fa,8);sfxCollect();obstacles.splice(i,1);continue}flow=Math.max(0,flow-4);spd*=.5;lives=Math.max(0,lives-0.5);
       sfxRed();screenFlash("flash-red");emitParticles(o.x,o.y,o.z,0xef4444,10);
       const proj=_v.set(o.x,o.y+1,o.z).project(cam);
