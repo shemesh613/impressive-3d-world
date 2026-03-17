@@ -307,6 +307,7 @@
   <div class="stats">בחירות אדומות: <span id="finalRed">0</span></div>
   <div class="stats">רצף ירוקים הכי ארוך: <span id="finalStreak">0</span> 🔥</div>
   <div class="stats">מרחק: <span id="finalDist">0</span>m 🛣️</div>
+  <div class="stats">מהירות שיא: <span id="finalTopSpeed">0</span>km/h 🏎️</div>
   <div class="stats" id="finalStars" style="font-size:clamp(24px,5vw,40px)"></div>
   <div class="stats" id="finalMsg"></div>
   <div id="mpResult"></div>
@@ -1773,7 +1774,7 @@ function updateParticles(){
 }
 
 // ---- GAME STATE ----
-let score=0,lives=5,level=1,flow=85,greenCount=0,redCount=0,streak=0,bestStreak=0,shieldTimer=0,turboTimer=0;
+let score=0,lives=5,level=1,flow=85,greenCount=0,redCount=0,streak=0,bestStreak=0,shieldTimer=0,turboTimer=0,topSpeed=0;
 let gameActive=false,spd=0,dir=0,fc=0,boostTimer=0,lastMilestone=0;
 let scenarioActive=false,scenarioTimer=0,scenarioTimeout=null,usedScenarios=[];
 let nextScenarioAt=0,scenariosAnswered=0;
@@ -2055,7 +2056,7 @@ function choose(type){
     const _msgs1=['💪 כל תרגול הופך אותך יותר גמיש!','🌱 ההתחלה טובה! תנסה שוב!','🎯 עוד קצת אימון וזורם כמו מים!'];
     const _r=Math.floor(Math.random()*3);
     document.getElementById('finalMsg').textContent=ratio>.7?_msgs3[_r]:ratio>.4?_msgs2[_r]:_msgs1[_r];
-    document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();_saveHighScore(score);document.getElementById('gameOver').style.display='flex';
+    document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalTopSpeed').textContent=topSpeed;document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();_saveHighScore(score);document.getElementById('gameOver').style.display='flex';
     return;
   }
 
@@ -2259,7 +2260,7 @@ function _realStartGame(){
   const _hud=document.getElementById('hud');_hud.style.display='block';_hud.classList.remove('hud-enter');void _hud.offsetWidth;_hud.classList.add('hud-enter');
   document.getElementById('followers').style.display='block';
   gameActive=true;startBgMusic();
-  score=0;lives=5;level=1;flow=85;greenCount=0;redCount=0;streak=0;bestStreak=0;
+  score=0;lives=5;level=1;flow=85;greenCount=0;redCount=0;streak=0;bestStreak=0;topSpeed=0;
   spd=0;dir=0;boostTimer=0;shieldTimer=0;turboTimer=0;lastMilestone=0;scenarioActive=false;scenariosAnswered=0;
   usedScenarios=[];nextScenarioAt=100;
   car.position.set(0,roadY(0),0);
@@ -2315,7 +2316,8 @@ function updateHUD(){
   const _ff=document.getElementById('flowFill');_ff.style.width=flow+'%';_ff.className=flow>70?'flow-high':'';
   const _fg=document.getElementById('flowGlow');if(_fg)_fg.style.opacity=flow>=95?String((flow-95)/5*0.8):'0';document.getElementById('distVal').textContent=Math.floor(car.position.z)+'m';
   const _cc=document.getElementById('choiceCounter');if(_cc)_cc.textContent='🟢'+greenCount+' 🔴'+redCount;
-  document.getElementById('speedVal').textContent=Math.round(spd*500)+'km/h';
+  const _curSpd=Math.round(spd*500);if(_curSpd>topSpeed)topSpeed=_curSpd;
+  document.getElementById('speedVal').textContent=_curSpd+'km/h';
   const _sn=document.getElementById('speedNeedle');if(_sn)_sn.style.transform='rotate('+(-90+spd*500)+'deg)';
   var _sl=document.getElementById('speedLines');if(_sl)_sl.style.opacity=spd>0.25?String(Math.min(1,(spd-0.25)*4)):'0';
   var _hl=document.getElementById('headlightGlow');if(_hl)_hl.style.opacity=spd>0.05?String(Math.min(1,spd*3)):'0';
