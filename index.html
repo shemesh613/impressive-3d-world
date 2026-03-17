@@ -152,6 +152,8 @@
     #motionBlur{position:fixed;inset:0;z-index:13;pointer-events:none;opacity:0;transition:opacity .2s;background:radial-gradient(ellipse at 50% 60%,transparent 35%,rgba(0,5,15,.35) 100%);mix-blend-mode:multiply}
     #starfield{position:fixed;top:0;left:0;right:0;height:40vh;z-index:1;pointer-events:none;opacity:.6}
     .star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--dur) ease-in-out infinite alternate}
+    .shooting-star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:0;box-shadow:0 0 4px #fff,20px 0 8px #fff,40px 0 4px rgba(255,255,255,.5);animation:shoot 1.2s ease-out forwards}
+    @keyframes shoot{0%{opacity:1;transform:translate(0,0) rotate(-35deg)}100%{opacity:0;transform:translate(-200px,120px) rotate(-35deg)}}
     @keyframes twinkle{0%{opacity:.2;transform:scale(.8)}100%{opacity:1;transform:scale(1.2)}}
     #headlightGlow{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:60vw;height:35vh;z-index:12;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(255,245,200,.04) 0%,rgba(255,240,180,.02) 40%,transparent 70%);opacity:0;transition:opacity .5s}
     #boostTrail{position:fixed;bottom:15%;left:50%;transform:translateX(-50%);width:8px;height:0;z-index:11;pointer-events:none;background:linear-gradient(to top,rgba(74,222,128,.5),rgba(74,222,128,0));border-radius:4px;transition:height .3s,opacity .3s;opacity:0;filter:blur(3px)}
@@ -358,7 +360,8 @@
 <div id="flowGlow"></div>
 <div id="motionBlur"></div>
 <div id="starfield"></div>
-<script>!function(){const sf=document.getElementById('starfield');if(!sf)return;for(let i=0;i<40;i++){const s=document.createElement('div');s.className='star';const sz=1+Math.random()*2;s.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;--dur:'+(2+Math.random()*3)+'s;animation-delay:'+(Math.random()*3)+'s';sf.appendChild(s)}}()</script>
+<script>!function(){const sf=document.getElementById('starfield');if(!sf)return;for(let i=0;i<40;i++){const s=document.createElement('div');s.className='star';const sz=1+Math.random()*2;s.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;--dur:'+(2+Math.random()*3)+'s;animation-delay:'+(Math.random()*3)+'s';sf.appendChild(s)}
+setInterval(function(){const sh=document.createElement('div');sh.className='shooting-star';sh.style.left=Math.random()*80+'%';sh.style.top=Math.random()*30+'%';sf.appendChild(sh);setTimeout(function(){sh.remove()},1300)},8000+Math.random()*12000)}()</script>
 <div id="headlightGlow"></div>
 <div id="boostTrail"></div>
 <div id="speedLines"></div>
