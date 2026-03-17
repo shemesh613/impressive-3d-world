@@ -19,7 +19,6 @@
     /* Start Screen */
     #startScreen{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;transition:opacity .4s ease;
       background:radial-gradient(ellipse at 50% 30%,#0d3525 0%,#061a12 50%,#020a07 100%)}
-    #startScreen::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,rgba(0,10,5,.8));pointer-events:none}
     #startRoad{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:120px;height:3px;background:#2a3a30;border-radius:2px;overflow:hidden}
     #startRoad::before{content:'';position:absolute;width:8px;height:3px;background:#fbbf24;border-radius:1px;animation:roadDash 1s linear infinite}
     @keyframes roadDash{0%{left:-10px}100%{left:130px}}
