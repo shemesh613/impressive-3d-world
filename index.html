@@ -2391,6 +2391,10 @@ function updateHUD(){
     ti.instanceMatrix.needsUpdate=true;if(ti.instanceColor)ti.instanceColor.needsUpdate=true;
     window._trailMarks=window._trailMarks.filter(t=>t.life>0);
   }
+  // Chromatic aberration on sharp turns
+  const _lean=Math.abs(window._carLean||0);
+  if(_lean>0.04){const ca=Math.min(3,_lean*30);document.querySelector('canvas').style.filter='contrast(1.05) saturate(1.15) hue-rotate('+(_lean>0?(ca):(-ca))+'deg)'}
+  else{document.querySelector('canvas').style.filter='contrast(1.05) saturate(1.15)'}
   // Dust puff behind car at speed
   if(spd>0.12&&fc%10===0){
     emitParticles(car.position.x+(Math.random()-.5)*1.5,car.position.y+0.1,car.position.z-2.5,0x888877,1);
