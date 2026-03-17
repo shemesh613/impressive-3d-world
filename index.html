@@ -2532,6 +2532,20 @@ function animate(){
 
     // Spawn
     if(fc%200===0){spawnGreen();if(Math.random()<.06)spawnObstacle();if(Math.random()<.08)spawnPowerup()}
+    // Rare golden bonus (1% chance per cycle)
+    if(fc%300===0&&Math.random()<.15&&!window._goldenActive){
+      window._goldenActive=true;window._goldenZ=car.position.z+50+Math.random()*30;
+      window._goldenX=roadX(window._goldenZ)+(Math.random()-.5)*5;
+    }
+    if(window._goldenActive){
+      const gd=car.position.z-window._goldenZ;
+      if(gd>-2&&gd<2&&Math.abs(car.position.x-window._goldenX)<3){
+        score+=25;sfxLevelUp();confettiBurst();
+        showPopup('💰 +25 בונוס!',innerWidth/2,innerHeight*0.35,'#fbbf24');
+        emitParticles(car.position.x,2,car.position.z,0xffd700,15);
+        window._goldenActive=false;
+      }else if(gd>10){window._goldenActive=false}
+    }
 
     // Clean
     for(let i=greens.length-1;i>=0;i--){if(greens[i].z<car.position.z-50)greens.splice(i,1)}
