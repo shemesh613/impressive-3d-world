@@ -1746,7 +1746,7 @@ function spawnGreen(){
 }
 
 // ---- POWER-UPS (golden diamonds) ----
-const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.8,1),new THREE.MeshStandardMaterial({color:0xfbbf24,emissive:0xffaa00,emissiveIntensity:0.5,roughness:0.2,metalness:0.5}),MAX_POWERUPS);powerupInst.frustumCulled=false;scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const z=car.position.z+(60+Math.random()*40);const rx=roadX(z);const x=rx+(Math.random()-.5)*7;  powerups.push({x,z,y:2.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
+const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(.6,0),new THREE.MeshStandardMaterial({color:0x66bbff,emissive:0x3399ff,emissiveIntensity:1.0,roughness:0.05,metalness:0.7,transparent:true,opacity:0.85}),MAX_POWERUPS);powerupInst.frustumCulled=false;scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const z=car.position.z+(60+Math.random()*40);const rx=roadX(z);const x=rx+(Math.random()-.5)*7;  powerups.push({x,z,y:2.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
 // ---- OBSTACLES (red) ----
 const MAX_OBS=2;
 const obstacles=[];
