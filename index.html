@@ -798,7 +798,8 @@ scene.add((() => {
 // ---- CURVED ROAD ----
 {
   const RSEGS=400,SLEN=6;
-  const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(11,SLEN),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x2a3050}),RSEGS);
+  const _roadMat=new THREE.MeshStandardMaterial({roughness:0.55,metalness:0.15,color:0x2a3050});window._roadMat=_roadMat;
+  const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(11,SLEN),_roadMat,RSEGS);
   const edgeMat=new THREE.MeshStandardMaterial({color:0x22c55e,emissive:0x22c55e,emissiveIntensity:0.7,roughness:0.3,metalness:0.1});window._edgeMat=edgeMat;
   const edgeGeo=new THREE.PlaneGeometry(.3,SLEN);
   const edgeL=new THREE.InstancedMesh(edgeGeo,edgeMat,RSEGS);
@@ -2248,6 +2249,8 @@ function updateHUD(){
   document.getElementById('speedVal').textContent=Math.round(spd*500)+'km/h';
   var _sl=document.getElementById('speedLines');if(_sl)_sl.style.opacity=spd>0.25?String(Math.min(1,(spd-0.25)*4)):'0';
   var _hl=document.getElementById('headlightGlow');if(_hl)_hl.style.opacity=spd>0.05?String(Math.min(1,spd*3)):'0';
+  // Dynamic road reflectivity — more reflective at speed
+  if(window._roadMat){window._roadMat.roughness=0.55-spd*0.3;window._roadMat.metalness=0.15+spd*0.25}
   var _bt=document.getElementById('boostTrail');if(_bt){if(boostTimer>0||turboTimer>0){_bt.style.opacity='1';_bt.style.height=Math.min(25,spd*80)+'vh';_bt.style.background=turboTimer>0?'linear-gradient(to top,rgba(251,191,36,.5),rgba(251,191,36,0))':'linear-gradient(to top,rgba(74,222,128,.5),rgba(74,222,128,0))'}else{_bt.style.opacity='0';_bt.style.height='0'}}
 }
 
