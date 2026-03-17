@@ -808,7 +808,7 @@ moonGlow.position.copy(moon.position);scene.add(moonGlow);
 // ---- SKY SPHERE with panoramic backgrounds ----
 const _skyTextures=[];
 const _skyPaths=['sky_city.jpg','sky_mountains.jpg','sky_desert.jpg','sky_ocean.jpg','sky_forest.jpg'];
-const _skyZoneMap=[0,1,2,3,4,0,1];
+const _skyZoneMap=[0,1,2,3,4,4,1];
 const _skyLoader=new THREE.TextureLoader();
 let _skyReady=false,_currentSkyIdx=-1;
 const skyGeo=new THREE.SphereGeometry(340,48,24);
@@ -2691,13 +2691,20 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
       const dist=car.position.z;
       const zone=Math.floor(dist/300)%7;
       const t=(dist%300)/300;
-      const skyColors=[0x0f1f35,0x101828,0x1a2538,0x0d1a2a,0x121d30,0x0f1f35,0x101828];
-      const fogColors=[0x0f1f35,0x101828,0x1a2538,0x0d1a2a,0x121d30,0x0f1f35,0x101828];
-      const edgeColors=[0x22c55e,0xe040fb,0x00e5ff,0xff9100,0x536dfe,0x40e0d0,0xff6b6b];
+      // Day-night cycle: night→dawn→morning→midday→sunset→dusk→night
+      const skyColors=[0x0c1a2e,0x2a1a3a,0x4a6a8a,0x5588bb,0x885533,0x3a2244,0x101828];
+      const fogColors=[0x0c1a2e,0x2a1a3a,0x5a7a9a,0x6699cc,0x996644,0x3a2244,0x101828];
+      const edgeColors=[0x22c55e,0xe040fb,0x00e5ff,0xff9100,0xff6b6b,0x40e0d0,0x536dfe];
       const nextZone=(zone+1)%7;
       const sc=_col.setHex(skyColors[zone]);const sn=new THREE.Color(skyColors[nextZone]);sc.lerp(sn,t);
       renderer.setClearColor(sc);
       scene.fog.color.copy(sc);
+      // Adjust lighting for day-night cycle
+      const ambIntensity=[0.6,0.8,1.4,1.8,1.0,0.7,0.6];
+      const dirIntensity=[0.8,1.0,2.0,2.5,1.5,0.9,0.8];
+      const aI=ambIntensity[zone]+(ambIntensity[nextZone]-ambIntensity[zone])*t;
+      const dI=dirIntensity[zone]+(dirIntensity[nextZone]-dirIntensity[zone])*t;
+      ambLight.intensity=aI;dirLight.intensity=dI;
       if(_skyReady){
         const skyIdx=_skyZoneMap[zone];
         if(skyIdx!==_currentSkyIdx&&_skyTextures[skyIdx]){
