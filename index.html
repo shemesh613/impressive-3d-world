@@ -1963,14 +1963,26 @@ function _updateGateLabels(){
     const pulse=Math.sin(performance.now()*.003)*.5+.5;
     gs.style.borderColor='rgba('+(Math.round(34+205*pulse))+','+(Math.round(197-130*pulse))+','+(Math.round(94-60*pulse))+',.5)';
   }
-  // Labels below question — grow as car approaches
+  // Labels — project 3D gate positions to screen (ABOVE each gate)
   const opacity=distToGate<5?Math.max(0,distToGate/5):Math.min(1,(55-distToGate)/15);
-  const sz=Math.round(18+12*(1-Math.max(0,distToGate-10)/45));// 18→30px
-  // LEFT label at left 25%, RIGHT label at right 25%
-  gl1.style.left='8%';gl1.style.right='auto';gl1.style.top='18%';gl1.style.transform='none';
-  gl1.style.display='block';gl1.style.opacity=String(opacity);gl1.style.fontSize=sz+'px';
-  gl2.style.left='auto';gl2.style.right='8%';gl2.style.top='18%';gl2.style.transform='none';
-  gl2.style.display='block';gl2.style.opacity=String(opacity);gl2.style.fontSize=sz+'px';
+  const sz=Math.round(16+14*(1-Math.max(0,distToGate-10)/45));// 16→30px
+  const _pv=new THREE.Vector3();
+  // Left gate label
+  _pv.set(_gateL.position.x,_gateL.position.y+7,_gateL.position.z).project(cam);
+  if(_pv.z>0&&_pv.z<1){
+    const sx=(_pv.x*.5+.5)*innerWidth;const sy=(-_pv.y*.5+.5)*innerHeight;
+    gl1.style.left=Math.max(10,sx-150)+'px';gl1.style.right='auto';
+    gl1.style.top=Math.max(60,sy-30)+'px';gl1.style.transform='none';
+    gl1.style.display='block';gl1.style.opacity=String(opacity);gl1.style.fontSize=sz+'px';
+  } else gl1.style.display='none';
+  // Right gate label
+  _pv.set(_gateR.position.x,_gateR.position.y+7,_gateR.position.z).project(cam);
+  if(_pv.z>0&&_pv.z<1){
+    const sx=(_pv.x*.5+.5)*innerWidth;const sy=(-_pv.y*.5+.5)*innerHeight;
+    gl2.style.left=Math.min(innerWidth-160,sx-150)+'px';gl2.style.right='auto';
+    gl2.style.top=Math.max(60,sy-30)+'px';gl2.style.transform='none';
+    gl2.style.display='block';gl2.style.opacity=String(opacity);gl2.style.fontSize=sz+'px';
+  } else gl2.style.display='none';
 
   // Check if car passed through a gate
   const dz=car.position.z-_gateZ;
@@ -2660,9 +2672,9 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
       const dist=car.position.z;
       const zone=Math.floor(dist/300)%7;
       const t=(dist%300)/300;
-      const skyColors=[0x1a2a40,0x1a2040,0x152a22,0x2a2818,0x182040,0x1a2a2a,0x241a25];
-      const groundColors=[0x1a2a3a,0x2a1a2a,0x1a2a1a,0x2a2a1a,0x1a1a3a,0x1a2a2a,0x2a1a1a];
-      const fogColors=[0x1a2a40,0x201a35,0x122a20,0x2a2515,0x15183a,0x1a2a2a,0x281a22];
+      const skyColors=[0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40];
+      const groundColors=[0x1a2a3a,0x1a2a3a,0x1a2a3a,0x1a2a3a,0x1a2a3a,0x1a2a3a,0x1a2a3a];
+      const fogColors=[0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40];
       const edgeColors=[0x22c55e,0xe040fb,0x00e5ff,0xff9100,0x536dfe,0x40e0d0,0xff6b6b];
       const nextZone=(zone+1)%7;
       const sc=_col.setHex(skyColors[zone]);const sn=new THREE.Color(skyColors[nextZone]);sc.lerp(sn,t);
