@@ -149,6 +149,7 @@
     #vignette{position:fixed;inset:0;z-index:13;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.45) 100%)}
     #dangerVignette{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(ellipse at center,transparent 40%,rgba(239,68,68,.25) 100%)}
     #flowGlow{position:fixed;inset:0;z-index:12;pointer-events:none;opacity:0;transition:opacity .5s;background:radial-gradient(ellipse at center,transparent 60%,rgba(74,222,128,.1) 100%)}
+    #motionBlur{position:fixed;inset:0;z-index:13;pointer-events:none;opacity:0;transition:opacity .2s;background:radial-gradient(ellipse at 50% 60%,transparent 35%,rgba(0,5,15,.35) 100%);mix-blend-mode:multiply}
     #starfield{position:fixed;top:0;left:0;right:0;height:40vh;z-index:1;pointer-events:none;opacity:.6}
     .star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--dur) ease-in-out infinite alternate}
     @keyframes twinkle{0%{opacity:.2;transform:scale(.8)}100%{opacity:1;transform:scale(1.2)}}
@@ -346,6 +347,7 @@
 </div>
 <div id="dangerVignette"></div>
 <div id="flowGlow"></div>
+<div id="motionBlur"></div>
 <div id="starfield"></div>
 <script>!function(){const sf=document.getElementById('starfield');if(!sf)return;for(let i=0;i<40;i++){const s=document.createElement('div');s.className='star';const sz=1+Math.random()*2;s.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;--dur:'+(2+Math.random()*3)+'s;animation-delay:'+(Math.random()*3)+'s';sf.appendChild(s)}}()</script>
 <div id="headlightGlow"></div>
@@ -2251,6 +2253,7 @@ function updateHUD(){
   var _hl=document.getElementById('headlightGlow');if(_hl)_hl.style.opacity=spd>0.05?String(Math.min(1,spd*3)):'0';
   // Dynamic road reflectivity — more reflective at speed
   if(window._roadMat){window._roadMat.roughness=0.55-spd*0.3;window._roadMat.metalness=0.15+spd*0.25}
+  var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.2?String(Math.min(0.8,(spd-0.2)*2)):'0';
   var _bt=document.getElementById('boostTrail');if(_bt){if(boostTimer>0||turboTimer>0){_bt.style.opacity='1';_bt.style.height=Math.min(25,spd*80)+'vh';_bt.style.background=turboTimer>0?'linear-gradient(to top,rgba(251,191,36,.5),rgba(251,191,36,0))':'linear-gradient(to top,rgba(74,222,128,.5),rgba(74,222,128,0))'}else{_bt.style.opacity='0';_bt.style.height='0'}}
 }
 
