@@ -1669,6 +1669,12 @@ const car=new THREE.Group();
   beam.position.set(0,0.3,8);beam.rotation.x=Math.PI/2;
   car.add(beam);window._carBeam=beam;
 }
+  // Car shadow (circle on ground)
+  const shadowGeo=new THREE.CircleGeometry(2.5,12);
+  const shadowMat=new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.3,side:THREE.DoubleSide});
+  const carShadow=new THREE.Mesh(shadowGeo,shadowMat);
+  carShadow.rotation.x=-Math.PI/2;carShadow.position.y=-0.3;
+  car.add(carShadow);
 scene.add(car);
 
 // ---- OPPONENT CAR (multiplayer) ----
