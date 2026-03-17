@@ -791,7 +791,7 @@ renderer.domElement.addEventListener('webglcontextlost',function(e){e.preventDef
 const scene=new THREE.Scene();
 const cam=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,0.5,700);
 cam.position.set(0,10,18);
-scene.fog=new THREE.FogExp2(0x1a2a40,.00065);
+scene.fog=new THREE.FogExp2(0x1a2a40,.0005);
 const ambLight=new THREE.AmbientLight(0x6688aa,1.1);scene.add(ambLight);
 const dirLight=new THREE.DirectionalLight(0xffeedd,1.5);dirLight.position.set(30,50,40);scene.add(dirLight);
 // Moon
@@ -814,6 +814,7 @@ let _skyReady=false,_currentSkyIdx=-1;
 const skyGeo=new THREE.SphereGeometry(340,48,24);
 const skyMat=new THREE.MeshBasicMaterial({side:THREE.BackSide,fog:false,color:0x1a2a40});
 const skyMesh=new THREE.Mesh(skyGeo,skyMat);
+skyMesh.rotation.x=-0.25;
 scene.add(skyMesh);
 let _skyLoaded=0;
 _skyPaths.forEach(function(p,i){
