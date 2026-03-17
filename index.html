@@ -2487,10 +2487,12 @@ function animate(){
     else{spd*=.975;if(spd<.04)spd=.04}
 
     if(Math.abs(spd)>.003){
-      if(keys.ArrowLeft||keys.KeyA)dir+=.035*Math.sign(spd);
-      if(keys.ArrowRight||keys.KeyD)dir-=.035*Math.sign(spd);
+      if(!window._steerSmooth)window._steerSmooth=0;
+      const steerTarget=(keys.ArrowLeft||keys.KeyA)?0.04:(keys.ArrowRight||keys.KeyD)?-0.04:0;
+      window._steerSmooth+=(steerTarget-window._steerSmooth)*0.15;// smooth easing
+      dir+=window._steerSmooth*Math.sign(spd)*(1+spd*0.5);// faster steer at speed
     }
-    dir*=.95;
+    dir*=.94;
 
     // Car follows curve by position pull (NOT rotation) - curves stay visible!
     const curX=roadX(car.position.z);
