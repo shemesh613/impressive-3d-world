@@ -799,14 +799,31 @@ const moonGeo=new THREE.SphereGeometry(8,12,12);
 const moonMat=new THREE.MeshBasicMaterial({color:0xeeeeff});
 const moon=new THREE.Mesh(moonGeo,moonMat);
 moon.position.set(-80,120,500);scene.add(moon);
-// Trail marks mesh (initialized after dummy)
-// Moon glow (larger transparent sphere)
+// Moon glow
 const moonGlowGeo=new THREE.SphereGeometry(14,12,12);
 const moonGlowMat=new THREE.MeshBasicMaterial({color:0xaabbdd,transparent:true,opacity:0.08});
 const moonGlow=new THREE.Mesh(moonGlowGeo,moonGlowMat);
 moonGlow.position.copy(moon.position);scene.add(moonGlow);
-// hemi removed// hemi removed
-// moon removed// moon removed// moon removed
+
+// ---- SKY SPHERE with panoramic backgrounds ----
+const _skyTextures=[];
+const _skyPaths=['sky_city.jpg','sky_mountains.jpg','sky_desert.jpg','sky_ocean.jpg','sky_forest.jpg'];
+const _skyZoneMap=[0,1,2,3,4,0,1];
+const _skyLoader=new THREE.TextureLoader();
+let _skyReady=false,_currentSkyIdx=-1;
+const skyGeo=new THREE.SphereGeometry(340,48,24);
+const skyMat=new THREE.MeshBasicMaterial({side:THREE.BackSide,fog:false,color:0x1a2a40});
+const skyMesh=new THREE.Mesh(skyGeo,skyMat);
+scene.add(skyMesh);
+let _skyLoaded=0;
+_skyPaths.forEach(function(p,i){
+_skyLoader.load('./'+p,function(tex){
+tex.colorSpace=THREE.SRGBColorSpace;
+_skyTextures[i]=tex;_skyLoaded++;
+if(_skyLoaded===_skyPaths.length){_skyReady=true;skyMat.map=_skyTextures[0];skyMat.color.set(0xffffff);skyMat.needsUpdate=true;_currentSkyIdx=0}
+},undefined,function(){_skyTextures[i]=null;_skyLoaded++; if(_skyLoaded===_skyPaths.length&&_skyTextures.some(function(t){return t})){_skyReady=true;
+for(var j=0;j<5;j++){if(_skyTextures[j]){skyMat.map=_skyTextures[j];skyMat.color.set(0xffffff);skyMat.needsUpdate=true;_currentSkyIdx=j;break}}}})
+})
 
 const dummy=new THREE.Object3D();
 const _v=new THREE.Vector3();
@@ -2416,7 +2433,8 @@ function updateHUD(){
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.2?String(Math.min(0.8,(spd-0.2)*2)):'0';
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
   scene.fog.density=0.00075-spd*0.0005;// fog clears at speed
-  moon.position.z=car.position.z+500;moonGlow.position.z=moon.position.z;// moon follows
+  moon.position.z=car.position.z+500;moonGlow.position.z=moon.position.z;
+  skyMesh.position.set(cam.position.x,cam.position.y,cam.position.z);
   // Tree sway (nearby trees only, every 6 frames)
   if(window._treeData&&fc%6===0){
     const td=window._treeData;const t=performance.now()*.001;
@@ -2672,14 +2690,19 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
       const dist=car.position.z;
       const zone=Math.floor(dist/300)%7;
       const t=(dist%300)/300;
-      const skyColors=[0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40];
-      const groundColors=[0x1a2a3a,0x1a2a3a,0x1a2a3a,0x1a2a3a,0x1a2a3a,0x1a2a3a,0x1a2a3a];
-      const fogColors=[0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40,0x1a2a40];
+      const skyColors=[0x0f1f35,0x101828,0x1a2538,0x0d1a2a,0x121d30,0x0f1f35,0x101828];
+      const fogColors=[0x0f1f35,0x101828,0x1a2538,0x0d1a2a,0x121d30,0x0f1f35,0x101828];
       const edgeColors=[0x22c55e,0xe040fb,0x00e5ff,0xff9100,0x536dfe,0x40e0d0,0xff6b6b];
       const nextZone=(zone+1)%7;
       const sc=_col.setHex(skyColors[zone]);const sn=new THREE.Color(skyColors[nextZone]);sc.lerp(sn,t);
       renderer.setClearColor(sc);
       scene.fog.color.copy(sc);
+      if(_skyReady){
+        const skyIdx=_skyZoneMap[zone];
+        if(skyIdx!==_currentSkyIdx&&_skyTextures[skyIdx]){
+          skyMat.map=_skyTextures[skyIdx];skyMat.needsUpdate=true;_currentSkyIdx=skyIdx;
+        }
+      }
       if(window._edgeMat){
         const ec=_col.setHex(edgeColors[zone]);const en=new THREE.Color(edgeColors[nextZone]);ec.lerp(en,t);
         const r=flow/100;

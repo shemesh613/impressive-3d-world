@@ -1,8 +1,13 @@
-const CACHE_NAME = 'tikia-yeruka-v5';
+const CACHE_NAME = 'tikia-yeruka-v6';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './sky_city.jpg',
+  './sky_mountains.jpg',
+  './sky_desert.jpg',
+  './sky_ocean.jpg',
+  './sky_forest.jpg',
   'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js',
   'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'
 ];
