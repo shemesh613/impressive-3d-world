@@ -1584,8 +1584,7 @@ for(let z=-100;z<=3600;z+=10){
   inst.instanceMatrix.needsUpdate=true;scene.add(inst);
 }
 
-// ---- TREES (lollipop style) ----
-{  const trunkGeo=new THREE.CylinderGeometry(.15,.2,2,5);  const trunkMat=new THREE.MeshStandardMaterial({roughness:0.85,metalness:0.0,color:0x4a3020});  const leafGeo=new THREE.ConeGeometry(1.4,2.8,6);  const leafColors=[0x16a34a,0x22c55e,0x15803d,0xd4a030,0xc05020,0x8a6a3a,0x2d8a4e,0x1a6a3a,0x6aaa3a];  const treePositions=[];  for(let z=-80;z<=2800;z+=12){    const _trx=roadX(z);if(Math.random()>.35)treePositions.push([_trx-8+(Math.random()-.5)*2,z]);    if(Math.random()>.35)treePositions.push([_trx+8+(Math.random()-.5)*2,z]);  }  const trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,treePositions.length);  const leafInst=new THREE.InstancedMesh(leafGeo,new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.0}),treePositions.length);  treePositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+1,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    trunkInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+3+Math.random()*.5,z);dummy.scale.setScalar(.7+Math.random()*.5);dummy.updateMatrix();    leafInst.setMatrixAt(i,dummy.matrix);leafInst.setColorAt(i,_col.setHex(leafColors[Math.floor(Math.random()*leafColors.length)]));  });  trunkInst.instanceMatrix.needsUpdate=true;leafInst.instanceMatrix.needsUpdate=true;  if(leafInst.instanceColor)leafInst.instanceColor.needsUpdate=true;  scene.add(trunkInst);scene.add(leafInst);window._treeData={leafInst,positions:treePositions}}// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=2800;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshPhongMaterial({color:0x888888,shininess:20});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.4,6,6);  const glowMat2=new THREE.MeshStandardMaterial({color:0xffffcc,emissive:0xffdd66,emissiveIntensity:1.0,roughness:0.1,metalness:0.3});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
+// ---- TREES removed ----// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=2800;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshPhongMaterial({color:0x888888,shininess:20});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.4,6,6);  const glowMat2=new THREE.MeshStandardMaterial({color:0xffffcc,emissive:0xffdd66,emissiveIntensity:1.0,roughness:0.1,metalness:0.3});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
 // ---- ELECTRIC POLES WITH WIRES ----
 {
   const EP_N=40;
@@ -2436,22 +2435,7 @@ function updateHUD(){
   scene.fog.density=0.00075-spd*0.0005;// fog clears at speed
   moon.position.z=car.position.z+500;moonGlow.position.z=moon.position.z;
   skyMesh.position.set(cam.position.x,cam.position.y,cam.position.z);
-  // Tree sway (nearby trees only, every 6 frames)
-  if(window._treeData&&fc%6===0){
-    const td=window._treeData;const t=performance.now()*.001;
-    const cz=car.position.z;
-    for(let i=0;i<td.positions.length;i++){
-      const tz=td.positions[i][1];
-      if(Math.abs(tz-cz)<80){// only animate nearby
-        const tx=td.positions[i][0];
-        const sway=Math.sin(t*1.5+i*0.7)*0.08+Math.sin(t*2.3+i)*0.04;
-        dummy.position.set(tx+sway,roadY(tz)+3,tz);
-        dummy.scale.setScalar(.7+(i%5)*.1);dummy.rotation.set(sway*0.5,0,sway*0.3);
-        dummy.updateMatrix();td.leafInst.setMatrixAt(i,dummy.matrix);
-      }
-    }
-    td.leafInst.instanceMatrix.needsUpdate=true;
-  }
+  // Trees removed
   // Trail marks on road at high speed
   if(spd>0.15&&fc%8===0&&!window._trailMarks)window._trailMarks=[];
   if(window._trailMarks&&spd>0.15&&fc%8===0){
