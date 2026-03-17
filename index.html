@@ -1629,7 +1629,7 @@ const car=new THREE.Group();
   const hlInst=new THREE.InstancedMesh(hlGeo,hlMat,2);
   [-.6,.6].forEach((x,i)=>{dummy.position.set(x,.5,2.01);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();hlInst.setMatrixAt(i,dummy.matrix)});
   hlInst.instanceMatrix.needsUpdate=true;car.add(hlInst);
-  const tlGeo=new THREE.BoxGeometry(.26,.12,.04);const tlMat=new THREE.MeshStandardMaterial({color:0xff4444,emissive:0xff2200,emissiveIntensity:0.9,roughness:0.3,metalness:0.2});
+  const tlGeo=new THREE.BoxGeometry(.26,.12,.04);const tlMat=new THREE.MeshStandardMaterial({color:0xff4444,emissive:0xff2200,emissiveIntensity:0.3,roughness:0.3,metalness:0.2});window._brakeMat=tlMat;
   const tlInst=new THREE.InstancedMesh(tlGeo,tlMat,2);
   [-.7,.7].forEach((x,i)=>{dummy.position.set(x,.5,-2.01);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();tlInst.setMatrixAt(i,dummy.matrix)});
   tlInst.instanceMatrix.needsUpdate=true;car.add(tlInst);
@@ -2307,6 +2307,9 @@ function updateHUD(){
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.2?String(Math.min(0.8,(spd-0.2)*2)):'0';
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
   scene.fog.density=0.00075-spd*0.0005;// fog clears at speed
+  // Brake lights — glow when decelerating or pressing brake
+  if(window._brakeMat){const braking=(keys.ArrowDown||keys.KeyS)||(!keys.ArrowUp&&!keys.KeyW&&spd>0.05);
+    window._brakeMat.emissiveIntensity=braking?1.5:0.3;window._brakeMat.color.setHex(braking?0xff2222:0xff4444)}
   var _bt=document.getElementById('boostTrail');if(_bt){if(boostTimer>0||turboTimer>0){_bt.style.opacity='1';_bt.style.height=Math.min(25,spd*80)+'vh';_bt.style.background=turboTimer>0?'linear-gradient(to top,rgba(251,191,36,.5),rgba(251,191,36,0))':'linear-gradient(to top,rgba(74,222,128,.5),rgba(74,222,128,0))'}else{_bt.style.opacity='0';_bt.style.height='0'}}
 }
 
