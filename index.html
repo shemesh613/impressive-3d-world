@@ -2170,8 +2170,9 @@ function joinRoom(){
   });
 }
 
-function mpStartAll(){
+window.mpStartAll=function(){
   // Host starts game and tells all guests to start
+  isMultiplayer=mpConns.length>0;
   mpConns.forEach((cc,i)=>{if(cc.open)cc.send({type:'start',playerId:i+1,total:mpConns.length})});
   initAudio();_realStartGame();
 }
