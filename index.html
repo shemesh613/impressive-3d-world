@@ -940,6 +940,24 @@ scene.add((() => {
 // ---- FLOATING BALLOONS ----
 {  const BLN_N=12;const blnColors=[0xff6b9d,0x4ecdc4,0xffe66d,0xa855f7,0x06b6d4,0xf97316];  const blnGeo=new THREE.SphereGeometry(.6,8,8);  const blnMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0xffffff});  const blnInst=new THREE.InstancedMesh(blnGeo,blnMat,BLN_N);  blnInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(BLN_N*3),3);  const blnData=[];  const _bc=new THREE.Color();  for(let i=0;i<BLN_N;i++){    const x=-20+Math.random()*40;    const z=Math.random()*2500;    const baseY=10+Math.random()*8;    blnData.push({x,z,baseY,phase:Math.random()*Math.PI*2,spd:.01+Math.random()*.02});    _bc.setHex(blnColors[i%blnColors.length]);    blnInst.instanceColor.setXYZ(i,_bc.r,_bc.g,_bc.b);    dummy.position.set(x,baseY,z);dummy.scale.setScalar(.8+Math.random()*.5);dummy.rotation.set(0,0,0);dummy.updateMatrix();    blnInst.setMatrixAt(i,dummy.matrix);  }  blnInst.instanceMatrix.needsUpdate=true;blnInst.instanceColor.needsUpdate=true;  scene.add(blnInst);  window._blnData={inst:blnInst,data:blnData,n:BLN_N};}
 
+// ---- CROSSWALK STRIPES ----
+{
+  const CW_N=15;
+  const cwGeo=new THREE.PlaneGeometry(9,0.4);
+  const cwMat=new THREE.MeshStandardMaterial({color:0xdddddd,emissive:0x888888,emissiveIntensity:0.15,roughness:0.4});
+  const cwInst=new THREE.InstancedMesh(cwGeo,cwMat,CW_N*5);
+  let ci=0;
+  for(let i=0;i<CW_N;i++){
+    const z=80+i*200;const rx=roadX(z);const ry=roadY(z);
+    for(let s=0;s<5;s++){
+      dummy.position.set(rx,ry+0.03,z+s*0.8);
+      dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
+      cwInst.setMatrixAt(ci++,dummy.matrix);
+    }
+  }
+  cwInst.count=ci;cwInst.instanceMatrix.needsUpdate=true;scene.add(cwInst);
+}
+
 // ---- ROAD BARRIERS (chicanes/turns) ----
 {
   const BARRIER_N=30;
