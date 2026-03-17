@@ -240,7 +240,14 @@
 <!-- HUD -->
 <div id="hud">
   <div class="hud-bar">
-      <div class="hud-item"><span class="icon">&#9889;</span><span class="val" id="speedVal">0</span></div>
+      <div class="hud-item" style="position:relative;min-width:70px">
+        <div id="speedGauge" style="width:40px;height:40px;border-radius:50%;background:conic-gradient(#22c55e 0deg,#fbbf24 90deg,#ef4444 180deg,#333 180deg,#333 360deg);position:relative;display:flex;align-items:center;justify-content:center;margin-right:4px">
+          <div style="width:30px;height:30px;border-radius:50%;background:rgba(10,20,30,.95);display:flex;align-items:center;justify-content:center">
+            <div id="speedNeedle" style="width:2px;height:14px;background:#fff;position:absolute;bottom:50%;left:50%;transform-origin:bottom center;transform:rotate(-90deg);border-radius:1px"></div>
+          </div>
+        </div>
+        <span class="val" id="speedVal" style="font-size:11px">0</span>
+      </div>
     <div class="hud-item"><span class="icon">🟢</span><span class="val" id="scoreVal">0</span></div>
     <div class="hud-item"><span class="icon">👫</span><span class="val" id="livesVal">🧒🧒🧒🧒🧒</span></div>
     <div class="hud-item"><span class="icon">🌊</span><div id="flowBar"><div id="flowFill"></div></div></div>
@@ -2273,6 +2280,7 @@ function updateHUD(){
   const _fg=document.getElementById('flowGlow');if(_fg)_fg.style.opacity=flow>=95?String((flow-95)/5*0.8):'0';document.getElementById('distVal').textContent=Math.floor(car.position.z)+'m';
   const _cc=document.getElementById('choiceCounter');if(_cc)_cc.textContent='🟢'+greenCount+' 🔴'+redCount;
   document.getElementById('speedVal').textContent=Math.round(spd*500)+'km/h';
+  const _sn=document.getElementById('speedNeedle');if(_sn)_sn.style.transform='rotate('+(-90+spd*500)+'deg)';
   var _sl=document.getElementById('speedLines');if(_sl)_sl.style.opacity=spd>0.25?String(Math.min(1,(spd-0.25)*4)):'0';
   var _hl=document.getElementById('headlightGlow');if(_hl)_hl.style.opacity=spd>0.05?String(Math.min(1,spd*3)):'0';
   // Dynamic road reflectivity — more reflective at speed
