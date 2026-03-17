@@ -2332,8 +2332,13 @@ function animate(){
     car.rotation.y=dir+curveAngle;
     car.position.x+=Math.sin(dir)*spd;
     car.position.z+=Math.cos(dir)*spd;
-    car.position.y=roadY(car.position.z);
+    const _baseY=roadY(car.position.z);
     const hillSlope=Math.atan2(roadY(car.position.z+2)-roadY(car.position.z-2),4);
+    // Suspension bounce on bumps
+    if(!window._suspY)window._suspY=0;if(!window._suspVel)window._suspVel=0;
+    const _hillChange=Math.abs(hillSlope-(window._prevSlope||0));window._prevSlope=hillSlope;
+    window._suspVel+=_hillChange*spd*8;window._suspVel*=0.85;window._suspY=Math.sin(fc*0.3)*window._suspVel*0.5;
+    car.position.y=_baseY+Math.abs(window._suspY)*0.3;
     car.rotation.x=-hillSlope;
     // Body roll - lean into turns
     const steerInput=(keys.ArrowLeft||keys.KeyA)?1:(keys.ArrowRight||keys.KeyD)?-1:0;
