@@ -1479,6 +1479,25 @@ for(let z=-100;z<=2800;z+=10){
     }
   }
   winInst.count=wi;winInst.instanceMatrix.needsUpdate=true;scene.add(winInst);
+  // Neon signs on buildings
+  const neonColors=[0xff3388,0x33ff88,0x3388ff,0xff8833,0x88ff33,0xff33ff];
+  const NEON_N=20;
+  const neonGeo=new THREE.PlaneGeometry(1.8,0.6);
+  const neonInst=new THREE.InstancedMesh(neonGeo,new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:1.0,roughness:0.0,side:THREE.DoubleSide}),NEON_N);
+  neonInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(NEON_N*3),3);
+  const _nc=new THREE.Color();
+  for(let ni=0;ni<NEON_N;ni++){
+    const bi=Math.floor(Math.random()*bdata.length);
+    const b=bdata[bi];if(b[3]<5)continue;
+    const facing=b[0]<roadX(b[1])?1:-1;
+    _nc.setHex(neonColors[ni%neonColors.length]);
+    neonInst.instanceColor.setXYZ(ni,_nc.r,_nc.g,_nc.b);
+    dummy.position.set(b[0]+facing*(b[2]/2+0.02),roadY(b[1])+b[3]*0.6,b[1]);
+    dummy.rotation.set(0,facing>0?-Math.PI/2:Math.PI/2,0);
+    dummy.scale.setScalar(1);dummy.updateMatrix();
+    neonInst.setMatrixAt(ni,dummy.matrix);
+  }
+  neonInst.instanceMatrix.needsUpdate=true;neonInst.instanceColor.needsUpdate=true;scene.add(neonInst);
 }
 
 // Building roof accents + antennas
