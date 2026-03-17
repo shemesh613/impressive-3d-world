@@ -219,7 +219,7 @@
   <button id="playBtn" onclick="startGame()">משחק יחיד 🚗</button>
   <div class="mp-divider">— או —</div>
   <div id="mpLobby">
-    <div class="mp-title">🏁 אחד נגד אחד!</div>
+    <div class="mp-title">🏁 תחרות — עד 4 שחקנים!</div>
     <button class="mp-btn" onclick="createRoom()">צור חדר 🏠</button>
     <button class="mp-btn" onclick="showJoin()">הצטרף לחדר 🔗</button>
     <div id="roomCodeDisplay">
@@ -2000,9 +2000,14 @@ function showPopup(text,x,y,color){
   setTimeout(()=>el.remove(),1000);
 }
 
-// ---- MULTIPLAYER ----
+// ---- MULTIPLAYER (up to 4 players) ----
 let isMultiplayer=false,isHost=false,peer=null,conn=null,mpRoomCode='';
 let opData={x:0,z:0,dir:0,score:0,flow:50,level:1,gameActive:false};
+// Multi-player support
+const mpConns=[];// host keeps array of connections
+const mpPlayers={};// all players data by id
+const MP_COLORS=[0xf59e0b,0x3b82f6,0xec4899];// orange, blue, pink for players 2-4
+const mpCars=[];// extra car meshes
 
 function createRoom(){
   mpRoomCode='';
@@ -2015,10 +2020,17 @@ function createRoom(){
   peer=new Peer('tikia-'+mpRoomCode+'-host',{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun2.l.google.com:19302'},{urls:'stun:stun3.l.google.com:19302'},{urls:'stun:stun4.l.google.com:19302'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]}});
   peer.on('open',function(){console.log('Host ready:',mpRoomCode)});
   peer.on('connection',function(c){
-    conn=c;
-    function onConnOpen(){setupConn();isMultiplayer=true;conn.send({type:'start'});initAudio();_realStartGame()}
-    if(conn.open)onConnOpen();
-    else conn.on('open',onConnOpen);
+    conn=c;mpConns.push(c);
+    const playerId=mpConns.length;
+    function onConnOpen(){
+      setupConn(c,playerId);isMultiplayer=true;c.send({type:'start',playerId:playerId,total:mpConns.length});
+      // Notify existing players
+      mpConns.forEach(cc=>{if(cc!==c&&cc.open)cc.send({type:'playerJoined',total:mpConns.length})});
+      if(mpConns.length===1){initAudio();_realStartGame()}
+      document.getElementById('roomCodeDisplay').querySelector('.waiting').textContent='👥 '+mpConns.length+' שחקנים מחוברים (עד 4)';
+    }
+    if(c.open)onConnOpen();
+    else c.on('open',onConnOpen);
   });
   peer.on('error',function(e){
     var w=document.getElementById('roomCodeDisplay').querySelector('.waiting');
@@ -2039,7 +2051,8 @@ function joinRoom(){
   document.getElementById('joinStatus').textContent='⏳ מתחבר...';
   document.getElementById('joinStatus').style.color='#a7f3d0';
   isHost=false;
-  peer=new Peer('tikia-'+mpRoomCode+'-guest',{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun2.l.google.com:19302'},{urls:'stun:stun3.l.google.com:19302'},{urls:'stun:stun4.l.google.com:19302'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]}});
+  const guestId='tikia-'+mpRoomCode+'-g'+Math.floor(Math.random()*9999);
+  peer=new Peer(guestId,{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun2.l.google.com:19302'},{urls:'stun:stun3.l.google.com:19302'},{urls:'stun:stun4.l.google.com:19302'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]}});
   peer.on('open',function(){
     conn=peer.connect('tikia-'+mpRoomCode+'-host',{reliable:true});
     var jt=setTimeout(function(){
@@ -2063,12 +2076,27 @@ function joinRoom(){
   });
 }
 
-function setupConn(){
-  conn.on('data',function(data){
+function setupConn(c,playerId){
+  if(!c)c=conn;
+  c.on('data',function(data){
     if(data.type==='pos'){
+      if(isHost){
+        // Host: store player data and broadcast to all others
+        mpPlayers[playerId||1]={x:data.x,z:data.z,dir:data.dir,score:data.score,flow:data.flow,level:data.level,ga:data.ga};
+        // Broadcast all player positions to each connection
+        const allData={type:'allPos',players:mpPlayers,hostX:car.position.x,hostZ:car.position.z,hostDir:dir,hostScore:score,hostFlow:flow,hostLevel:level,hostGa:gameActive};
+        mpConns.forEach(cc=>{if(cc.open)cc.send(allData)});
+      }
       opData.x=data.x;opData.z=data.z;opData.dir=data.dir;
       opData.score=data.score;opData.flow=data.flow;opData.level=data.level;
       opData.gameActive=data.ga;
+    } else if(data.type==='allPos'){
+      // Guest: received all player positions from host
+      opData.x=data.hostX;opData.z=data.hostZ;opData.dir=data.hostDir;
+      opData.score=data.hostScore;opData.flow=data.hostFlow;opData.level=data.hostLevel;
+      opData.gameActive=data.hostGa;
+      // Update other guest cars
+      if(data.players){Object.assign(mpPlayers,data.players)}
     } else if(data.type==='gameOver'){
       opData.gameActive=false;
       if(gameActive){
