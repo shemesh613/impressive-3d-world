@@ -830,8 +830,20 @@ scene.add((() => {
     inst.setMatrixAt(i,dummy.matrix);
   }
   inst.instanceMatrix.needsUpdate=true;scene.add(inst);
+  // White edge dashes
+  const edgeDG=new THREE.PlaneGeometry(.12,2);
+  const edgeDM=new THREE.MeshStandardMaterial({color:0xcccccc,emissive:0xaaaaaa,emissiveIntensity:0.1,roughness:0.5});
+  const edgeDL=new THREE.InstancedMesh(edgeDG,edgeDM,300);
+  const edgeDR=new THREE.InstancedMesh(edgeDG,edgeDM,300);
+  for(let i=0;i<300;i++){
+    const _z=-50+i*12;const rx=roadX(_z);const ry=roadY(_z);
+    dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);
+    dummy.position.set(rx-4.8,ry+.025,_z);dummy.updateMatrix();edgeDL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(rx+4.8,ry+.025,_z);dummy.updateMatrix();edgeDR.setMatrixAt(i,dummy.matrix);
+  }
+  edgeDL.instanceMatrix.needsUpdate=true;edgeDR.instanceMatrix.needsUpdate=true;
+  scene.add(edgeDL);scene.add(edgeDR);
 }
-
 
 // ---- PARKS ----
 {
