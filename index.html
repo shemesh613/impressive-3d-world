@@ -2213,7 +2213,7 @@ function animate(){
   if(_paused){renderer.render(scene,cam);return}
   fc++;
 
-  if(gameActive&&!scenarioActive){
+  if(gameActive&&(!scenarioActive||_gateActive)){
     const maxSpd=turboTimer>0?.65:boostTimer>0?.5:.35;
     if(keys.ArrowUp||keys.KeyW)spd=Math.min(maxSpd,spd+.018);
     else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.12,spd-.012);
