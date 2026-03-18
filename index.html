@@ -902,6 +902,21 @@ scene.add((() => {
     dummy.position.set(x+6.8*cosA,hy+.005,zc-6.8*sinA);dummy.updateMatrix();glowR.setMatrixAt(i,dummy.matrix);
   }
   [roadInst,edgeL,edgeR,glowL,glowR].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});
+// Grass strips alongside road
+{
+  const _gMat=new THREE.MeshStandardMaterial({color:0x1a4a2e,roughness:0.9,metalness:0});
+  const _gGeo=new THREE.PlaneGeometry(8,SLEN+0.5);
+  const _gL=new THREE.InstancedMesh(_gGeo,_gMat,RSEGS);
+  const _gR=new THREE.InstancedMesh(_gGeo,_gMat,RSEGS);
+  for(let i=0;i<RSEGS;i++){
+    const z=RSTART+i*SLEN+SLEN/2;const x=roadX(z);const y=roadY(z);
+    dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);
+    dummy.position.set(x-9.5,y-0.3,z);dummy.updateMatrix();_gL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x+9.5,y-0.3,z);dummy.updateMatrix();_gR.setMatrixAt(i,dummy.matrix);
+  }
+  _gL.instanceMatrix.needsUpdate=true;_gR.instanceMatrix.needsUpdate=true;
+  scene.add(_gL);scene.add(_gR);
+}
 }
 
 // ---- ROAD MARKS ----
