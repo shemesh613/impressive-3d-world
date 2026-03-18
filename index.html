@@ -112,7 +112,7 @@
 
     /* Friend notification */
     #friendNotify{position:fixed;top:50px;right:15px;z-index:39;
-      font-size:clamp(14px,2.5vw,20px);font-weight:bold;text-align:center;pointer-events:none;
+      font-size:clamp(16px,3.5vw,22px);font-weight:bold;text-align:center;pointer-events:none;
       opacity:0;text-shadow:0 2px 8px rgba(0,0,0,.7);padding:10px 18px;border-radius:14px;transition:opacity .3s}
     #friendNotify.show{opacity:1;animation:friendSlide .5s cubic-bezier(.22,1,.36,1)}
     @keyframes friendSlide{0%{transform:translateX(30px);opacity:0}100%{transform:translateX(0);opacity:1}}
@@ -279,7 +279,7 @@
 <div id="multiplier" style="display:none;position:fixed;top:25%;right:15%;z-index:40;font-size:clamp(40px,8vw,70px);font-weight:900;color:#fbbf24;text-shadow:0 0 30px rgba(251,191,36,.7),0 0 60px rgba(251,191,36,.3);pointer-events:none"></div>
 
 <!-- GATE LABELS -->
-<div id="gateSituation" style="display:none;position:fixed;top:55px;left:50%;transform:translateX(-50%);z-index:52;background:rgba(5,15,25,.92);border:2px solid;border-radius:14px;padding:8px 18px;color:#fff;font-size:clamp(14px,2.5vw,20px);font-weight:700;text-align:center;direction:rtl;max-width:420px;pointer-events:none;backdrop-filter:blur(8px);transition:border-color .5s"></div>
+<div id="gateSituation" style="display:none;position:fixed;top:55px;left:50%;transform:translateX(-50%);z-index:52;background:rgba(5,15,25,.92);border:2px solid;border-radius:14px;padding:10px 22px;color:#fff;font-size:clamp(16px,3.5vw,22px);font-weight:700;text-align:center;direction:rtl;max-width:min(420px,88vw);pointer-events:none;backdrop-filter:blur(8px);transition:border-color .5s"></div>
 <div id="gateLabel1" style="display:none;position:fixed;left:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(5,15,30,.95);border:2px solid rgba(200,220,255,.35);border-radius:16px;padding:14px 18px;color:#e0eaff;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
 <div id="gateLabel2" style="display:none;position:fixed;right:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(5,15,30,.95);border:2px solid rgba(200,220,255,.35);border-radius:16px;padding:14px 18px;color:#e0eaff;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
 
@@ -342,7 +342,7 @@
 <!-- MOBILE CONTROLS -->
 <!-- TUTORIAL -->
 <div id="tutorial" style="display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.85);display:none;flex-direction:column;align-items:center;justify-content:center;direction:rtl;font-family:'Segoe UI',Arial,sans-serif">
-  <div style="background:linear-gradient(135deg,rgba(10,30,20,.95),rgba(5,20,12,.98));border:2px solid rgba(74,222,128,.3);border-radius:24px;padding:30px 36px;max-width:420px;width:90%;text-align:center">
+  <div style="background:linear-gradient(135deg,rgba(10,30,20,.95),rgba(5,20,12,.98));border:2px solid rgba(74,222,128,.3);border-radius:24px;padding:30px 36px;max-width:min(420px,88vw);width:90%;text-align:center">
     <div id="tutStep1" class="tut-step">
       <div style="font-size:60px;margin-bottom:12px">🚗</div>
       <h3 style="color:#4ade80;font-size:22px;margin-bottom:8px">נהג על הכביש!</h3>
