@@ -280,8 +280,8 @@
 
 <!-- GATE LABELS -->
 <div id="gateSituation" style="display:none;position:fixed;top:55px;left:50%;transform:translateX(-50%);z-index:52;background:rgba(5,15,25,.92);border:2px solid;border-radius:14px;padding:8px 18px;color:#fff;font-size:clamp(14px,2.5vw,20px);font-weight:700;text-align:center;direction:rtl;max-width:420px;pointer-events:none;backdrop-filter:blur(8px);transition:border-color .5s"></div>
-<div id="gateLabel1" style="display:none;position:fixed;left:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(10,25,45,.92);border:2px solid rgba(200,220,255,.35);border-radius:16px;padding:14px 18px;color:#e0eaff;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
-<div id="gateLabel2" style="display:none;position:fixed;right:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(10,25,45,.92);border:2px solid rgba(200,220,255,.35);border-radius:16px;padding:14px 18px;color:#e0eaff;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
+<div id="gateLabel1" style="display:none;position:fixed;left:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(5,15,30,.95);border:2px solid rgba(200,220,255,.35);border-radius:16px;padding:14px 18px;color:#e0eaff;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
+<div id="gateLabel2" style="display:none;position:fixed;right:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(5,15,30,.95);border:2px solid rgba(200,220,255,.35);border-radius:16px;padding:14px 18px;color:#e0eaff;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
 
 <!-- OPPONENT HUD -->
 <div id="opponentHud">
@@ -2107,8 +2107,8 @@ function _updateGateLabels(){
   const yL=Math.round(Math.max(115,Math.min(innerHeight*.42,pyL-60)));
   const yR=Math.round(Math.max(115,Math.min(innerHeight*.42,pyR-60)));
   if(vecL.z<1&&vecR.z<1){
-    gl1.style.cssText='display:block;position:fixed;left:'+x1+'px;top:'+yL+'px;opacity:'+opacity+';font-size:'+fs+'px;max-width:'+lw+'px;width:'+lw+'px;z-index:52;animation:gatePulse 2s ease-in-out infinite;background:rgba(10,25,45,.92);border:2px solid '+gl1.style.borderColor+';border-radius:16px;padding:12px 16px;color:'+gl1.style.color+';font-weight:800;text-align:center;direction:rtl;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px);pointer-events:none;white-space:normal';
-    gl2.style.cssText='display:block;position:fixed;left:'+x2+'px;top:'+yR+'px;opacity:'+opacity+';font-size:'+fs+'px;max-width:'+lw+'px;width:'+lw+'px;z-index:52;animation:gatePulse 2s ease-in-out infinite;background:rgba(10,25,45,.92);border:2px solid '+gl2.style.borderColor+';border-radius:16px;padding:12px 16px;color:'+gl2.style.color+';font-weight:800;text-align:center;direction:rtl;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px);pointer-events:none;white-space:normal';
+    gl1.style.cssText='display:block;position:fixed;left:'+x1+'px;top:'+yL+'px;opacity:'+opacity+';font-size:'+fs+'px;max-width:'+lw+'px;width:'+lw+'px;z-index:52;animation:gatePulse 2s ease-in-out infinite;background:rgba(5,15,30,.95);border:2px solid '+gl1.style.borderColor+';border-radius:16px;padding:12px 16px;color:'+gl1.style.color+';font-weight:800;text-align:center;direction:rtl;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px);pointer-events:none;white-space:normal';
+    gl2.style.cssText='display:block;position:fixed;left:'+x2+'px;top:'+yR+'px;opacity:'+opacity+';font-size:'+fs+'px;max-width:'+lw+'px;width:'+lw+'px;z-index:52;animation:gatePulse 2s ease-in-out infinite;background:rgba(5,15,30,.95);border:2px solid '+gl2.style.borderColor+';border-radius:16px;padding:12px 16px;color:'+gl2.style.color+';font-weight:800;text-align:center;direction:rtl;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px);pointer-events:none;white-space:normal';
   }else{gl1.style.display='none';gl2.style.display='none'}
 
   // Check if car passed through a gate
@@ -2658,7 +2658,7 @@ function animate(){
     const maxSpd=_gateActive?(_mob?.15:.22):turboTimer>0?(_mob?.32:.65):boostTimer>0?(_mob?.28:.5):(_mob?.2:.35);
     if(keys.ArrowUp||keys.KeyW)spd=Math.min(maxSpd,spd+(_mob?.008:.018));
     else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.12,spd-.012);
-    else{spd*=_mob?.95:.975;if(Math.abs(spd)<.005)spd=0;else if(!_mob&&spd>0&&spd<.04)spd=.04}
+    else{spd*=_mob?.96:.975;if(Math.abs(spd)<.005)spd=0;else if(!_mob&&spd>0&&spd<.04)spd=.04}
 
     if(Math.abs(spd)>.003){
       if(!window._steerSmooth)window._steerSmooth=0;
@@ -2676,7 +2676,7 @@ function animate(){
     const curX=roadX(car.position.z);
     const aheadX=roadX(car.position.z+30);
     const _isMob=!!window._isMobileDevice;
-    const curvePull=(curX-car.position.x)*(_isMob?.06:.008);
+    const curvePull=(curX-car.position.x)*(_isMob?.08:.008);
     car.position.x+=curvePull;
     const _offRoad=Math.abs(car.position.x-curX);
     const _dv=document.getElementById('dangerVignette');if(_dv)_dv.style.opacity=_offRoad>3?String(Math.min(1,(_offRoad-3)*0.15)):'0';
