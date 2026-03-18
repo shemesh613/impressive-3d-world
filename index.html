@@ -340,6 +340,7 @@
 
     #boostTrail{position:fixed;bottom:15%;left:50%;transform:translateX(-50%);width:8px;height:0;z-index:11;pointer-events:none;background:linear-gradient(to top,rgba(74,222,128,.5),rgba(74,222,128,0));border-radius:4px;transition:height .3s,opacity .3s;opacity:0;filter:blur(3px)}
 
+    @keyframes countPop{0%{transform:translate(-50%,-50%) scale(0);opacity:0}30%{transform:translate(-50%,-50%) scale(1.3);opacity:1}60%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(0.8);opacity:0}}
     @keyframes scoreFly{0%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}100%{transform:translateX(-50%) translateY(-60px) scale(1.5);opacity:0}}
     @keyframes speedLineMove{from{background-position:0 0}to{background-position:15px 0}}
     /* Screen flash */    #speedLines{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:repeating-linear-gradient(90deg,transparent 0%,transparent 46%,rgba(255,255,255,0.12) 49%,transparent 51%,transparent 96%,rgba(255,255,255,0.12) 99%,transparent 100%);background-size:15px 100%;animation:speedLineMove .15s linear infinite}
@@ -4958,7 +4959,20 @@ function _realStartGame(){
 
   document.getElementById('followers').style.display='block';
 
-  gameActive=true;startBgMusic();
+  // 3-2-1-GO countdown
+  var _cdEl=document.createElement('div');
+  _cdEl.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;font-size:min(20vw,150px);font-weight:900;color:#4ade80;text-shadow:0 0 40px rgba(74,222,128,.6),0 0 80px rgba(74,222,128,.3);pointer-events:none;font-family:Impact,sans-serif';
+  document.body.appendChild(_cdEl);
+  var _cdNums=['3','2','1','!!!סע'];
+  var _cdI=0;
+  _cdEl.textContent=_cdNums[0];_cdEl.style.animation='countPop .8s ease forwards';try{playTone(440,.15,'sine',.1)}catch(e){}
+  var _cdInt=setInterval(function(){_cdI++;
+    if(_cdI>=_cdNums.length){clearInterval(_cdInt);_cdEl.remove();gameActive=true;startBgMusic();return}
+    _cdEl.textContent=_cdNums[_cdI];_cdEl.style.animation='none';void _cdEl.offsetWidth;
+    _cdEl.style.animation='countPop .8s ease forwards';
+    try{playTone(_cdI<3?440:880,.15,'sine',.1)}catch(e){}if(_cdI===3){_cdEl.style.color='#fbbf24';_cdEl.style.textShadow='0 0 40px rgba(251,191,36,.6),0 0 80px rgba(251,191,36,.3)'}
+  },900);
+  // Don't set gameActive yet - countdown will do it
 
   score=0;lives=5;level=1;flow=85;greenCount=0;redCount=0;streak=0;bestStreak=0;topSpeed=0;
 
