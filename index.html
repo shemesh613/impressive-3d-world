@@ -275,8 +275,8 @@
 
 <!-- GATE LABELS -->
 <div id="gateSituation" style="display:none;position:fixed;top:55px;left:50%;transform:translateX(-50%);z-index:38;background:rgba(5,15,25,.92);border:2px solid;border-radius:14px;padding:8px 18px;color:#fff;font-size:clamp(14px,2.5vw,20px);font-weight:700;text-align:center;direction:rtl;max-width:420px;pointer-events:none;backdrop-filter:blur(8px);transition:border-color .5s"></div>
-<div id="gateLabel1" style="display:none;position:fixed;left:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(10,25,45,.92);border:2px solid rgba(74,222,128,.5);border-radius:16px;padding:14px 18px;color:#4ade80;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
-<div id="gateLabel2" style="display:none;position:fixed;right:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(10,25,45,.92);border:2px solid rgba(239,68,68,.5);border-radius:16px;padding:14px 18px;color:#f87171;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
+<div id="gateLabel1" style="display:none;position:fixed;left:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(10,25,45,.92);border:2px solid rgba(200,220,255,.35);border-radius:16px;padding:14px 18px;color:#e0eaff;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
+<div id="gateLabel2" style="display:none;position:fixed;right:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(10,25,45,.92);border:2px solid rgba(200,220,255,.35);border-radius:16px;padding:14px 18px;color:#e0eaff;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
 
 <!-- OPPONENT HUD -->
 <div id="opponentHud">
@@ -1937,7 +1937,7 @@ function triggerScenario(){
   _pillarL1.material=_gateMat;_pillarL2.material=_gateMat;_topL.material=_gateMat;
   _pillarR1.material=_gateMat;_pillarR2.material=_gateMat;_topR.material=_gateMat;
 
-  // Randomize which side is green
+  // Randomize which side is green (but don't reveal colors!)
   _gateIsGreenLeft=Math.random()>0.5;
   const greenText=s.green.text.replace('🟢 ','');
   const redText=s.red.text.replace('🔴 ','');
@@ -1946,16 +1946,18 @@ function triggerScenario(){
   const gs=document.getElementById('gateSituation');
   gs.textContent=s.situation;gs.style.display='block';
 
-  // Set label texts — LEFT side = LEFT gate, RIGHT side = RIGHT gate
+  // Set label texts — neutral white, no color hints!
   const gl1=document.getElementById('gateLabel1');
   const gl2=document.getElementById('gateLabel2');
   if(_gateIsGreenLeft){
-    gl1.textContent='🟢 '+greenText;gl1.style.borderColor='rgba(74,222,128,.5)';gl1.style.color='#4ade80';
-    gl2.textContent='🔴 '+redText;gl2.style.borderColor='rgba(239,68,68,.5)';gl2.style.color='#f87171';
+    gl1.textContent=greenText;
+    gl2.textContent=redText;
   } else {
-    gl1.textContent='🔴 '+redText;gl1.style.borderColor='rgba(239,68,68,.5)';gl1.style.color='#f87171';
-    gl2.textContent='🟢 '+greenText;gl2.style.borderColor='rgba(74,222,128,.5)';gl2.style.color='#4ade80';
+    gl1.textContent=redText;
+    gl2.textContent=greenText;
   }
+  gl1.style.borderColor='rgba(200,220,255,.35)';gl1.style.color='#e0eaff';
+  gl2.style.borderColor='rgba(200,220,255,.35)';gl2.style.color='#e0eaff';
   gl1.style.display='block';gl2.style.display='block';
 
   _gateActive=true;
@@ -2019,14 +2021,20 @@ function _updateGateLabels(){
     const dx=car.position.x-rx;
     const wentLeft=dx<0;
     const isGreen=(wentLeft&&_gateIsGreenLeft)||(!wentLeft&&!_gateIsGreenLeft);
-    // Color the gates
+    // Reveal colors on gates AND labels
     const greenMat=_gateGreenMat;const redMat=_gateRedMat;
+    const gl1=document.getElementById('gateLabel1');
+    const gl2=document.getElementById('gateLabel2');
     if(_gateIsGreenLeft){
       _pillarL1.material=greenMat;_pillarL2.material=greenMat;_topL.material=greenMat;
       _pillarR1.material=redMat;_pillarR2.material=redMat;_topR.material=redMat;
+      gl1.style.borderColor='rgba(74,222,128,.7)';gl1.style.color='#4ade80';
+      gl2.style.borderColor='rgba(239,68,68,.7)';gl2.style.color='#f87171';
     } else {
       _pillarL1.material=redMat;_pillarL2.material=redMat;_topL.material=redMat;
       _pillarR1.material=greenMat;_pillarR2.material=greenMat;_topR.material=greenMat;
+      gl1.style.borderColor='rgba(239,68,68,.7)';gl1.style.color='#f87171';
+      gl2.style.borderColor='rgba(74,222,128,.7)';gl2.style.color='#4ade80';
     }
     _gateActive=false;
     // Process choice
