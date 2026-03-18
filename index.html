@@ -2630,7 +2630,7 @@ function animate(){
     // Car follows curve by position pull (NOT rotation) - curves stay visible!
     const curX=roadX(car.position.z);
     const aheadX=roadX(car.position.z+30);
-    const curvePull=(curX-car.position.x)*.003;
+    const curvePull=(curX-car.position.x)*.008;
     car.position.x+=curvePull;
     const _offRoad=Math.abs(car.position.x-curX);
     const _dv=document.getElementById('dangerVignette');if(_dv)_dv.style.opacity=_offRoad>3?String(Math.min(1,(_offRoad-3)*0.15)):'0';
@@ -2657,8 +2657,8 @@ function animate(){
     const roadCurve=curX;
     const leftEdge=-3.5+roadCurve;
     const rightEdge=3.5+roadCurve;
-    if(car.position.x<leftEdge)car.position.x+=(leftEdge-car.position.x)*.15+.1;
-    if(car.position.x>rightEdge)car.position.x+=(rightEdge-car.position.x)*.15-.1;
+    if(car.position.x<leftEdge)car.position.x+=(leftEdge-car.position.x)*.25+.15;
+    if(car.position.x>rightEdge)car.position.x+=(rightEdge-car.position.x)*.25-.15;
 
     if(boostTimer>0)boostTimer--;if(shieldTimer>0)shieldTimer--;if(turboTimer>0)turboTimer--;if(shieldTimer>0)car.children[0].material.color.setHex(fc%10<5?0x60a5fa:0x3b82f6);else if(turboTimer>0)car.children[0].material.color.setHex(fc%10<5?0xfbbf24:0xf59e0b);else if(boostTimer>0){car.children[0].material.color.setHex(fc%10<5?0x4ade80:0x22c55e)}
     else{car.children[0].material.color.setHex(0x22c55e)}
