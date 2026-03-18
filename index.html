@@ -3573,6 +3573,7 @@ const car=new THREE.Group();
   carShadow.rotation.x=-Math.PI/2;carShadow.position.y=-0.3;
 
   car.add(carShadow);
+{var _flG=new THREE.BufferGeometry();var _flN=20;var _flP=new Float32Array(_flN*3);var _flC=new Float32Array(_flN*3);var _flS=new Float32Array(_flN);for(var i=0;i<_flN;i++){_flP[i*3]=0;_flP[i*3+1]=-99;_flP[i*3+2]=0;_flS[i]=0.3;_flC[i*3]=1;_flC[i*3+1]=0.6;_flC[i*3+2]=0}_flG.setAttribute('position',new THREE.BufferAttribute(_flP,3));_flG.setAttribute('color',new THREE.BufferAttribute(_flC,3));var _flM=new THREE.PointsMaterial({size:0.5,vertexColors:true,transparent:true,opacity:0.7,sizeAttenuation:true,depthWrite:false,blending:THREE.AdditiveBlending});scene.add(new THREE.Points(_flG,_flM));window._nitroFlame={geo:_flG,pos:_flP,col:_flC,n:_flN,idx:0,mat:_flM}}
 
 scene.add(car);
 
@@ -5098,7 +5099,7 @@ function updateHUD(){
 
   const _ff=document.getElementById('flowFill');_ff.style.width=flow+'%';_ff.className=flow>70?'flow-high':'';
 
-  const _fg=document.getElementById('flowGlow');if(_fg)_fg.style.opacity=flow>=95?String((flow-95)/5*0.8):'0';document.getElementById('distVal').textContent=Math.floor(car.position.z)+'m';
+  const _fg=document.getElementById('flowGlow');if(_fg)_fg.style.opacity=flow>=95?String((flow-95)/5*0.8):'0';document.getElementById('distVal').textContent=Math.floor(car.position.z)+'m';var _cd=Math.floor(car.position.z);if(_cd>0&&_cd%200===0&&_cd!==window._lastMPop){window._lastMPop=_cd;showPopup('🏁 '+_cd+'m!',innerWidth/2,innerHeight*0.3,'#fbbf24');try{playTone(660,.1,'sine',.08);setTimeout(function(){playTone(880,.15,'sine',.08)},100)}catch(e){}}
 
   const _cc=document.getElementById('choiceCounter');if(_cc)_cc.textContent='🟢'+greenCount+' 🔴'+redCount;
 
@@ -5119,7 +5120,8 @@ function updateHUD(){
 
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.12?String(Math.min(0.9,(spd-0.12)*2.5)):'0';
 
-  if(window._brakeMat){if(turboTimer>0){window._brakeMat.emissive.setHex(0xff8800);window._brakeMat.emissiveIntensity=0.8+Math.sin(fc*0.3)*0.3}else if(keys.ArrowDown||keys.KeyS){window._brakeMat.emissive.setHex(0xff2200);window._brakeMat.emissiveIntensity=0.8}else{window._brakeMat.emissive.setHex(0xff2200);window._brakeMat.emissiveIntensity=0.3}}
+  if(window._nitroFlame){var nf=window._nitroFlame;if(turboTimer>0||boostTimer>0){for(var fi=0;fi<3;fi++){var ni=nf.idx%nf.n;nf.pos[ni*3]=car.position.x+(Math.random()-.5)*0.6;nf.pos[ni*3+1]=car.position.y+0.3+Math.random()*0.3;nf.pos[ni*3+2]=car.position.z-2.5-Math.random()*1.5;nf.col[ni*3]=1;nf.col[ni*3+1]=0.3+Math.random()*0.5;nf.col[ni*3+2]=Math.random()*0.2;nf.idx++}nf.geo.attributes.position.needsUpdate=true;nf.geo.attributes.color.needsUpdate=true;nf.mat.opacity=0.6+Math.sin(fc*0.5)*0.2}else{for(var fi=0;fi<nf.n;fi++)if(nf.pos[fi*3+1]>-90)nf.pos[fi*3+1]=-99;nf.geo.attributes.position.needsUpdate=true}}
+    if(window._brakeMat){if(turboTimer>0){window._brakeMat.emissive.setHex(0xff8800);window._brakeMat.emissiveIntensity=0.8+Math.sin(fc*0.3)*0.3}else if(keys.ArrowDown||keys.KeyS){window._brakeMat.emissive.setHex(0xff2200);window._brakeMat.emissiveIntensity=0.8}else{window._brakeMat.emissive.setHex(0xff2200);window._brakeMat.emissiveIntensity=0.3}}
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.12,spd*0.25):0;
 
   scene.fog.density=0.00075-spd*0.0005;// fog clears at speed
