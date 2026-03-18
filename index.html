@@ -1904,12 +1904,42 @@ if(location.search.includes('auto=1')){
 
 const isMobile='ontouchstart'in window||navigator.maxTouchPoints>0;
 if(isMobile){
-  document.getElementById('mobileControls').style.display='flex';
+  document.getElementById('mobileControls').style.display='none'; // hidden - using touch controls
   const bind=(id,code)=>{const el=document.getElementById(id);
     el.addEventListener('touchstart',e=>{e.preventDefault();keys[code]=true},{passive:false});
     el.addEventListener('touchend',e=>{e.preventDefault();keys[code]=false},{passive:false});
     el.addEventListener('touchcancel',()=>{keys[code]=false})};
   bind('btnUp','KeyW');bind('btnDown','KeyS');bind('btnLeft','KeyA');bind('btnRight','KeyD');
+  // Touch-to-steer: auto-drive, touch left/right half to steer
+  let _touchActive=false,_touchX=0;
+  document.addEventListener('touchstart',function(e){
+    if(!gameActive)return;
+    _touchActive=true;
+    _touchX=e.touches[0].clientX;
+    keys.KeyW=true; // auto-drive on touch
+    const hw=innerWidth/2;
+    if(_touchX<hw*0.4){keys.KeyA=true;keys.KeyD=false}
+    else if(_touchX>hw*1.6){keys.KeyD=true;keys.KeyA=false}
+    else{keys.KeyA=false;keys.KeyD=false}
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(!_touchActive||!gameActive)return;
+    _touchX=e.touches[0].clientX;
+    const hw=innerWidth/2;
+    if(_touchX<hw*0.4){keys.KeyA=true;keys.KeyD=false}
+    else if(_touchX>hw*1.6){keys.KeyD=true;keys.KeyA=false}
+    else{keys.KeyA=false;keys.KeyD=false}
+  },{passive:true});
+  document.addEventListener('touchend',function(){
+    _touchActive=false;keys.KeyA=false;keys.KeyD=false;
+    // Keep driving forward
+  },{passive:true});
+  // Show touch hint
+  const _tHint=document.createElement('div');
+  _tHint.innerHTML='👆 גע במסך כדי לנהוג | שמאל/ימין לכיוון';
+  _tHint.style.cssText='position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:30;color:#a7f3d0;font-size:14px;font-weight:600;text-align:center;direction:rtl;background:rgba(0,0,0,.6);padding:8px 16px;border-radius:12px;pointer-events:none;opacity:1;transition:opacity 2s';
+  document.body.appendChild(_tHint);
+  setTimeout(()=>{_tHint.style.opacity='0';setTimeout(()=>_tHint.remove(),2000)},5000);
 }
 
 let cTh=0,cPh=.6,mx=0,my=0,drag=false;

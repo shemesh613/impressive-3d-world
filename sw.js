@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tikia-yeruka-v17';
+const CACHE_NAME = 'tikia-yeruka-v18';
 const ASSETS = [
   './',
   './index.html',
