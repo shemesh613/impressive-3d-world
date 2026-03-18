@@ -757,7 +757,9 @@
 
 <div id="starfield"></div>
 
-<script>!function(){const sf=document.getElementById('starfield');if(!sf)return;for(let i=0;i<40;i++){const s=document.createElement('div');s.className='star';const sz=1+Math.random()*2;s.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;--dur:'+(2+Math.random()*3)+'s;animation-delay:'+(Math.random()*3)+'s';sf.appendChild(s)}
+<script>
+if('caches'in window){caches.keys().then(function(k){k.forEach(function(n){if(n!=='tikia-yeruka-v56')caches.delete(n)})})}
+!function(){const sf=document.getElementById('starfield');if(!sf)return;for(let i=0;i<40;i++){const s=document.createElement('div');s.className='star';const sz=1+Math.random()*2;s.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;--dur:'+(2+Math.random()*3)+'s;animation-delay:'+(Math.random()*3)+'s';sf.appendChild(s)}
 
 setInterval(function(){const sh=document.createElement('div');sh.className='shooting-star';sh.style.left=Math.random()*80+'%';sh.style.top=Math.random()*30+'%';sf.appendChild(sh);setTimeout(function(){sh.remove()},1300)},8000+Math.random()*12000)}()</script>
 
