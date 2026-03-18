@@ -2653,7 +2653,8 @@ function animate(){
   fc++;
 
   if(gameActive&&(!scenarioActive||_gateActive)){
-    const maxSpd=_gateActive?.22:turboTimer>0?.65:boostTimer>0?.5:.35;
+    const _mob=window._mobileSteer!==undefined;
+    const maxSpd=_gateActive?.18:turboTimer>0?(_mob?.45:.65):boostTimer>0?(_mob?.35:.5):(_mob?.25:.35);
     if(keys.ArrowUp||keys.KeyW)spd=Math.min(maxSpd,spd+.018);
     else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.12,spd-.012);
     else{spd*=.975;if(spd<.04)spd=.04}
@@ -2663,7 +2664,7 @@ function animate(){
       let steerTarget=(keys.ArrowLeft||keys.KeyA)?0.04:(keys.ArrowRight||keys.KeyD)?-0.04:0;
       // Analog mobile steer: proportional to finger position
       if(window._mobileSteer&&Math.abs(window._mobileSteer)>0.05){
-        steerTarget=-window._mobileSteer*0.05;// analog range, inverted for RTL road feel
+        steerTarget=-window._mobileSteer*0.04;// analog range, smooth
       }
       window._steerSmooth+=(steerTarget-window._steerSmooth)*0.18;// smooth easing
       dir+=window._steerSmooth*Math.sign(spd)*(1+spd*0.3);// balanced steer-at-speed
@@ -2674,7 +2675,7 @@ function animate(){
     const curX=roadX(car.position.z);
     const aheadX=roadX(car.position.z+30);
     const _isMob=window._mobileSteer!==undefined;
-    const curvePull=(curX-car.position.x)*(_isMob?.018:.008);
+    const curvePull=(curX-car.position.x)*(_isMob?.035:.008);
     car.position.x+=curvePull;
     const _offRoad=Math.abs(car.position.x-curX);
     const _dv=document.getElementById('dangerVignette');if(_dv)_dv.style.opacity=_offRoad>3?String(Math.min(1,(_offRoad-3)*0.15)):'0';
@@ -2701,8 +2702,9 @@ function animate(){
     const roadCurve=curX;
     const leftEdge=-3.5+roadCurve;
     const rightEdge=3.5+roadCurve;
-    if(car.position.x<leftEdge)car.position.x+=(leftEdge-car.position.x)*.4+.2;
-    if(car.position.x>rightEdge)car.position.x+=(rightEdge-car.position.x)*.4-.2;
+    const _edgeStr=_isMob?.7:.4;const _edgePush=_isMob?.35:.2;
+    if(car.position.x<leftEdge)car.position.x+=(leftEdge-car.position.x)*_edgeStr+_edgePush;
+    if(car.position.x>rightEdge)car.position.x+=(rightEdge-car.position.x)*_edgeStr-_edgePush;
 
     if(boostTimer>0)boostTimer--;if(shieldTimer>0)shieldTimer--;if(turboTimer>0)turboTimer--;if(shieldTimer>0)car.children[0].material.color.setHex(fc%10<5?0x60a5fa:0x3b82f6);else if(turboTimer>0)car.children[0].material.color.setHex(fc%10<5?0xfbbf24:0xf59e0b);else if(boostTimer>0){car.children[0].material.color.setHex(fc%10<5?0x4ade80:0x22c55e)}
     else{car.children[0].material.color.setHex(0x22c55e)}
