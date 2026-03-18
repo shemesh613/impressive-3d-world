@@ -1374,7 +1374,6 @@ function initAudio(){
     osc.start();
 
     window._engineAudio={ctx:eng,osc:osc,gain:gain};var osc2=eng.createOscillator();var g2=eng.createGain();osc2.type="triangle";osc2.frequency.value=130;g2.gain.value=0.01;osc2.connect(g2);g2.connect(eng.destination);osc2.start();window._engineAudio.osc2=osc2;window._engineAudio.gain2=g2;var wNoise=eng.createBufferSource();var wSz=eng.sampleRate*2;var wBuf=eng.createBuffer(1,wSz,eng.sampleRate);var wD=wBuf.getChannelData(0);for(var wi=0;wi<wSz;wi++)wD[wi]=(Math.random()*2-1);wNoise.buffer=wBuf;wNoise.loop=true;var wFilt=eng.createBiquadFilter();wFilt.type='highpass';wFilt.frequency.value=2000;var wGain=eng.createGain();wGain.gain.value=0;wNoise.connect(wFilt);wFilt.connect(wGain);wGain.connect(eng.destination);wNoise.start();window._engineAudio.wind=wGain;
-    const osc2=eng.createOscillator();const g2=eng.createGain();osc2.type='triangle';osc2.frequency.value=130;g2.gain.value=0.01;osc2.connect(g2);g2.connect(eng.destination);osc2.start();window._engineAudio.osc2=osc2;window._engineAudio.gain2=g2;var wNoise=eng.createBufferSource();var wSz=eng.sampleRate*2;var wBuf=eng.createBuffer(1,wSz,eng.sampleRate);var wD=wBuf.getChannelData(0);for(var wi=0;wi<wSz;wi++)wD[wi]=(Math.random()*2-1);wNoise.buffer=wBuf;wNoise.loop=true;var wFilt=eng.createBiquadFilter();wFilt.type='highpass';wFilt.frequency.value=2000;var wGain=eng.createGain();wGain.gain.value=0;wNoise.connect(wFilt);wFilt.connect(wGain);wGain.connect(eng.destination);wNoise.start();window._engineAudio.wind=wGain;
 
   }catch(e){}
 
