@@ -91,6 +91,11 @@
     #scenario .timer-fill.timer-danger{background:#ef4444;box-shadow:0 0 14px rgba(239,68,68,.7);animation:timerPulse .4s ease-in-out infinite}
     @keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.5}}
 
+
+    /* Gate label pulse animation */
+    @keyframes gatePulse{0%,100%{box-shadow:0 4px 20px rgba(0,0,0,.5),0 0 0 rgba(200,220,255,0)}50%{box-shadow:0 4px 25px rgba(0,0,0,.5),0 0 18px rgba(200,220,255,.35)}}
+    @keyframes gateSitPulse{0%,100%{box-shadow:0 0 0 rgba(74,222,128,0)}50%{box-shadow:0 0 25px rgba(74,222,128,.3)}}
+
     /* Feedback overlay */
     #feedback{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:45;display:none;
       text-align:center;pointer-events:none;animation:feedSlide .5s cubic-bezier(.22,1,.36,1);
@@ -274,7 +279,7 @@
 <div id="multiplier" style="display:none;position:fixed;top:25%;right:15%;z-index:40;font-size:clamp(40px,8vw,70px);font-weight:900;color:#fbbf24;text-shadow:0 0 30px rgba(251,191,36,.7),0 0 60px rgba(251,191,36,.3);pointer-events:none"></div>
 
 <!-- GATE LABELS -->
-<div id="gateSituation" style="display:none;position:fixed;top:55px;z-index:42;left:50%;transform:translateX(-50%);z-index:38;background:rgba(5,15,25,.92);border:2px solid;border-radius:14px;padding:8px 18px;color:#fff;font-size:clamp(14px,2.5vw,20px);font-weight:700;text-align:center;direction:rtl;max-width:420px;pointer-events:none;backdrop-filter:blur(8px);transition:border-color .5s"></div>
+<div id="gateSituation" style="display:none;position:fixed;top:55px;left:50%;transform:translateX(-50%);z-index:52;background:rgba(5,15,25,.92);border:2px solid;border-radius:14px;padding:8px 18px;color:#fff;font-size:clamp(14px,2.5vw,20px);font-weight:700;text-align:center;direction:rtl;max-width:420px;pointer-events:none;backdrop-filter:blur(8px);transition:border-color .5s"></div>
 <div id="gateLabel1" style="display:none;position:fixed;left:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(10,25,45,.92);border:2px solid rgba(200,220,255,.35);border-radius:16px;padding:14px 18px;color:#e0eaff;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
 <div id="gateLabel2" style="display:none;position:fixed;right:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(10,25,45,.92);border:2px solid rgba(200,220,255,.35);border-radius:16px;padding:14px 18px;color:#e0eaff;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
 
@@ -1944,7 +1949,7 @@ function triggerScenario(){
 
   // Show situation text
   const gs=document.getElementById('gateSituation');
-  gs.textContent=s.situation;gs.style.display='block';
+  gs.textContent=s.situation;gs.style.display='block';gs.style.animation='gateSitPulse 1.5s ease-in-out infinite';
 
   // Set label texts — neutral white, no color hints!
   const gl1=document.getElementById('gateLabel1');
@@ -1972,6 +1977,10 @@ function triggerScenario(){
 // Update gate label positions (called in animate)
 function _updateGateLabels(){
   if(!_gateActive)return;
+  // Suppress overlapping notifications during gate mode
+  const _achEl=document.getElementById('achievement');if(_achEl&&_achEl.style.display==='block')_achEl.style.display='none';
+  const _tipEl=document.getElementById('tip');if(_tipEl&&_tipEl.style.display==='block')_tipEl.style.display='none';
+  const _multEl=document.getElementById('multiplier');if(_multEl&&_multEl.style.display==='block')_multEl.style.display='none';
   const distToGate=_gateZ-car.position.z;
   const gl1=document.getElementById('gateLabel1');
   const gl2=document.getElementById('gateLabel2');
@@ -2006,16 +2015,16 @@ function _updateGateLabels(){
   rx2=Math.max(5,Math.min(innerWidth-lw-5,rx2));
   // Ensure min separation still holds after clamping
   if(Math.abs(rx2-lx)<lw+minGap){if(lx<rx2){lx=Math.max(5,rx2-lw-minGap)}else{rx2=Math.max(5,lx-lw-minGap)}}
-  const yPos=Math.max(55,Math.min(innerHeight*.6,(syL+syR)/2-40));
+  const yPos=Math.max(120,Math.min(innerHeight*.45,(syL+syR)/2-70));
   if(vecL.z<1&&vecR.z<1){
     gl1.style.display='block';gl1.style.opacity=String(opacity);
     gl1.style.left=Math.round(lx)+'px';gl1.style.right='auto';
     gl1.style.top=Math.round(yPos)+'px';gl1.style.transform='none';gl1.style.fontSize=fs+'px';
-    gl1.style.maxWidth=lw+'px';gl1.style.width=lw+'px';gl1.style.zIndex='42';
+    gl1.style.maxWidth=lw+'px';gl1.style.width=lw+'px';gl1.style.zIndex='52';gl1.style.animation='gatePulse 2s ease-in-out infinite';
     gl2.style.display='block';gl2.style.opacity=String(opacity);
     gl2.style.left=Math.round(rx2)+'px';gl2.style.right='auto';
     gl2.style.top=Math.round(yPos)+'px';gl2.style.transform='none';gl2.style.fontSize=fs+'px';
-    gl2.style.maxWidth=lw+'px';gl2.style.width=lw+'px';gl2.style.zIndex='42';
+    gl2.style.maxWidth=lw+'px';gl2.style.width=lw+'px';gl2.style.zIndex='52';gl2.style.animation='gatePulse 2s ease-in-out infinite';
   }else{gl1.style.display='none';gl2.style.display='none'}
 
   // Check if car passed through a gate
