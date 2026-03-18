@@ -1502,16 +1502,6 @@ function confettiBurst(){
 
 
 function sfxWhoosh(){if(!audioCtx)return;const n=audioCtx.createBufferSource();const sr=audioCtx.sampleRate;const buf=audioCtx.createBuffer(1,sr*.3,sr);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const t=i/sr;d[i]=(Math.random()*2-1)*Math.max(0,1-t*4)*0.15}n.buffer=buf;const f=audioCtx.createBiquadFilter();f.type='bandpass';f.frequency.value=800;f.Q.value=0.5;n.connect(f);f.connect(audioCtx.destination);n.start()}
-function sfxTireScreech(){
-  if(!audioCtx||_muted)return;try{
-  const n=audioCtx.createBufferSource();const sz=audioCtx.sampleRate*0.15;
-  const buf=audioCtx.createBuffer(1,sz,audioCtx.sampleRate);const d=buf.getChannelData(0);
-  for(let i=0;i<sz;i++){const t=i/audioCtx.sampleRate;d[i]=(Math.random()*2-1)*Math.exp(-t*20)*0.15}
-  n.buffer=buf;const f=audioCtx.createBiquadFilter();f.type='bandpass';f.frequency.value=3000;f.Q.value=5;
-  const g=audioCtx.createGain();g.gain.value=0.08*_masterVol;
-  n.connect(f);f.connect(g);g.connect(audioCtx.destination);n.start();
-  }catch(e){}}
-
 
 function sfxScenario(){
 
@@ -1680,8 +1670,6 @@ const scene=new THREE.Scene();
 const cam=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,0.5,700);
 
 cam.position.set(0,10,18);
-    // Speed micro-shake for immersion
-    if(spd>0.15){const sh=spd*0.03;cam.position.x+=Math.sin(fc*0.7)*sh;cam.position.y+=Math.cos(fc*0.9)*sh*0.5}
 
 scene.fog=new THREE.FogExp2(0x1a2a40,.0005);
 
@@ -3589,7 +3577,6 @@ const car=new THREE.Group();
   car.add(carShadow);
 
 scene.add(car);
-// Smoke removed for stability
 
 
 
@@ -4265,9 +4252,9 @@ function _updateGateLabels(){
 
       _pillarR1.material=redMat;_pillarR2.material=redMat;_topR.material=redMat;
 
-      gl1.style.transition='border-color .5s,color .5s';gl1.style.borderColor='rgba(74,222,128,.7)';gl1.style.color='#4ade80';
+      gl1.style.borderColor='rgba(74,222,128,.7)';gl1.style.color='#4ade80';
 
-      gl2.style.transition='border-color .5s,color .5s';gl2.style.borderColor='rgba(239,68,68,.7)';gl2.style.color='#f87171';
+      gl2.style.borderColor='rgba(239,68,68,.7)';gl2.style.color='#f87171';
 
     } else {
 
@@ -4275,20 +4262,15 @@ function _updateGateLabels(){
 
       _pillarR1.material=greenMat;_pillarR2.material=greenMat;_topR.material=greenMat;
 
-      gl1.style.transition='border-color .5s,color .5s';gl1.style.borderColor='rgba(239,68,68,.7)';gl1.style.color='#f87171';
+      gl1.style.borderColor='rgba(239,68,68,.7)';gl1.style.color='#f87171';
 
-      gl2.style.transition='border-color .5s,color .5s';gl2.style.borderColor='rgba(74,222,128,.7)';gl2.style.color='#4ade80';
+      gl2.style.borderColor='rgba(74,222,128,.7)';gl2.style.color='#4ade80';
 
     }
 
     _gateActive=false;
+
     sfxWhoosh();
-    // Smooth gate glow reveal animation
-    if(!window._gateRevealAnim)window._gateRevealAnim=0;
-    window._gateRevealAnim=60;// 60 frames of glow
-    window._gateRevealGreen=isGreen;
-    // Haptic feedback on mobile
-    if(navigator.vibrate)navigator.vibrate(isGreen?[50,30,50]:[100,50,100]);
 
     // Process choice
 
@@ -5418,9 +5400,6 @@ function animate(){
 
     car.rotation.z=window._carLean;
     if(window._wheels){const wSpd=spd*8;window._wheels.forEach(w=>{w.children.forEach(c=>{c.rotation.x+=wSpd})})}
-    const _isDrift=Math.abs(steerInput)>0.5&&spd>0.12;if(_isDrift&&fc%15===0&&window.sfxTireScreech)sfxTireScreech();
-    if(window._dSmoke&&_isDrift){const ds=window._dSmoke;for(let _si=0;_si<2;_si++){const _di=ds.idx%ds.n;ds.pos[_di*3]=car.position.x+(Math.random()-.5)*1.8;ds.pos[_di*3+1]=car.position.y+0.2+Math.random()*0.3;ds.pos[_di*3+2]=car.position.z-2.2+Math.random();ds.life[_di]=1;ds.idx++}ds.geo.attributes.position.needsUpdate=true}
-    if(window._dSmoke){const ds=window._dSmoke;for(let i=0;i<ds.n;i++){if(ds.life[i]>0){ds.life[i]-=0.025;ds.pos[i*3+1]+=0.04;if(ds.life[i]<=0)ds.pos[i*3+1]=-99}}ds.geo.attributes.position.needsUpdate=true;ds.mat.opacity=0.2+Math.random()*0.1}
 
 
 
@@ -6106,15 +6085,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   updateInstances(obstacles,obsInst,MAX_OBS,false);updateInstances(powerups,powerupInst,MAX_POWERUPS,true);
 
-  updateParticles();
-  // Gate reveal glow pulse
-  if(window._gateRevealAnim>0){window._gateRevealAnim--;const gi=1-(window._gateRevealAnim/60);
-    const glow=Math.sin(gi*Math.PI)*0.8;
-    if(window._gateRevealGreen){
-      if(_gateGreenMat)_gateGreenMat.emissiveIntensity=0.5+glow;
-    }else{if(_gateRedMat)_gateRedMat.emissiveIntensity=0.5+glow}
-    if(window._gateRevealAnim===0){if(_gateGreenMat)_gateGreenMat.emissiveIntensity=0.5;if(_gateRedMat)_gateRedMat.emissiveIntensity=0.5}
-  }_updateGateLabels();
+  updateParticles();_updateGateLabels();
 
   if(fc%6===0){updateHUD();const pi=document.getElementById('powerIndicator');
 
