@@ -861,6 +861,21 @@ scene.add((() => {
   const m=new THREE.Mesh(new THREE.PlaneGeometry(400,6000),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x0d1a2d}));
   m.rotation.x=-Math.PI/2;m.position.y=-2;return m;
 })());
+// Grass strips alongside road
+{
+  const grassMat=new THREE.MeshStandardMaterial({color:0x1a4a2e,roughness:0.9,metalness:0});
+  const grassGeo=new THREE.PlaneGeometry(8,SLEN+0.5);
+  const grassL=new THREE.InstancedMesh(grassGeo,grassMat,RSEGS);
+  const grassR=new THREE.InstancedMesh(grassGeo,grassMat,RSEGS);
+  for(let i=0;i<RSEGS;i++){
+    const z=RSTART+i*SLEN+SLEN/2;const x=roadX(z);const y=roadY(z);
+    dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);
+    dummy.position.set(x-9.5,y-0.3,z);dummy.updateMatrix();grassL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x+9.5,y-0.3,z);dummy.updateMatrix();grassR.setMatrixAt(i,dummy.matrix);
+  }
+  grassL.instanceMatrix.needsUpdate=true;grassR.instanceMatrix.needsUpdate=true;
+  scene.add(grassL);scene.add(grassR);
+}
 
 // ---- CURVED ROAD ----
 {
