@@ -4253,9 +4253,9 @@ function _updateGateLabels(){
 
       _pillarR1.material=redMat;_pillarR2.material=redMat;_topR.material=redMat;
 
-      gl1.style.borderColor='rgba(74,222,128,.7)';gl1.style.color='#4ade80';
+      gl1.style.transition='border-color .5s,color .5s';gl1.style.borderColor='rgba(74,222,128,.7)';gl1.style.color='#4ade80';
 
-      gl2.style.borderColor='rgba(239,68,68,.7)';gl2.style.color='#f87171';
+      gl2.style.transition='border-color .5s,color .5s';gl2.style.borderColor='rgba(239,68,68,.7)';gl2.style.color='#f87171';
 
     } else {
 
@@ -4263,15 +4263,20 @@ function _updateGateLabels(){
 
       _pillarR1.material=greenMat;_pillarR2.material=greenMat;_topR.material=greenMat;
 
-      gl1.style.borderColor='rgba(239,68,68,.7)';gl1.style.color='#f87171';
+      gl1.style.transition='border-color .5s,color .5s';gl1.style.borderColor='rgba(239,68,68,.7)';gl1.style.color='#f87171';
 
-      gl2.style.borderColor='rgba(74,222,128,.7)';gl2.style.color='#4ade80';
+      gl2.style.transition='border-color .5s,color .5s';gl2.style.borderColor='rgba(74,222,128,.7)';gl2.style.color='#4ade80';
 
     }
 
     _gateActive=false;
-
     sfxWhoosh();
+    // Smooth gate glow reveal animation
+    if(!window._gateRevealAnim)window._gateRevealAnim=0;
+    window._gateRevealAnim=60;// 60 frames of glow
+    window._gateRevealGreen=isGreen;
+    // Haptic feedback on mobile
+    if(navigator.vibrate)navigator.vibrate(isGreen?[50,30,50]:[100,50,100]);
 
     // Process choice
 
@@ -6088,7 +6093,15 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   updateInstances(obstacles,obsInst,MAX_OBS,false);updateInstances(powerups,powerupInst,MAX_POWERUPS,true);
 
-  updateParticles();_updateGateLabels();
+  updateParticles();
+  // Gate reveal glow pulse
+  if(window._gateRevealAnim>0){window._gateRevealAnim--;const gi=1-(window._gateRevealAnim/60);
+    const glow=Math.sin(gi*Math.PI)*0.8;
+    if(window._gateRevealGreen){
+      if(_gateGreenMat)_gateGreenMat.emissiveIntensity=0.5+glow;
+    }else{if(_gateRedMat)_gateRedMat.emissiveIntensity=0.5+glow}
+    if(window._gateRevealAnim===0){if(_gateGreenMat)_gateGreenMat.emissiveIntensity=0.5;if(_gateRedMat)_gateRedMat.emissiveIntensity=0.5}
+  }_updateGateLabels();
 
   if(fc%6===0){updateHUD();const pi=document.getElementById('powerIndicator');
 
