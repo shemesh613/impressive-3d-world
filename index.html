@@ -1370,7 +1370,7 @@ function initAudio(){
 
     osc.start();
 
-    window._engineAudio={ctx:eng,osc:osc,gain:gain};
+    window._engineAudio={ctx:eng,osc:osc,gain:gain};var osc2=eng.createOscillator();var g2=eng.createGain();osc2.type="triangle";osc2.frequency.value=130;g2.gain.value=0.01;osc2.connect(g2);g2.connect(eng.destination);osc2.start();window._engineAudio.osc2=osc2;window._engineAudio.gain2=g2;
     const osc2=eng.createOscillator();const g2=eng.createGain();osc2.type='triangle';osc2.frequency.value=130;g2.gain.value=0.01;osc2.connect(g2);g2.connect(eng.destination);osc2.start();window._engineAudio.osc2=osc2;window._engineAudio.gain2=g2;
 
   }catch(e){}
@@ -3543,12 +3543,7 @@ const car=new THREE.Group();
 
   const wPositions=[[-1.15,.35,1.4],[1.15,.35,1.4],[-1.15,.35,-1.4],[1.15,.35,-1.4]];
 
-  window._wheels=[];wPositions.forEach(p=>{
-    const wG=new THREE.Group();wG.position.set(p[0],p[1],p[2]);
-    const tire=new THREE.Mesh(wGeo,wMat);tire.rotation.set(0,0,Math.PI/2);wG.add(tire);
-    const rim=new THREE.Mesh(rimGeo,rimMat);rim.rotation.set(0,0,Math.PI/2);wG.add(rim);
-    car.add(wG);window._wheels.push(wG);
-  });
+  window._wheels=[];window._wheels=[];wPositions.forEach(function(p){var wG=new THREE.Group();wG.position.set(p[0],p[1],p[2]);var tire=new THREE.Mesh(wGeo,wMat);tire.rotation.set(0,0,Math.PI/2);wG.add(tire);var rim=new THREE.Mesh(rimGeo,rimMat);rim.rotation.set(0,0,Math.PI/2);wG.add(rim);car.add(wG);window._wheels.push(wG);});
 
   // Headlight beam cone on road
 
@@ -4269,8 +4264,9 @@ function _updateGateLabels(){
     }
 
     _gateActive=false;
-
     sfxWhoosh();
+    window._gateRevealAnim=60;window._gateRevealGreen=isGreen;
+    if(navigator.vibrate)navigator.vibrate(isGreen?[50,30,50]:[100,50,100]);
 
     // Process choice
 
@@ -5399,6 +5395,9 @@ function animate(){
     window._carLean+=(targetLean-window._carLean)*0.08;
 
     car.rotation.z=window._carLean;
+    if(window._wheels){var wSpd=spd*8;window._wheels.forEach(function(w){w.children.forEach(function(ch){ch.rotation.x+=wSpd})})}
+    var _isDrift=Math.abs(steerInput)>0.5&&spd>0.12;
+    if(_isDrift&&fc%15===0){try{if(audioCtx&&!_muted){var nb=audioCtx.createBufferSource();var sz=audioCtx.sampleRate*0.12;var buf=audioCtx.createBuffer(1,sz,audioCtx.sampleRate);var dd=buf.getChannelData(0);for(var qi=0;qi<sz;qi++){dd[qi]=(Math.random()*2-1)*Math.exp(-qi/audioCtx.sampleRate*20)*0.12}nb.buffer=buf;var bf=audioCtx.createBiquadFilter();bf.type="bandpass";bf.frequency.value=3000;bf.Q.value=5;var gg=audioCtx.createGain();gg.gain.value=0.06*_masterVol;nb.connect(bf);bf.connect(gg);gg.connect(audioCtx.destination);nb.start()}}catch(e){}}
     if(window._wheels){const wSpd=spd*8;window._wheels.forEach(w=>{w.children.forEach(c=>{c.rotation.x+=wSpd})})}
 
 
