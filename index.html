@@ -5312,7 +5312,7 @@ function animate(){
 
     const _mob=!!window._isMobileDevice;
 
-    const maxSpd=_gateActive?(_mob?.15:.22):turboTimer>0?(_mob?.32:.65):boostTimer>0?(_mob?.28:.5):(_mob?.2:.35);
+    const maxSpd=_gateActive?(_mob?.15:.30):turboTimer>0?(_mob?.32:.65):boostTimer>0?(_mob?.28:.5):(_mob?.2:.35);
 
     if(keys.ArrowUp||keys.KeyW)spd=Math.min(maxSpd,spd+(_mob?.008:.018));
 
