@@ -106,7 +106,7 @@
       border:1px solid rgba(74,222,128,.12);backdrop-filter:blur(8px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
 
     /* Friend notification */
-    #friendNotify{position:fixed;top:80px;right:15px;z-index:50;
+    #friendNotify{position:fixed;top:50px;right:15px;z-index:39;
       font-size:clamp(14px,2.5vw,20px);font-weight:bold;text-align:center;pointer-events:none;
       opacity:0;text-shadow:0 2px 8px rgba(0,0,0,.7);padding:10px 18px;border-radius:14px;transition:opacity .3s}
     #friendNotify.show{opacity:1;animation:friendSlide .5s cubic-bezier(.22,1,.36,1)}
@@ -274,7 +274,7 @@
 <div id="multiplier" style="display:none;position:fixed;top:25%;right:15%;z-index:40;font-size:clamp(40px,8vw,70px);font-weight:900;color:#fbbf24;text-shadow:0 0 30px rgba(251,191,36,.7),0 0 60px rgba(251,191,36,.3);pointer-events:none"></div>
 
 <!-- GATE LABELS -->
-<div id="gateSituation" style="display:none;position:fixed;top:55px;left:50%;transform:translateX(-50%);z-index:38;background:rgba(5,15,25,.92);border:2px solid;border-radius:14px;padding:8px 18px;color:#fff;font-size:clamp(14px,2.5vw,20px);font-weight:700;text-align:center;direction:rtl;max-width:420px;pointer-events:none;backdrop-filter:blur(8px);transition:border-color .5s"></div>
+<div id="gateSituation" style="display:none;position:fixed;top:55px;z-index:42;left:50%;transform:translateX(-50%);z-index:38;background:rgba(5,15,25,.92);border:2px solid;border-radius:14px;padding:8px 18px;color:#fff;font-size:clamp(14px,2.5vw,20px);font-weight:700;text-align:center;direction:rtl;max-width:420px;pointer-events:none;backdrop-filter:blur(8px);transition:border-color .5s"></div>
 <div id="gateLabel1" style="display:none;position:fixed;left:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(10,25,45,.92);border:2px solid rgba(200,220,255,.35);border-radius:16px;padding:14px 18px;color:#e0eaff;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
 <div id="gateLabel2" style="display:none;position:fixed;right:12px;top:40%;transform:translateY(-50%);z-index:37;background:rgba(10,25,45,.92);border:2px solid rgba(200,220,255,.35);border-radius:16px;padding:14px 18px;color:#e0eaff;font-size:clamp(15px,2.8vw,22px);font-weight:800;text-align:center;direction:rtl;max-width:260px;pointer-events:none;white-space:normal;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px)"></div>
 
@@ -1985,33 +1985,37 @@ function _updateGateLabels(){
     const pulse=Math.sin(performance.now()*.003)*.5+.5;
     gs.style.borderColor='rgba('+(Math.round(34+205*pulse))+','+(Math.round(197-130*pulse))+','+(Math.round(94-60*pulse))+',.5)';
   }
-  // Project gate positions to screen — labels float above their 3D gate
+  // Project gate positions to screen using separate vectors (avoid shared _v overwrite)
   const rx=roadX(_gateZ);const ry=roadY(_gateZ);
   const leftGateX=rx-3,rightGateX=rx+3;
   const opacity=distToGate<5?Math.max(0,distToGate/5):Math.min(1,(85-distToGate)/25);
-  // Project just above gate arch top (ry+6 = gate top)
-  const pL=_v.set(leftGateX,ry+6.2,_gateZ).project(cam);
-  const sxL=(pL.x*.5+.5)*innerWidth;const syL=(-(pL.y*.5)+.5)*innerHeight;
-  const pR=_v.set(rightGateX,ry+6.2,_gateZ).project(cam);
-  const sxR=(pR.x*.5+.5)*innerWidth;const syR=(-(pR.y*.5)+.5)*innerHeight;
-  // Each label follows its gate position, enforced left/right separation
-  const hw=innerWidth/2;const lw=220;
-  const clampLx=Math.max(5,Math.min(hw-lw-5,sxL-lw/2));
-  const clampRx=Math.max(hw+5,Math.min(innerWidth-lw-5,sxR-lw/2));
-  // Y follows projected gate position directly (with small offset above)
-  const lyTop=Math.max(55,Math.min(innerHeight*.65,syL-55));
-  const ryTop=Math.max(55,Math.min(innerHeight*.65,syR-55));
-  const sc=Math.max(0.6,Math.min(1.2,25/Math.max(8,distToGate)));
+  const vecL=new THREE.Vector3(leftGateX,ry+6.5,_gateZ).project(cam);
+  const sxL=(vecL.x*.5+.5)*innerWidth;const syL=(-(vecL.y*.5)+.5)*innerHeight;
+  const vecR=new THREE.Vector3(rightGateX,ry+6.5,_gateZ).project(cam);
+  const sxR=(vecR.x*.5+.5)*innerWidth;const syR=(-(vecR.y*.5)+.5)*innerHeight;
+  // Label width scales with distance
+  const sc=Math.max(0.55,Math.min(1.3,20/Math.max(5,distToGate)));
+  const lw=Math.round(Math.max(140,Math.min(240,sc*200)));
   const fs=Math.round(sc*17);
-  if(pL.z<1&&pR.z<1){
+  // Position labels centered on their projected gate X, with min gap enforcement
+  let lx=sxL-lw/2, rx2=sxR-lw/2;
+  const minGap=20;
+  if(rx2-lx<lw+minGap){const mid=(lx+rx2)/2;lx=mid-lw/2-minGap/2;rx2=mid+lw/2+minGap/2-lw}
+  // Clamp to screen bounds
+  lx=Math.max(5,Math.min(innerWidth-lw-5,lx));
+  rx2=Math.max(5,Math.min(innerWidth-lw-5,rx2));
+  // Ensure min separation still holds after clamping
+  if(Math.abs(rx2-lx)<lw+minGap){if(lx<rx2){lx=Math.max(5,rx2-lw-minGap)}else{rx2=Math.max(5,lx-lw-minGap)}}
+  const yPos=Math.max(55,Math.min(innerHeight*.6,(syL+syR)/2-40));
+  if(vecL.z<1&&vecR.z<1){
     gl1.style.display='block';gl1.style.opacity=String(opacity);
-    gl1.style.left=clampLx+'px';gl1.style.right='auto';
-    gl1.style.top=lyTop+'px';gl1.style.transform='none';gl1.style.fontSize=fs+'px';
-    gl1.style.maxWidth=lw+'px';gl1.style.width=lw+'px';
+    gl1.style.left=Math.round(lx)+'px';gl1.style.right='auto';
+    gl1.style.top=Math.round(yPos)+'px';gl1.style.transform='none';gl1.style.fontSize=fs+'px';
+    gl1.style.maxWidth=lw+'px';gl1.style.width=lw+'px';gl1.style.zIndex='42';
     gl2.style.display='block';gl2.style.opacity=String(opacity);
-    gl2.style.left=clampRx+'px';gl2.style.right='auto';
-    gl2.style.top=ryTop+'px';gl2.style.transform='none';gl2.style.fontSize=fs+'px';
-    gl2.style.maxWidth=lw+'px';gl2.style.width=lw+'px';
+    gl2.style.left=Math.round(rx2)+'px';gl2.style.right='auto';
+    gl2.style.top=Math.round(yPos)+'px';gl2.style.transform='none';gl2.style.fontSize=fs+'px';
+    gl2.style.maxWidth=lw+'px';gl2.style.width=lw+'px';gl2.style.zIndex='42';
   }else{gl1.style.display='none';gl2.style.display='none'}
 
   // Check if car passed through a gate
