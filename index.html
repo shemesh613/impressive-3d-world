@@ -1918,17 +1918,17 @@ if(isMobile){
     _touchActive=true;
     _touchX=e.touches[0].clientX;
     keys.KeyW=true; // auto-drive on touch
-    const hw=innerWidth/2;
-    if(_touchX<hw*0.4){keys.KeyA=true;keys.KeyD=false}
-    else if(_touchX>hw*1.6){keys.KeyD=true;keys.KeyA=false}
+    const w3=innerWidth/3;
+    if(_touchX<w3){keys.KeyA=true;keys.KeyD=false}
+    else if(_touchX>w3*2){keys.KeyD=true;keys.KeyA=false}
     else{keys.KeyA=false;keys.KeyD=false}
   },{passive:true});
   document.addEventListener('touchmove',function(e){
     if(!_touchActive||!gameActive)return;
     _touchX=e.touches[0].clientX;
-    const hw=innerWidth/2;
-    if(_touchX<hw*0.4){keys.KeyA=true;keys.KeyD=false}
-    else if(_touchX>hw*1.6){keys.KeyD=true;keys.KeyA=false}
+    const w3=innerWidth/3;
+    if(_touchX<w3){keys.KeyA=true;keys.KeyD=false}
+    else if(_touchX>w3*2){keys.KeyD=true;keys.KeyA=false}
     else{keys.KeyA=false;keys.KeyD=false}
   },{passive:true});
   document.addEventListener('touchend',function(){
