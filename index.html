@@ -340,6 +340,7 @@
 
     #boostTrail{position:fixed;bottom:15%;left:50%;transform:translateX(-50%);width:8px;height:0;z-index:11;pointer-events:none;background:linear-gradient(to top,rgba(74,222,128,.5),rgba(74,222,128,0));border-radius:4px;transition:height .3s,opacity .3s;opacity:0;filter:blur(3px)}
 
+    @keyframes scoreFly{0%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}100%{transform:translateX(-50%) translateY(-60px) scale(1.5);opacity:0}}
     @keyframes speedLineMove{from{background-position:0 0}to{background-position:15px 0}}
     /* Screen flash */    #speedLines{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:repeating-linear-gradient(90deg,transparent 0%,transparent 46%,rgba(255,255,255,0.12) 49%,transparent 51%,transparent 96%,rgba(255,255,255,0.12) 99%,transparent 100%);background-size:15px 100%;animation:speedLineMove .15s linear infinite}
 
@@ -1670,7 +1671,7 @@ const scene=new THREE.Scene();
 
 const cam=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,0.5,700);
 
-cam.position.set(0,10,18);var _tFov=68+spd*25;cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();
+cam.position.set(0,10,18);var _tFov=68+spd*25;if(window._turboFlash>0){_tFov+=window._turboFlash*0.8;window._turboFlash--}cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();
 
 scene.fog=new THREE.FogExp2(0x1a2a40,.0005);
 
@@ -5075,7 +5076,7 @@ function updateHUD(){
 
   const _sp=_sv.parentElement;if(_sp){if(streak>=5){_sp.style.boxShadow='0 0 20px rgba(255,100,0,.6)';_sp.style.transform='scale(1.1)';_sp.style.borderColor='rgba(255,100,0,0.6)';
 
-    if(!window._streakTurbo){window._streakTurbo=true;turboTimer=Math.max(turboTimer,180);sfxBoost()}}
+    if(!window._streakTurbo){window._streakTurbo=true;turboTimer=Math.max(turboTimer,180);window._turboFlash=15;sfxBoost()}}
 
     else if(streak>=3){_sp.style.boxShadow='0 0 '+(8+streak*3)+'px rgba(251,191,36,'+(0.3+streak*0.08)+')';_sp.style.transform='scale('+(1+streak*0.02)+')';_sp.style.borderColor='rgba(251,191,36,0.5)';window._streakTurbo=false}
 
@@ -5100,7 +5101,7 @@ function updateHUD(){
 
   // Dynamic road reflectivity — more reflective at speed
 
-  if(window._roadMat){window._roadMat.roughness=0.55-spd*0.3;window._roadMat.metalness=0.15+spd*0.25}
+  if(window._roadMat){window._roadMat.roughness=0.4-spd*0.25;window._roadMat.metalness=0.25+spd*0.35}
 
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.12?String(Math.min(0.9,(spd-0.12)*2.5)):'0';
 
@@ -5207,7 +5208,7 @@ function checkCollisions(){
 
       const combo=window._collectStreak;const bonus=Math.min(combo,5);score+=8+bonus;flow=Math.min(100,flow+6);lives=Math.min(5,lives+0.3);
 
-      sfxCollect();emitParticles(g.x,g.y,g.z,0x22c55e,6+combo);
+      sfxCollect();if(navigator.vibrate)navigator.vibrate(30);emitParticles(g.x,g.y,g.z,0x22c55e,6+combo);
 
       const proj=_v.set(g.x,g.y+1,g.z).project(cam);
 
@@ -5249,13 +5250,13 @@ function checkCollisions(){
 
       showPopup('😎 כמעט! +5',innerWidth/2,innerHeight*0.3,'#60a5fa');
 
-      sfxCollect();emitParticles(car.position.x,1.5,car.position.z,0x60a5fa,4);
+      sfxCollect();if(navigator.vibrate)navigator.vibrate(30);emitParticles(car.position.x,1.5,car.position.z,0x60a5fa,4);
 
     }
 
     if(oDist2<4){
 
-      o.active=false;if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,o.y,o.z,0x60a5fa,8);sfxCollect();obstacles.splice(i,1);continue}flow=Math.max(0,flow-4);spd*=.5;lives=Math.max(0,lives-0.5);
+      o.active=false;if(shieldTimer>0){shieldTimer=0;emitParticles(o.x,o.y,o.z,0x60a5fa,8);sfxCollect();if(navigator.vibrate)navigator.vibrate(30);obstacles.splice(i,1);continue}flow=Math.max(0,flow-4);spd*=.5;lives=Math.max(0,lives-0.5);
 
       sfxRed();screenFlash("flash-red");emitParticles(o.x,o.y,o.z,0xef4444,10);
 
