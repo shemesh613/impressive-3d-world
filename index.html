@@ -1974,8 +1974,8 @@ function _updateGateLabels(){
   const gl1=document.getElementById('gateLabel1');
   const gl2=document.getElementById('gateLabel2');
   const gs=document.getElementById('gateSituation');
-  if(distToGate>60||distToGate<-2){
-    gl1.style.display='none';gl2.style.display='none';if(gs)gs.style.display='none';return;
+  if(distToGate>85||distToGate<-2){
+    gl1.style.display='none';gl2.style.display='none';return;
   }
   // Question banner at top
   if(gs){
@@ -1986,7 +1986,7 @@ function _updateGateLabels(){
   // Project gate positions to screen — labels float above their 3D gate
   const rx=roadX(_gateZ);const ry=roadY(_gateZ);
   const leftGateX=rx-3,rightGateX=rx+3;
-  const opacity=distToGate<5?Math.max(0,distToGate/5):Math.min(1,(60-distToGate)/20);
+  const opacity=distToGate<5?Math.max(0,distToGate/5):Math.min(1,(85-distToGate)/25);
   // Project just above gate arch top (ry+6 = gate top)
   const pL=_v.set(leftGateX,ry+6.2,_gateZ).project(cam);
   const sxL=(pL.x*.5+.5)*innerWidth;const syL=(-(pL.y*.5)+.5)*innerHeight;
@@ -2547,7 +2547,7 @@ function animate(){
   fc++;
 
   if(gameActive&&(!scenarioActive||_gateActive)){
-    const maxSpd=turboTimer>0?.65:boostTimer>0?.5:.35;
+    const maxSpd=_gateActive?.22:turboTimer>0?.65:boostTimer>0?.5:.35;
     if(keys.ArrowUp||keys.KeyW)spd=Math.min(maxSpd,spd+.018);
     else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.12,spd-.012);
     else{spd*=.975;if(spd<.04)spd=.04}
