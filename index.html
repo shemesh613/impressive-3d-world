@@ -3056,7 +3056,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
   cam.position.lerp(_cv,.06);
   _ct.set(roadX(_lookAheadZ),roadY(_lookAheadZ)+1,_lookAheadZ);cam.lookAt(_ct);
   // Dynamic FOV - widens at high speed
-  const _targetFov=68+spd*25;
+  let _targetFov=68+spd*25;if(_gateActive){const gd=_gateZ-car.position.z;if(gd>0&&gd<40)_targetFov=Math.max(55,_targetFov-((40-gd)/40)*15)}
   cam.fov+=((_targetFov-cam.fov)*.06);
   cam.updateProjectionMatrix();
 
