@@ -3528,7 +3528,7 @@ const car=new THREE.Group();
 
   hlInst.instanceMatrix.needsUpdate=true;car.add(hlInst);
 
-  const tlGeo=new THREE.BoxGeometry(.26,.12,.04);const tlMat=new THREE.MeshStandardMaterial({color:0xff4444,emissive:0xff2200,emissiveIntensity:0.3,roughness:0.3,metalness:0.2});window._brakeMat=tlMat;
+  const tlGeo=new THREE.BoxGeometry(.26,.12,.04);const tlMat=new THREE.MeshStandardMaterial({color:0xff4444,emissive:0xff2200,emissiveIntensity:0.3,roughness:0.3,metalness:0.2});window._brakeMat=tlMat;window._boostGlow=tlMat;
 
   const tlInst=new THREE.InstancedMesh(tlGeo,tlMat,2);
 
@@ -5089,10 +5089,11 @@ function updateHUD(){
 
   const _curSpd=Math.round(spd*500);if(_curSpd>topSpeed)topSpeed=_curSpd;
 
-  document.getElementById('speedVal').textContent=_curSpd+'km/h';
+  document.getElementById('speedVal').textContent=_curSpd+'km/h';var _spEl=document.getElementById('speedVal').parentElement;if(_spEl){if(_curSpd>140)_spEl.style.borderColor='rgba(239,68,68,.6)';else if(_curSpd>100)_spEl.style.borderColor='rgba(251,191,36,.5)';else _spEl.style.borderColor=''}
 
   const _sn=document.getElementById('speedNeedle');if(_sn)_sn.style.transform='rotate('+(-90+spd*500)+'deg)';
 
+  var _tb=document.getElementById('screenFlash');if(_tb&&turboTimer>0){_tb.style.background='radial-gradient(ellipse at 50% 80%,rgba(251,191,36,.08) 0%,transparent 70%)';_tb.style.opacity=String(0.3+Math.sin(fc*0.15)*0.15)}else if(_tb&&boostTimer>0){_tb.style.background='radial-gradient(ellipse at 50% 80%,rgba(34,197,94,.06) 0%,transparent 70%)';_tb.style.opacity=String(0.2+Math.sin(fc*0.1)*0.1)}
   var _sl=document.getElementById('speedLines');if(_sl)_sl.style.opacity=spd>0.15?String(Math.min(0.9,(spd-0.15)*3)):'0';
 
   var _hl=document.getElementById('headlightGlow');if(_hl)_hl.style.opacity=spd>0.05?String(Math.min(1,spd*3)):'0';
@@ -5103,7 +5104,8 @@ function updateHUD(){
 
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.12?String(Math.min(0.9,(spd-0.12)*2.5)):'0';
 
-  if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
+  if(window._brakeMat){if(turboTimer>0){window._brakeMat.emissive.setHex(0xff8800);window._brakeMat.emissiveIntensity=0.8+Math.sin(fc*0.3)*0.3}else if(keys.ArrowDown||keys.KeyS){window._brakeMat.emissive.setHex(0xff2200);window._brakeMat.emissiveIntensity=0.8}else{window._brakeMat.emissive.setHex(0xff2200);window._brakeMat.emissiveIntensity=0.3}}
+  if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.12,spd*0.25):0;
 
   scene.fog.density=0.00075-spd*0.0005;// fog clears at speed
 
