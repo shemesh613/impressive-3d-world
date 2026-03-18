@@ -2462,7 +2462,7 @@ scene.add((() => {
 
   const CMARK_N=50;
 
-  const cmarkGeo=new THREE.BoxGeometry(0.3,0.1,2);
+  const cmarkGeo=new THREE.BoxGeometry(0.5,0.12,2.5);
 
   const cmarkMatL=new THREE.MeshBasicMaterial({color:0xffcc00});
 
@@ -4543,7 +4543,7 @@ function choose(type){
 
     document.getElementById('finalMsg').textContent=ratio>.7?_msgs3[_r]:ratio>.4?_msgs2[_r]:_msgs1[_r];
 
-    document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalTopSpeed').textContent=topSpeed;document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();_saveHighScore(score);document.getElementById('gameOver').style.display='flex';
+    document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalTopSpeed').textContent=topSpeed;var _stE=document.getElementById('finalStars');_stE.style.fontSize='2.5em';_stE.style.textShadow='0 0 20px rgba(251,191,36,.6)';_stE.textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();_saveHighScore(score);document.getElementById('gameOver').style.display='flex';
 
     return;
 
@@ -4809,7 +4809,7 @@ function setupConn(c,playerId){
 
         document.getElementById('finalDist').textContent=Math.floor(car.position.z);
 
-        document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';
+        var _stE=document.getElementById('finalStars');_stE.style.fontSize='2.5em';_stE.style.textShadow='0 0 20px rgba(251,191,36,.6)';_stE.textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';
 
         document.getElementById('gameOver').style.display='flex';
 
@@ -4839,7 +4839,7 @@ function setupConn(c,playerId){
 
       document.getElementById('finalDist').textContent=Math.floor(car.position.z);
 
-      document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';
+      var _stE=document.getElementById('finalStars');_stE.style.fontSize='2.5em';_stE.style.textShadow='0 0 20px rgba(251,191,36,.6)';_stE.textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';
 
       document.getElementById('gameOver').style.display='flex';
 
@@ -5031,6 +5031,8 @@ function _realStartGame(){
 
 
 function restartGame(){
+  var pb=parseInt(localStorage.getItem('gf_personalBest')||'0');if(score>pb)localStorage.setItem('gf_personalBest',String(score));
+
 
   document.getElementById('gameOver').style.display='none';
 
@@ -5112,7 +5114,7 @@ function updateHUD(){
 
   const _cc=document.getElementById('choiceCounter');if(_cc)_cc.textContent='🟢'+greenCount+' 🔴'+redCount;
 
-  const _curSpd=Math.round(spd*500);if(_curSpd>topSpeed)topSpeed=_curSpd;
+  const _curSpd=Math.round(spd*500);if(_curSpd>topSpeed){if(_curSpd>=150&&topSpeed<150)showPopup('150km/h!',innerWidth*0.85,innerHeight*0.08,'#ef4444');if(_curSpd>=200&&topSpeed<200)showPopup('200km/h!',innerWidth*0.85,innerHeight*0.08,'#ef4444');if(_curSpd>=250&&topSpeed<250)showPopup('250km/h!',innerWidth*0.85,innerHeight*0.08,'#f59e0b');topSpeed=_curSpd}
 
   document.getElementById('speedVal').textContent=_curSpd+'km/h';var _spEl=document.getElementById('speedVal').parentElement;if(_spEl){if(_curSpd>140)_spEl.style.borderColor='rgba(239,68,68,.6)';else if(_curSpd>100)_spEl.style.borderColor='rgba(251,191,36,.5)';else _spEl.style.borderColor=''}
 
@@ -5253,7 +5255,7 @@ function checkCollisions(){
 
   // Red edge collision
 
-  if(window._redEdges){const re=window._redEdges;for(let i=0;i<re.n;i++){const rd=re.data[i];const dz=car.position.z-rd.z;if(dz>-12&&dz<12){const rx=roadX(rd.z);const dx=car.position.x-rx;if(Math.abs(dx)>4){lives=Math.max(0,lives-0.02);if(fc%30===0){sfxRed();emitParticles(car.position.x,.5,car.position.z,0xff2222,3)}if(lives<=0){gameActive=false;document.getElementById('finalScore').textContent=score;document.getElementById('finalGreen').textContent=greenCount;document.getElementById('finalRed').textContent=redCount;document.getElementById('finalStreak').textContent=bestStreak;document.getElementById('finalMsg').textContent='😢 כל החברים עזבו... ננסה שוב?';document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();document.getElementById('gameOver').style.display='flex';return}}}}}
+  if(window._redEdges){const re=window._redEdges;for(let i=0;i<re.n;i++){const rd=re.data[i];const dz=car.position.z-rd.z;if(dz>-12&&dz<12){const rx=roadX(rd.z);const dx=car.position.x-rx;if(Math.abs(dx)>4){lives=Math.max(0,lives-0.02);if(fc%30===0){sfxRed();emitParticles(car.position.x,.5,car.position.z,0xff2222,3)}if(lives<=0){gameActive=false;document.getElementById('finalScore').textContent=score;document.getElementById('finalGreen').textContent=greenCount;document.getElementById('finalRed').textContent=redCount;document.getElementById('finalStreak').textContent=bestStreak;document.getElementById('finalMsg').textContent='😢 כל החברים עזבו... ננסה שוב?';document.getElementById('finalDist').textContent=Math.floor(car.position.z);var _stE=document.getElementById('finalStars');_stE.style.fontSize='2.5em';_stE.style.textShadow='0 0 20px rgba(251,191,36,.6)';_stE.textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();document.getElementById('gameOver').style.display='flex';return}}}}}
 
 
 
@@ -5305,7 +5307,7 @@ function checkCollisions(){
 
         document.getElementById('finalMsg').textContent='😢 כל החברים עזבו... ננסה שוב?';
 
-        document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();document.getElementById('gameOver').style.display='flex';return;
+        document.getElementById('finalDist').textContent=Math.floor(car.position.z);var _stE=document.getElementById('finalStars');_stE.style.fontSize='2.5em';_stE.style.textShadow='0 0 20px rgba(251,191,36,.6)';_stE.textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();document.getElementById('gameOver').style.display='flex';return;
 
       }
 
@@ -5721,7 +5723,7 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
 
       document.getElementById('finalMsg').textContent='🌊 מד הזרימה התרוקן — ננסה שוב?';
 
-      document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();document.getElementById('gameOver').style.display='flex';
+      document.getElementById('finalDist').textContent=Math.floor(car.position.z);var _stE=document.getElementById('finalStars');_stE.style.fontSize='2.5em';_stE.style.textShadow='0 0 20px rgba(251,191,36,.6)';_stE.textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();document.getElementById('gameOver').style.display='flex';
 
     }}
 
@@ -5779,7 +5781,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
           else{lives=Math.max(0,lives-1);flow=Math.max(0,flow-8);spd*=0.2;sfxRed();screenFlash("flash-red");emitParticles(o.x,1,o.z,0xff4444,12);o.active=false;
 
-            if(lives<=0){gameActive=false;document.getElementById('finalScore').textContent=score;document.getElementById('finalGreen').textContent=greenCount;document.getElementById('finalRed').textContent=redCount;document.getElementById('finalStreak').textContent=bestStreak;document.getElementById('finalMsg').textContent='😢 כל החברים עזבו... ננסה שוב?';document.getElementById('finalDist').textContent=Math.floor(car.position.z);document.getElementById('finalStars').textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();document.getElementById('gameOver').style.display='flex';return;}
+            if(lives<=0){gameActive=false;document.getElementById('finalScore').textContent=score;document.getElementById('finalGreen').textContent=greenCount;document.getElementById('finalRed').textContent=redCount;document.getElementById('finalStreak').textContent=bestStreak;document.getElementById('finalMsg').textContent='😢 כל החברים עזבו... ננסה שוב?';document.getElementById('finalDist').textContent=Math.floor(car.position.z);var _stE=document.getElementById('finalStars');_stE.style.fontSize='2.5em';_stE.style.textShadow='0 0 20px rgba(251,191,36,.6)';_stE.textContent=greenCount>redCount*2?'⭐⭐⭐':greenCount>redCount?'⭐⭐':'⭐';mpGameOver();document.getElementById('gameOver').style.display='flex';return;}
 
           }
 
