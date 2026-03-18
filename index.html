@@ -2451,7 +2451,7 @@ function updateHUD(){
     const ranks=['🌱','🌿','🌳','💪','⭐','🌟','👑','💎'];
     const rankIdx=Math.min(ranks.length-1,Math.floor(score/30));
     _pt.textContent=ranks[rankIdx]+' '+(pn||'נהג')+' | שלב '+level+' | '+Math.floor(car.position.z)+'m'}
-  const _sv=document.getElementById('streakVal');_sv.textContent=streak>0?'🔥'.repeat(Math.min(streak,5)):'-';
+  const _sv=document.getElementById('streakVal');_sv.textContent=streak>0?'🔥'.repeat(Math.min(streak,5)):'';
   const _sp=_sv.parentElement;if(_sp){if(streak>=5){_sp.style.boxShadow='0 0 20px rgba(255,100,0,.6)';_sp.style.transform='scale(1.1)';_sp.style.borderColor='rgba(255,100,0,0.6)';
     if(!window._streakTurbo){window._streakTurbo=true;turboTimer=Math.max(turboTimer,180);sfxBoost()}}
     else if(streak>=3){_sp.style.boxShadow='0 0 '+(8+streak*3)+'px rgba(251,191,36,'+(0.3+streak*0.08)+')';_sp.style.transform='scale('+(1+streak*0.02)+')';_sp.style.borderColor='rgba(251,191,36,0.5)';window._streakTurbo=false}
