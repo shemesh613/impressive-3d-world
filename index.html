@@ -1987,23 +1987,27 @@ function _updateGateLabels(){
   const rx=roadX(_gateZ);const ry=roadY(_gateZ);
   const leftGateX=rx-3,rightGateX=rx+3;
   const opacity=distToGate<5?Math.max(0,distToGate/5):Math.min(1,(60-distToGate)/20);
-  // Project left gate top to screen
   const pL=_v.set(leftGateX,ry+7.5,_gateZ).project(cam);
   const sxL=(pL.x*.5+.5)*innerWidth;const syL=(-(pL.y*.5)+.5)*innerHeight;
-  // Project right gate top to screen
   const pR=_v.set(rightGateX,ry+7.5,_gateZ).project(cam);
   const sxR=(pR.x*.5+.5)*innerWidth;const syR=(-(pR.y*.5)+.5)*innerHeight;
-  // Only show if in front of camera
-  if(pL.z<1){gl1.style.display='block';gl1.style.opacity=String(opacity);
-    gl1.style.left=Math.max(5,Math.min(innerWidth-270,sxL-130))+'px';gl1.style.right='auto';
-    gl1.style.top=Math.max(50,Math.min(innerHeight-100,syL-60))+'px';gl1.style.transform='none';
-    const sc1=Math.max(0.6,Math.min(1.2,30/Math.max(10,distToGate)));gl1.style.fontSize=Math.round(sc1*18)+'px';
-  }else{gl1.style.display='none'}
-  if(pR.z<1){gl2.style.display='block';gl2.style.opacity=String(opacity);
-    gl2.style.left=Math.max(5,Math.min(innerWidth-270,sxR-130))+'px';gl2.style.right='auto';
-    gl2.style.top=Math.max(50,Math.min(innerHeight-100,syR-60))+'px';gl2.style.transform='none';
-    const sc2=Math.max(0.6,Math.min(1.2,30/Math.max(10,distToGate)));gl2.style.fontSize=Math.round(sc2*18)+'px';
-  }else{gl2.style.display='none'}
+  // Enforce separation: left label stays in left half, right in right half
+  const hw=innerWidth/2;const lw=240;
+  const clampL=Math.max(8,Math.min(hw-lw-10,sxL-lw/2));
+  const clampR=Math.max(hw+10,Math.min(innerWidth-lw-8,sxR-lw/2));
+  const clampY=Math.max(70,Math.min(innerHeight*.55,Math.min(syL,syR)-30));
+  const sc=Math.max(0.65,Math.min(1.15,25/Math.max(8,distToGate)));
+  const fs=Math.round(sc*17);
+  if(pL.z<1&&pR.z<1){
+    gl1.style.display='block';gl1.style.opacity=String(opacity);
+    gl1.style.left=clampL+'px';gl1.style.right='auto';
+    gl1.style.top=clampY+'px';gl1.style.transform='none';gl1.style.fontSize=fs+'px';
+    gl1.style.maxWidth=lw+'px';gl1.style.width=lw+'px';
+    gl2.style.display='block';gl2.style.opacity=String(opacity);
+    gl2.style.left=clampR+'px';gl2.style.right='auto';
+    gl2.style.top=clampY+'px';gl2.style.transform='none';gl2.style.fontSize=fs+'px';
+    gl2.style.maxWidth=lw+'px';gl2.style.width=lw+'px';
+  }else{gl1.style.display='none';gl2.style.display='none'}
 
   // Check if car passed through a gate
   const dz=car.position.z-_gateZ;
