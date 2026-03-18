@@ -5400,6 +5400,8 @@ function animate(){
 
     car.rotation.z=window._carLean;
     if(window._wheels){const wSpd=spd*8;window._wheels.forEach(w=>{w.children.forEach(c=>{c.rotation.x+=wSpd})})}
+    if(window._dSmoke&&Math.abs(steerInput)>0.5&&spd>0.12){const ds=window._dSmoke;for(let _si=0;_si<2;_si++){const _di=ds.idx%ds.n;ds.pos[_di*3]=car.position.x+(Math.random()-.5)*1.8;ds.pos[_di*3+1]=car.position.y+0.2+Math.random()*0.3;ds.pos[_di*3+2]=car.position.z-2.2+Math.random();ds.life[_di]=1;ds.idx++}ds.geo.attributes.position.needsUpdate=true}
+    if(window._dSmoke){const ds=window._dSmoke;for(let i=0;i<ds.n;i++){if(ds.life[i]>0){ds.life[i]-=0.025;ds.pos[i*3+1]+=0.04;if(ds.life[i]<=0)ds.pos[i*3+1]=-99}}ds.geo.attributes.position.needsUpdate=true;ds.mat.opacity=0.2+Math.random()*0.1}
 
 
 
