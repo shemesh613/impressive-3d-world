@@ -3577,6 +3577,7 @@ const car=new THREE.Group();
   car.add(carShadow);
 
 scene.add(car);
+// Drift smoke particles{const _sG=new THREE.BufferGeometry();const _sN=40;const _sP=new Float32Array(_sN*3);const _sL=new Float32Array(_sN);for(let i=0;i<_sN;i++){_sP[i*3]=0;_sP[i*3+1]=-99;_sP[i*3+2]=0;_sL[i]=0}_sG.setAttribute("position",new THREE.BufferAttribute(_sP,3));const _sM=new THREE.PointsMaterial({color:0xaaaaaa,size:0.8,transparent:true,opacity:0.3,sizeAttenuation:true,depthWrite:false});scene.add(new THREE.Points(_sG,_sM));window._dSmoke={geo:_sG,pos:_sP,life:_sL,n:_sN,idx:0,mat:_sM}}
 
 
 
