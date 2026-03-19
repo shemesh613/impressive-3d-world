@@ -5033,7 +5033,7 @@ function updateHUD(){
 
     else{_sp.style.boxShadow='';_sp.style.transform='';_sp.style.borderColor='';window._streakTurbo=false}}
 
-  const _ff=document.getElementById('flowFill');_ff.style.width=flow+'%';_ff.className=flow>70?'flow-high':'';
+  const _ff=document.getElementById('flowFill');_ff.style.width=flow+'%';_ff.className=flow>70?'flow-high':'';;if(_ff&&flow>80)_ff.style.boxShadow='0 0 12px rgba(74,222,128,.6)';else if(_ff)_ff.style.boxShadow=''
 
   const _fg=document.getElementById('flowGlow');if(_fg)_fg.style.opacity=flow>=95?String((flow-95)/5*0.8):'0';document.getElementById('distVal').textContent=Math.floor(car.position.z)+'m';
 
