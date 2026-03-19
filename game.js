@@ -1005,6 +1005,45 @@ scene.add(skyMesh);
     starPositions[si*3+1]=r*Math.cos(phi)+50;
     starPositions[si*3+2]=r*Math.sin(phi)*Math.sin(theta);
   }
+
+// ---- ATMOSPHERIC DUST PARTICLES ----
+{
+  var dustGeo=new THREE.BufferGeometry();
+  var DUST_N=300;
+  var dustPos=new Float32Array(DUST_N*3);
+  var dustSizes=new Float32Array(DUST_N);
+  for(var di=0;di<DUST_N;di++){
+    dustPos[di*3]=(Math.random()-0.5)*60;
+    dustPos[di*3+1]=1+Math.random()*15;
+    dustPos[di*3+2]=Math.random()*100;
+    dustSizes[di]=0.3+Math.random()*0.5;
+  }
+
+// ---- LIGHT RAYS (volumetric fake) ----
+{
+  var rayGeo=new THREE.PlaneGeometry(0.5,20);
+  var rayMat=new THREE.MeshBasicMaterial({color:0xffeedd,transparent:true,opacity:0.02,side:THREE.DoubleSide,fog:true,depthWrite:false});
+  var RAY_N=30;
+  var rayInst=new THREE.InstancedMesh(rayGeo,rayMat,RAY_N);
+  for(var ri=0;ri<RAY_N;ri++){
+    var rz=Math.random()*2000;
+    var rx=roadX(rz)+(Math.random()-0.5)*20;
+    dummy.position.set(rx,10+Math.random()*5,rz);
+    dummy.rotation.set(0,Math.random()*Math.PI,0.1*(Math.random()-0.5));
+    dummy.scale.set(1+Math.random()*2,1,1);
+    dummy.updateMatrix();
+    rayInst.setMatrixAt(ri,dummy.matrix);
+  }
+  rayInst.instanceMatrix.needsUpdate=true;
+  scene.add(rayInst);
+}
+  dustGeo.setAttribute('position',new THREE.BufferAttribute(dustPos,3));
+  dustGeo.setAttribute('size',new THREE.BufferAttribute(dustSizes,1));
+  var dustMat=new THREE.PointsMaterial({color:0xaabbcc,size:0.4,transparent:true,opacity:0.15,fog:true,sizeAttenuation:true});
+  var dustMesh=new THREE.Points(dustGeo,dustMat);
+  scene.add(dustMesh);
+  window._dustMesh=dustMesh;
+}
   starGeo.setAttribute('position',new THREE.BufferAttribute(starPositions,3));
   var starMat=new THREE.PointsMaterial({color:0xffffff,size:0.8,transparent:true,opacity:0.7});
   scene.add(new THREE.Points(starGeo,starMat));
@@ -1134,9 +1173,9 @@ scene.add((() => {
 
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(14,SLEN+1),_roadMat,RSEGS);
 
-  const edgeMat=new THREE.MeshStandardMaterial({color:0x22c55e,emissive:0x22c55e,emissiveIntensity:0.7,roughness:0.3,metalness:0.1});window._edgeMat=edgeMat;
+  const edgeMat=new THREE.MeshStandardMaterial({color:0x33dd66,emissive:0x22ff55,emissiveIntensity:1.5,roughness:0.2,metalness:0.1});window._edgeMat=edgeMat;
 
-  const edgeGeo=new THREE.PlaneGeometry(.3,SLEN);
+  const edgeGeo=new THREE.PlaneGeometry(.5,SLEN+0.5);
 
   const edgeL=new THREE.InstancedMesh(edgeGeo,edgeMat,RSEGS);
 
@@ -2475,7 +2514,7 @@ for(let z=-100;z<=7000;z+=10){
 
 {
 
-  const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshStandardMaterial({roughness:0.5,metalness:0.2,envMapIntensity:1.5});
+  const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshStandardMaterial({roughness:0.55,metalness:0.25,envMapIntensity:1.8});
 
   const inst=new THREE.InstancedMesh(geo,mat,bdata.length);
 
@@ -5759,7 +5798,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   updateInstances(obstacles,obsInst,MAX_OBS,false);updateInstances(powerups,powerupInst,MAX_POWERUPS,true);
 
-  updateParticles();fadeTireMarks();
+  updateParticles();fadeTireMarks();if(window._dustMesh){window._dustMesh.position.z=car.position.z;window._dustMesh.position.x=car.position.x;window._dustMesh.rotation.y+=0.001}
 
   if(fc%6===0){updateHUD();const pi=document.getElementById('powerIndicator');
 
