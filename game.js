@@ -857,7 +857,7 @@ renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 
-renderer.toneMappingExposure=1.7;
+renderer.toneMappingExposure=1.5;
 
 document.body.prepend(renderer.domElement);
 
@@ -904,7 +904,7 @@ composer.addPass(fxaaPass);
 
 // Color Grading
 const colorPass=new THREE.ShaderPass(THREE.ColorGradingShader);
-colorPass.uniforms['contrast'].value=1.12;
+colorPass.uniforms['contrast'].value=1.18;
 colorPass.uniforms['saturation'].value=1.15;
 colorPass.uniforms['vignetteAmount'].value=0.35;
 colorPass.uniforms['vignetteFalloff'].value=0.5;
@@ -924,8 +924,8 @@ _envScene.add(new THREE.HemisphereLight(0x4466aa,0x1a1a2e,0.8));
 var _envRT=_pmremGen.fromScene(_envScene,0);
 scene.environment=_envRT.texture;
 
-const ambLight=new THREE.AmbientLight(0x334466,0.8);scene.add(ambLight);
-var hemiLight=new THREE.HemisphereLight(0x4466aa,0x1a3a20,0.4);scene.add(hemiLight);
+const ambLight=new THREE.AmbientLight(0x223344,0.6);scene.add(ambLight);
+var hemiLight=new THREE.HemisphereLight(0x334488,0x112211,0.3);scene.add(hemiLight);
 
 const dirLight=new THREE.DirectionalLight(0xffeedd,1.5);dirLight.position.set(30,50,40);
 dirLight.castShadow=true;
@@ -1143,7 +1143,7 @@ var _roadTex=(function(){
 var _groundTex=(function(){
   var cv=document.createElement('canvas');cv.width=256;cv.height=256;
   var ctx=cv.getContext('2d');
-  ctx.fillStyle='#1a4a1a';ctx.fillRect(0,0,256,256);
+  ctx.fillStyle='#143814';ctx.fillRect(0,0,256,256);
   for(var i=0;i<2000;i++){var x=Math.random()*256,y=Math.random()*256,g=45+Math.random()*35;ctx.fillStyle='rgb('+(15+Math.random()*12|0)+','+(g|0)+','+(10+Math.random()*12|0)+')';ctx.fillRect(x,y,2+Math.random()*3,1+Math.random()*2)}
   var t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(80,200);
   if(renderer.capabilities&&renderer.capabilities.getMaxAnisotropy)t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
@@ -1271,7 +1271,7 @@ scene.add((() => {
 // ---- GRASS STRIPS ----
 {
   var grGeo=new THREE.PlaneGeometry(8,SLEN+1);
-  var grMat=new THREE.MeshStandardMaterial({color:0x2a5518,roughness:0.95,metalness:0.0});
+  var grMat=new THREE.MeshStandardMaterial({color:0x1e4412,roughness:0.95,metalness:0.0});
   var grInstL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);
   var grInstR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);
   for(var gi=0;gi<RSEGS;gi++){
@@ -4817,7 +4817,7 @@ function updateHUD(){
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
     if(window._chromaPass){var _ci=Math.min(0.008,spd*0.006);if(handbrake&&isDrifting)_ci*=2.5;window._chromaPass.uniforms['intensity'].value+=((_ci)-window._chromaPass.uniforms['intensity'].value)*0.1}
 
-  scene.fog.density=0.00075-spd*0.0005;scene.fog.color.setHex(spd>0.1?0x1e1e30:0x1a1a2e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(88,_tFov)-cam.fov)*0.03;cam.updateProjectionMatrix();
+  scene.fog.density=0.0006-spd*0.0003;scene.fog.color.setHex(spd>0.1?0x1e1e30:0x1a1a2e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(88,_tFov)-cam.fov)*0.03;cam.updateProjectionMatrix();
     // Dynamic vignette at speed
     if(typeof colorPass!=='undefined'&&colorPass.uniforms){colorPass.uniforms['vignetteAmount'].value=0.35+spd*0.3}// fog clears at speed
 
