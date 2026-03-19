@@ -2615,6 +2615,92 @@ for(let z=-100;z<=7000;z+=10){
 
 
 
+
+// ---- BUILDING LEDGES (horizontal floor lines) ----
+{
+  var ledgeGeo=new THREE.BoxGeometry(1.08,0.08,1.08);
+  var ledgeMat=new THREE.MeshStandardMaterial({color:0x333344,roughness:0.7,metalness:0.3});
+  var LEDGE_N=Math.min(800,bdata.length*2);
+  var ledgeInst=new THREE.InstancedMesh(ledgeGeo,ledgeMat,LEDGE_N);
+  var li=0;
+  for(var bi=0;bi<bdata.length&&li<LEDGE_N;bi++){
+    var bd=bdata[bi];
+    if(bd[3]<5)continue;// skip short buildings
+    // Add 2 ledges per tall building (at 1/3 and 2/3 height)
+    for(var fl=1;fl<=2&&li<LEDGE_N;fl++){
+      var ly=roadY(bd[1])+bd[3]*fl/3;
+      dummy.position.set(bd[0],ly,bd[1]);
+      dummy.scale.set(bd[2],1,bd[4]);
+      dummy.rotation.set(0,0,0);
+      dummy.updateMatrix();
+      ledgeInst.setMatrixAt(li,dummy.matrix);
+      li++;
+    }
+  }
+  ledgeInst.count=li;
+  ledgeInst.instanceMatrix.needsUpdate=true;
+  scene.add(ledgeInst);
+}
+
+// ---- ROOFTOP CAPS ----
+{
+  var roofGeo=new THREE.BoxGeometry(1,0.15,1);
+  var roofMat=new THREE.MeshStandardMaterial({color:0x2a2a3a,roughness:0.8,metalness:0.1});
+  var ROOF_N=Math.min(600,bdata.length);
+  var roofInst=new THREE.InstancedMesh(roofGeo,roofMat,ROOF_N);
+  roofInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(ROOF_N*3),3);
+  var roofColors=[0x2a2a3a,0x3a2a2a,0x2a3a2a,0x3a3a2a,0x2a2a4a];
+  var ri2=0;
+  for(var bi2=0;bi2<bdata.length&&ri2<ROOF_N;bi2++){
+    var bd2=bdata[bi2];
+    if(bd2[3]<3)continue;
+    dummy.position.set(bd2[0],roadY(bd2[1])+bd2[3]+0.07,bd2[1]);
+    dummy.scale.set(bd2[2]*1.05,1,bd2[4]*1.05);
+    dummy.rotation.set(0,0,0);
+    dummy.updateMatrix();
+    roofInst.setMatrixAt(ri2,dummy.matrix);
+    var rc=new THREE.Color(roofColors[ri2%roofColors.length]);
+    roofInst.instanceColor.setXYZ(ri2,rc.r,rc.g,rc.b);
+    ri2++;
+  }
+  roofInst.count=ri2;
+  roofInst.instanceMatrix.needsUpdate=true;
+  roofInst.instanceColor.needsUpdate=true;
+  scene.add(roofInst);
+}
+
+
+// ---- GROUND FLOOR STOREFRONTS ----
+{
+  var sfGeo=new THREE.BoxGeometry(1,0.4,0.05);
+  var sfMat=new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.1});
+  var SF_N=Math.min(400,bdata.length);
+  var sfInst=new THREE.InstancedMesh(sfGeo,sfMat,SF_N);
+  sfInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(SF_N*3),3);
+  var sfColors=[0xdd8844,0x44aa88,0x8866cc,0xcc5555,0x55aadd,0xaaaa44];
+  var si3=0;
+  for(var bi3=0;bi3<bdata.length&&si3<SF_N;bi3++){
+    var bd3=bdata[bi3];
+    if(bd3[3]<4||Math.random()>0.5)continue;
+    var sy3=roadY(bd3[1])+1.5;
+    // Face toward road
+    var rx3=roadX(bd3[1]);
+    var facing=bd3[0]<rx3?1:-1;
+    dummy.position.set(bd3[0]+facing*bd3[2]*0.5,sy3,bd3[1]);
+    dummy.scale.set(bd3[2]*0.8,1,1);
+    dummy.rotation.set(0,facing>0?0:Math.PI,0);
+    dummy.updateMatrix();
+    sfInst.setMatrixAt(si3,dummy.matrix);
+    var sc3=new THREE.Color(sfColors[si3%sfColors.length]);
+    sfInst.instanceColor.setXYZ(si3,sc3.r,sc3.g,sc3.b);
+    si3++;
+  }
+  sfInst.count=si3;
+  sfInst.instanceMatrix.needsUpdate=true;
+  sfInst.instanceColor.needsUpdate=true;
+  scene.add(sfInst);
+}
+
 // ---- TREES removed ----// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=7000;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshPhongMaterial({color:0x888888,shininess:20});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.4,6,6);  const glowMat2=new THREE.MeshStandardMaterial({color:0xffffcc,emissive:0xffdd66,emissiveIntensity:1.0,roughness:0.1,metalness:0.3});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
 
 // ---- ELECTRIC POLES WITH WIRES ----
