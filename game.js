@@ -4819,6 +4819,8 @@ function animate(){
     car.position.x+=Math.sin(dir)*spd;
 
     car.position.z+=Math.cos(dir)*spd;
+    // Road loop: teleport when near end
+    if(car.position.z>6500){car.position.z-=6000;if(typeof nextScenarioAt!=="undefined")nextScenarioAt-=6000}
 
     const _baseY=roadY(car.position.z);
 
