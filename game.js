@@ -1565,7 +1565,7 @@ scene.add((() => {
 
   const cwGeo=new THREE.PlaneGeometry(9,0.4);
 
-  const cwMat=new THREE.MeshStandardMaterial({color:0xdddddd,emissive:0x888888,emissiveIntensity:0.15,roughness:0.4});
+  const cwMat=new THREE.MeshStandardMaterial({color:0x999999,emissive:0x444444,emissiveIntensity:0.05,roughness:0.6,transparent:true,opacity:0.7});
 
   const cwInst=new THREE.InstancedMesh(cwGeo,cwMat,CW_N*5);
 
@@ -1743,13 +1743,13 @@ scene.add((() => {
 
   const crossGeo=new THREE.PlaneGeometry(40,5);
 
-  const crossMat=new THREE.MeshBasicMaterial({color:0x4a5a70});
+  const crossMat=new THREE.MeshBasicMaterial({color:0x2a2a35});
 
   const crossInst=new THREE.InstancedMesh(crossGeo,crossMat,crossN);
 
   const zebraGeo=new THREE.PlaneGeometry(1.4,.6);
 
-  const zebraMat=new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.05,color:0xffffdd,emissive:0xffffaa,emissiveIntensity:0.15});
+  const zebraMat=new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.05,color:0xaaaaaa,transparent:true,opacity:0.6});
 
   const zebraInst=new THREE.InstancedMesh(zebraGeo,zebraMat,crossN*5);
 
