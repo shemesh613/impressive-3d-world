@@ -851,13 +851,13 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
 
 renderer.setSize(innerWidth,innerHeight);
 
-renderer.setClearColor(0x1a2a40);
+renderer.setClearColor(0x1a1a2e);
 
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 
-renderer.toneMappingExposure=1.8;
+renderer.toneMappingExposure=1.6;
 
 document.body.prepend(renderer.domElement);
 
@@ -887,7 +887,7 @@ ssaoPass.uniforms['aoRadius'].value=0.12;
 composer.addPass(ssaoPass);
 window._ssaoPass=ssaoPass;
 
-const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.75,0.4,0.75);
+const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.6,0.35,0.85);
 composer.addPass(bloomPass);
 window._bloomPass=bloomPass;
 
@@ -904,27 +904,23 @@ composer.addPass(fxaaPass);
 
 // Color Grading
 const colorPass=new THREE.ShaderPass(THREE.ColorGradingShader);
-colorPass.uniforms['contrast'].value=1.08;
-colorPass.uniforms['saturation'].value=1.2;
-colorPass.uniforms['vignetteAmount'].value=0.45;
-colorPass.uniforms['vignetteFalloff'].value=0.6;
+colorPass.uniforms['contrast'].value=1.12;
+colorPass.uniforms['saturation'].value=1.15;
+colorPass.uniforms['vignetteAmount'].value=0.35;
+colorPass.uniforms['vignetteFalloff'].value=0.5;
 composer.addPass(colorPass);
 
-// Film Grain (subtle)
-var grainPass=new THREE.ShaderPass(THREE.FilmGrainShader);
-grainPass.uniforms['intensity'].value=0.04;
-composer.addPass(grainPass);
-window._grainPass=grainPass;
+// Film Grain removed — cleaner image
 
-scene.fog=new THREE.FogExp2(0x182a1e,.00045);
+scene.fog=new THREE.FogExp2(0x1a1a2e,.00035);
 
 // Environment map for reflections
 var _pmremGen=new THREE.PMREMGenerator(renderer);
 _pmremGen.compileEquirectangularShader();
 var _envScene=new THREE.Scene();
-_envScene.background=new THREE.Color(0x1a2a40);
+_envScene.background=new THREE.Color(0x1a1a2e);
 var _envLight1=new THREE.DirectionalLight(0xffeedd,0.8);_envLight1.position.set(1,1,1);_envScene.add(_envLight1);
-_envScene.add(new THREE.AmbientLight(0x6688aa,0.5));
+_envScene.add(new THREE.HemisphereLight(0x4466aa,0x1a1a2e,0.8));
 var _envRT=_pmremGen.fromScene(_envScene,0);
 scene.environment=_envRT.texture;
 
@@ -1054,11 +1050,39 @@ function roadX(z){
 
 
 
+
+// ---- PROCEDURAL ROAD TEXTURE ----
+var _roadTex=(function(){
+  var cv=document.createElement('canvas');cv.width=512;cv.height=512;
+  var ctx=cv.getContext('2d');
+  ctx.fillStyle='#2a2a38';ctx.fillRect(0,0,512,512);
+  // Asphalt noise
+  for(var i=0;i<6000;i++){var x=Math.random()*512,y=Math.random()*512,v=28+Math.random()*22;ctx.fillStyle='rgb('+v+','+v+','+(v+4)+')';ctx.fillRect(x,y,1+Math.random()*2,1+Math.random()*2)}
+  // Center dashed line
+  ctx.strokeStyle='#dddddd';ctx.lineWidth=3;ctx.setLineDash([40,30]);ctx.beginPath();ctx.moveTo(256,0);ctx.lineTo(256,512);ctx.stroke();
+  // Edge lines
+  ctx.setLineDash([]);ctx.lineWidth=2;ctx.strokeStyle='#cccccc';ctx.beginPath();ctx.moveTo(25,0);ctx.lineTo(25,512);ctx.moveTo(487,0);ctx.lineTo(487,512);ctx.stroke();
+  var t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1,50);
+  if(renderer.capabilities&&renderer.capabilities.getMaxAnisotropy)t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+  return t;
+})();
+
+// ---- PROCEDURAL GROUND TEXTURE ----
+var _groundTex=(function(){
+  var cv=document.createElement('canvas');cv.width=256;cv.height=256;
+  var ctx=cv.getContext('2d');
+  ctx.fillStyle='#1a4a1a';ctx.fillRect(0,0,256,256);
+  for(var i=0;i<2000;i++){var x=Math.random()*256,y=Math.random()*256,g=45+Math.random()*35;ctx.fillStyle='rgb('+(15+Math.random()*12|0)+','+(g|0)+','+(10+Math.random()*12|0)+')';ctx.fillRect(x,y,2+Math.random()*3,1+Math.random()*2)}
+  var t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(80,200);
+  if(renderer.capabilities&&renderer.capabilities.getMaxAnisotropy)t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+  return t;
+})();
+
 // ---- GROUND ----
 
 scene.add((() => {
 
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.95,metalness:0.02,color:0x1a4a1a}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.95,metalness:0.02,color:0xffffff,map:_groundTex}));
 
   m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;return m;
 
@@ -1074,7 +1098,7 @@ scene.add((() => {
 
   const RSEGS=1200,SLEN=6;
 
-  const _roadMat=new THREE.MeshStandardMaterial({roughness:0.55,metalness:0.15,color:0x2a3050});window._roadMat=_roadMat;
+  const _roadMat=new THREE.MeshStandardMaterial({roughness:0.45,metalness:0.2,color:0x2a2a38,envMapIntensity:0.8});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
 
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(14,SLEN+1),_roadMat,RSEGS);
 
@@ -4558,11 +4582,10 @@ function updateHUD(){
   var _sg=document.getElementById('speedGlow');if(_sg)_sg.style.opacity=spd>0.2?String(Math.min(0.8,(spd-0.2)*2)):'0';
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.12?String(Math.min(0.9,(spd-0.12)*2.5)):'0';
 
-  if(window._grainPass)window._grainPass.uniforms['time'].value=performance.now()*0.001;
-    if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
+  if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
     if(window._chromaPass){var _ci=Math.min(0.008,spd*0.006);if(handbrake&&isDrifting)_ci*=2.5;window._chromaPass.uniforms['intensity'].value+=((_ci)-window._chromaPass.uniforms['intensity'].value)*0.1}
 
-  scene.fog.density=0.00075-spd*0.0005;scene.fog.color.setHex(spd>0.1?0x1e3530:0x182a1e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();// fog clears at speed
+  scene.fog.density=0.00075-spd*0.0005;scene.fog.color.setHex(spd>0.1?0x1e1e30:0x1a1a2e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();// fog clears at speed
 
   moon.position.z=car.position.z+500;moonGlow.position.z=moon.position.z;
 
