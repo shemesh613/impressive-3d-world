@@ -874,7 +874,7 @@ cam.position.set(0,8.5,16);
 const composer=new THREE.EffectComposer(renderer);
 const renderPass=new THREE.RenderPass(scene,cam);
 composer.addPass(renderPass);
-const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.6,0.4,0.85);
+const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.75,0.4,0.75);
 composer.addPass(bloomPass);
 window._bloomPass=bloomPass;
 
@@ -893,8 +893,8 @@ composer.addPass(fxaaPass);
 const colorPass=new THREE.ShaderPass(THREE.ColorGradingShader);
 colorPass.uniforms['contrast'].value=1.08;
 colorPass.uniforms['saturation'].value=1.2;
-colorPass.uniforms['vignetteAmount'].value=0.35;
-colorPass.uniforms['vignetteFalloff'].value=0.55;
+colorPass.uniforms['vignetteAmount'].value=0.45;
+colorPass.uniforms['vignetteFalloff'].value=0.6;
 composer.addPass(colorPass);
 
 scene.fog=new THREE.FogExp2(0x1a2a40,.0005);
@@ -2748,14 +2748,14 @@ function buildPrimitiveCar(){
   tlStrip.position.set(0,.42,-2.38);car.add(tlStrip);
   // Wheels with rims + spokes
   window._wheels=[];
-  var wG=new THREE.CylinderGeometry(.4,.4,.28,16);var wM=new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:0.85,metalness:0.15});
+  var wG=new THREE.CylinderGeometry(.4,.4,.28,24);var wM=new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:0.85,metalness:0.15});
   var rM=new THREE.MeshStandardMaterial({color:0xdddddd,roughness:0.06,metalness:0.97});
   [[-1.22,.36,1.55],[1.22,.36,1.55],[-1.22,.36,-1.55],[1.22,.36,-1.55]].forEach(function(p){
     var wGr=new THREE.Group();wGr.position.set(p[0],p[1],p[2]);
     var t=new THREE.Mesh(wG,wM);t.rotation.set(0,0,Math.PI/2);t.castShadow=true;wGr.add(t);
     var rim=new THREE.Mesh(new THREE.TorusGeometry(.28,.04,6,16),rM);rim.rotation.set(0,0,Math.PI/2);wGr.add(rim);
     var hub=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,.3,8),rM);hub.rotation.set(0,0,Math.PI/2);wGr.add(hub);
-    for(var s=0;s<5;s++){var spoke=new THREE.Mesh(new THREE.BoxGeometry(.26,.02,.03),rM);spoke.rotation.set(0,0,Math.PI/2+s*Math.PI/2.5);wGr.add(spoke)}
+    for(var s=0;s<8;s++){var spoke=new THREE.Mesh(new THREE.BoxGeometry(.28,.015,.025),rM);spoke.rotation.set(0,0,Math.PI/2+s*Math.PI/4);wGr.add(spoke)}
     car.add(wGr);window._wheels.push(wGr);
   });
   // Headlight beam cone
@@ -3008,7 +3008,7 @@ function emitParticles(x,y,z,color,n){for(let i=0;i<n&&particles.length<PART_MAX
 
 function updateParticles(){
 
-  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.z+=p.vz;p.vx*=0.96;p.vz*=0.96;p.vy=p.isSmoke?(p.vy*0.98+0.005):(p.vy-0.01);p.life-=p.isSmoke?0.015:0.03;if(p.life<=0)particles.splice(i,1)}
+  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.z+=p.vz;p.vx*=0.96;p.vz*=0.96;p.vy=p.isSmoke?(p.vy*0.98+0.005):(p.vy-0.01);p.life-=p.isSmoke?0.008:0.03;if(p.life<=0)particles.splice(i,1)}
 
   for(let i=0;i<PART_MAX;i++){
 
@@ -3118,7 +3118,7 @@ _tmInst.instanceColor.needsUpdate=true;
 scene.add(_tmInst);window._tireMarks={inst:_tmInst,idx:0,max:300,ages:new Float32Array(300)}}
 // Drift tire screech
 window._driftOsc=null;
-window._startDriftSound=function(){if(!window._audioCtx||window._driftOsc)return;try{var ctx=window._audioCtx,osc=ctx.createOscillator(),gain=ctx.createGain(),flt=ctx.createBiquadFilter();osc.type="sawtooth";osc.frequency.value=200+Math.random()*100;flt.type="bandpass";flt.frequency.value=2000;flt.Q.value=5;gain.gain.value=0;osc.connect(flt);flt.connect(gain);gain.connect(ctx.destination);osc.start();window._driftOsc=osc;window._driftGain=gain}catch(e){}};
+window._startDriftSound=function(){if(!window._audioCtx||window._driftOsc)return;try{var ctx=window._audioCtx,osc=ctx.createOscillator(),osc2=ctx.createOscillator(),gain=ctx.createGain(),flt=ctx.createBiquadFilter();osc.type="sawtooth";osc.frequency.value=200+Math.random()*100;osc2.type="sine";osc2.frequency.value=2800+Math.random()*700;flt.type="bandpass";flt.frequency.value=2000;flt.Q.value=5;gain.gain.value=0;osc.connect(flt);osc2.connect(flt);flt.connect(gain);gain.connect(ctx.destination);osc.start();osc2.start();window._driftOsc=osc;window._driftOsc2=osc2;window._driftGain=gain}catch(e){}};
 window._updateDriftSound=function(intensity){if(!window._driftGain)return;try{window._driftGain.gain.linearRampToValueAtTime(intensity*0.08,window._audioCtx.currentTime+0.05)}catch(e){}};
 window._stopDriftSound=function(){if(!window._driftOsc)return;try{window._driftGain.gain.linearRampToValueAtTime(0,window._audioCtx.currentTime+0.1);var o=window._driftOsc,g=window._driftGain;window._driftOsc=null;window._driftGain=null;setTimeout(function(){try{o.stop();o.disconnect()}catch(e){}},150)}catch(e){window._driftOsc=null}};
 
@@ -4702,6 +4702,9 @@ function animate(){
     lateralVel*=isDrifting?(handbrake?0.975:0.96):0.86;
     driftIntensity=Math.min(1,Math.abs(lateralVel)*(handbrake?16:12));
     if(Math.abs(lateralVel)>0.002)car.position.x+=lateralVel;
+    // Counter-steer: reward steering into drift direction
+    var _csBonus=(Math.sign(window._steerSmooth||0)===Math.sign(lateralVel))?0.94:1.0;
+    lateralVel*=_csBonus;
     driftAngle=lateralVel*(2.5+driftIntensity*1.5);
 
 
