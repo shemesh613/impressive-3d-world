@@ -3575,8 +3575,7 @@ function triggerScenario(){
   _gateActive=true;
 
   scenarioActive=true;
-  // Slow down for gates so player can read
-  if(spd>0.25)spd=0.25;
+  // Speed brake disabled
 
   // Don't stop car for gates - player drives through!
 
@@ -3832,7 +3831,7 @@ function _processGateChoice(isGreen){
 
 
 
-  scenarioActive=false;
+  scenarioActive=false;document.getElementById('gateSituation').style.display='none';
 
   nextScenarioAt=car.position.z+220+Math.random()*130;
 
@@ -5126,7 +5125,8 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
 
     // Trigger scenario
 
-    if(car.position.z>=nextScenarioAt)triggerScenario();
+    // Scenarios disabled for facelift
+    // if(car.position.z>=nextScenarioAt)triggerScenario();
 
 
 
@@ -5606,7 +5606,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   updateInstances(obstacles,obsInst,MAX_OBS,false);updateInstances(powerups,powerupInst,MAX_POWERUPS,true);
 
-  updateParticles();fadeTireMarks();_updateGateLabels();
+  updateParticles();fadeTireMarks();
 
   if(fc%6===0){updateHUD();const pi=document.getElementById('powerIndicator');
 
