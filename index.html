@@ -5058,7 +5058,7 @@ function updateHUD(){
 
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
 
-  scene.fog.density=0.00075-spd*0.0005;var _tFov=68+spd*25;cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();// fog clears at speed
+  scene.fog.density=0.00075-spd*0.0005;scene.fog.color.setHex(spd>0.1?0x1e3050:0x1a2a40);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();// fog clears at speed
 
   moon.position.z=car.position.z+500;moonGlow.position.z=moon.position.z;
 
@@ -5250,7 +5250,7 @@ function animate(){
 
   requestAnimationFrame(animate);
 
-  if(_paused){renderer.render(scene,cam);return}
+  if(_paused){renderer.toneMappingExposure=1.2+spd*0.3;renderer.render(scene,cam);return}
 
   fc++;
 
