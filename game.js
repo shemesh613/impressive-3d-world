@@ -1095,15 +1095,16 @@ var _roadTex=(function(){
 var _groundTex=(function(){
   var cv=document.createElement('canvas');cv.width=256;cv.height=256;
   var ctx=cv.getContext('2d');
-  // Rich dark grass base
-  ctx.fillStyle='#081a0a';ctx.fillRect(0,0,256,256);
-  // Grass variation — multiple layers for depth
-  for(var i=0;i<2500;i++){var x=Math.random()*256,y=Math.random()*256,g=38+Math.random()*40;ctx.fillStyle='rgb('+(12+Math.random()*15|0)+','+(g|0)+','+(8+Math.random()*12|0)+')';ctx.fillRect(x,y,2+Math.random()*3,1+Math.random()*2)}
-  // Darker patches for natural variation
-  ctx.globalAlpha=0.15;
-  for(var i=0;i<200;i++){var x=Math.random()*256,y=Math.random()*256;ctx.fillStyle='#0a1a0a';ctx.fillRect(x,y,5+Math.random()*15,5+Math.random()*15)}
-  // Lighter highlights
-  for(var i=0;i<150;i++){var x=Math.random()*256,y=Math.random()*256;ctx.fillStyle='#1a5a1a';ctx.fillRect(x,y,3+Math.random()*8,3+Math.random()*8)}
+  // Very dark grass base for night
+  ctx.fillStyle='#050e06';ctx.fillRect(0,0,256,256);
+  // Subtle grass variation — very dark greens only
+  for(var i=0;i<2000;i++){var x=Math.random()*256,y=Math.random()*256,g=12+Math.random()*20;ctx.fillStyle='rgb('+(5+Math.random()*8|0)+','+(g|0)+','+(4+Math.random()*8|0)+')';ctx.fillRect(x,y,2+Math.random()*3,1+Math.random()*2)}
+  // Very dark patches
+  ctx.globalAlpha=0.2;
+  for(var i=0;i<250;i++){var x=Math.random()*256,y=Math.random()*256;ctx.fillStyle='#030a04';ctx.fillRect(x,y,5+Math.random()*15,5+Math.random()*15)}
+  // Subtle blue-green moonlight highlights
+  ctx.globalAlpha=0.06;
+  for(var i=0;i<100;i++){var x=Math.random()*256,y=Math.random()*256;ctx.fillStyle='#0a2a15';ctx.fillRect(x,y,4+Math.random()*10,4+Math.random()*10)}
   ctx.globalAlpha=1;
   var t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(80,200);
   if(renderer.capabilities&&renderer.capabilities.getMaxAnisotropy)t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
@@ -1114,11 +1115,12 @@ var _groundTex=(function(){
 
 scene.add((() => {
 
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.92,metalness:0.05,color:0x223322,map:_groundTex}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.92,metalness:0.05,color:0x112211,map:_groundTex}));
 
   m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;m.receiveShadow=true;return m;
 
 })());
+// ---- LOW GROUND FOG ----scene.add((function(){var fogMat=new THREE.MeshBasicMaterial({color:0x141422,transparent:true,opacity:0.15,side:THREE.DoubleSide,fog:true,depthWrite:false});var fogPlane=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),fogMat);fogPlane.rotation.x=-Math.PI/2;fogPlane.position.set(0,0.1,3500);fogPlane.renderOrder=1;return fogPlane})());
 
 
 
