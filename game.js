@@ -2799,27 +2799,77 @@ var headlightR=new THREE.SpotLight(0xffffee,2,40,Math.PI/6,0.5,1.5);
 headlightR.position.set(0.6,0.42,2.4);headlightR.target.position.set(0.6,0,20);
 car.add(headlightR);car.add(headlightR.target);
 
-// === Try loading GLB model (async) ===
+// === Load Ferrari 458 GLB model ===
 if(typeof THREE.GLTFLoader!=='undefined'){
   try{
     var _glbLoader=new THREE.GLTFLoader();
-    _glbLoader.load('./car-model.glb',function(gltf){
+    _glbLoader.load('./ferrari.glb',function(gltf){
       var model=gltf.scene;
+      // Scale to fit our car dimensions
       var box=new THREE.Box3().setFromObject(model);
       var size=new THREE.Vector3();box.getSize(size);
-      var maxDim=Math.max(size.x,size.y,size.z);
-      model.scale.setScalar(4.5/maxDim);
-      box.setFromObject(model);var center=new THREE.Vector3();box.getCenter(center);
-      model.position.sub(center);model.position.y+=0.4;
+      var targetLength=4.8;// match our primitive car length
+      var sc=targetLength/size.z;
+      model.scale.setScalar(sc);
+      // Re-center
+      box.setFromObject(model);
+      var center=new THREE.Vector3();box.getCenter(center);
+      model.position.x=-center.x;
+      model.position.z=-center.z;
+      model.position.y=-box.min.y+0.02;// sit on ground
+      // Upgrade materials
       model.traverse(function(child){
         if(child.isMesh){
           child.castShadow=true;child.receiveShadow=true;
-          if(child.material){child.material.roughness=Math.min(child.material.roughness||0.5,0.4);child.material.metalness=Math.max(child.material.metalness||0.5,0.6);child.material.envMapIntensity=2}
+          if(child.material){
+            child.material.envMapIntensity=2.5;
+            // Make car body green to match our theme
+            if(child.material.color&&child.name&&(child.name.toLowerCase().indexOf('body')>=0||child.name.toLowerCase().indexOf('paint')>=0)){
+              child.material.color.setHex(0x22c55e);
+              child.material.roughness=0.08;
+              child.material.metalness=0.85;
+            }
+          }
         }
       });
+      // Find wheels for rotation
+      window._glbWheels=[];
+      model.traverse(function(child){
+        if(child.name&&child.name.toLowerCase().indexOf('wheel')>=0){
+          window._glbWheels.push(child);
+        }
+      });
+      // Remove primitive car children but keep lights
+      var keep=[headlightL,headlightR,headlightL.target,headlightR.target];
+      var toRemove=[];
+      car.children.forEach(function(c){if(keep.indexOf(c)===-1)toRemove.push(c)});
+      toRemove.forEach(function(c){car.remove(c)});
+      car.add(model);
+      // Re-add shadow
+      var sg=new THREE.CircleGeometry(3,16);
+      var sm=new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.4,side:THREE.DoubleSide});
+      var cs2=new THREE.Mesh(sg,sm);cs2.rotation.x=-Math.PI/2;cs2.position.y=0.01;car.add(cs2);
+      // Re-add beam
+      var bg=new THREE.ConeGeometry(3.5,14,8,1,true);
+      var bm=new THREE.MeshBasicMaterial({color:0xffffee,transparent:true,opacity:0.035,side:THREE.DoubleSide});
+      var bMesh=new THREE.Mesh(bg,bm);bMesh.position.set(0,0.3,9);bMesh.rotation.x=Math.PI/2;
+      car.add(bMesh);window._carBeam=bMesh;
       window._glbLoaded=true;
-      console.log('GLB car loaded');
-    },null,function(err){console.warn('GLB failed, using primitives:',err)});
+      console.log('Ferrari GLB loaded, wheels:',window._glbWheels.length);
+    },null,function(err){
+      console.warn('Ferrari failed, trying Kenney:',err);
+      // Fallback to Kenney race car
+      _glbLoader.load('./kenney-racecar.gltf',function(gltf2){
+        var m2=gltf2.scene;
+        var b2=new THREE.Box3().setFromObject(m2);var s2=new THREE.Vector3();b2.getSize(s2);
+        m2.scale.setScalar(4.5/Math.max(s2.x,s2.y,s2.z));
+        b2.setFromObject(m2);var c2=new THREE.Vector3();b2.getCenter(c2);
+        m2.position.sub(c2);m2.position.y=-b2.min.y+0.02;
+        m2.traverse(function(ch){if(ch.isMesh){ch.castShadow=true;if(ch.material)ch.material.envMapIntensity=2}});
+        car.add(m2);window._glbLoaded=true;
+        console.log('Kenney car loaded as fallback');
+      },null,function(){console.warn('All GLB models failed, keeping primitives')});
+    });
   }catch(e){console.warn('GLTFLoader error:',e)}
 }
 
@@ -4784,7 +4834,7 @@ function animate(){
     window._carLean+=(targetLean-window._carLean)*0.08;
 
     car.rotation.z=window._carLean;
-    if(window._wheels){const wSpd=spd*8;window._wheels.forEach(w=>{w.children.forEach(c=>{c.rotation.x+=wSpd})})}
+    if(window._wheels){const wSpd=spd*8;window._wheels.forEach(w=>{w.children.forEach(c=>{c.rotation.x+=wSpd})})}if(window._glbWheels&&window._glbWheels.length){const _gws=spd*8;window._glbWheels.forEach(function(w){w.rotation.x+=_gws})}
     // Drift sound
     if(isDrifting&&driftIntensity>0.2){if(!window._driftOsc)window._startDriftSound();window._updateDriftSound(driftIntensity);driftChain+=driftIntensity*(handbrake?2:1);driftChainTimer=0}else{if(window._driftOsc)window._stopDriftSound();if(driftChain>30){score+=Math.floor(driftChain);var _dsc=document.createElement('div');_dsc.textContent='DRIFT +'+Math.floor(driftChain);_dsc.style.cssText='position:fixed;top:35%;left:50%;transform:translateX(-50%);z-index:55;font-size:clamp(20px,4vw,32px);font-weight:900;color:#fbbf24;text-shadow:0 0 20px rgba(251,191,36,.7);pointer-events:none;transition:all 1.5s;opacity:1';document.body.appendChild(_dsc);setTimeout(function(){_dsc.style.opacity='0';_dsc.style.top='25%'},50);setTimeout(function(){_dsc.remove()},1600);var _sv2=document.getElementById('scoreVal');if(_sv2)_sv2.textContent=score}driftChain=0}
     // Drift smoke
