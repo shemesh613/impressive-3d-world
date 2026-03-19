@@ -1113,7 +1113,6 @@ scene.add((() => {
   const RSEGS=800,SLEN=9;
 
   const _roadMat=new THREE.MeshStandardMaterial({roughness:0.45,metalness:0.2,color:0x2a2a38,envMapIntensity:0.8});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
-  roadInst.receiveShadow=true;
 
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(14,SLEN+1.5),_roadMat,RSEGS);
 
@@ -1155,6 +1154,7 @@ scene.add((() => {
 
   }
 
+  roadInst.receiveShadow=true;
   [roadInst,edgeL,edgeR,glowL,glowR].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});
 // ---- SIDEWALKS ----
 {
