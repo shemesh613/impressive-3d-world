@@ -978,6 +978,10 @@ const skyMesh=new THREE.Mesh(skyGeo,skyMat);
 skyMesh.rotation.x=-0.25;
 
 scene.add(skyMesh);
+const _v=new THREE.Vector3();
+const _cv=new THREE.Vector3();
+const _ct=new THREE.Vector3();
+const _col=new THREE.Color();
 var dummy=new THREE.Object3D();
 // ---- STARS ----
 {
@@ -1016,13 +1020,6 @@ for(var j=0;j<5;j++){if(_skyTextures[j]){skyMat.map=_skyTextures[j];skyMat.color
 
 
 
-const _v=new THREE.Vector3();
-
-const _cv=new THREE.Vector3();
-
-const _ct=new THREE.Vector3();
-
-const _col=new THREE.Color();
 
 
 
