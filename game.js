@@ -1188,9 +1188,6 @@ scene.add((() => {
     curbR.setMatrixAt(ci,dummy.matrix);
   }
 
-// Wet patches removed for performance
-  wetInst.instanceMatrix.needsUpdate=true;
-  scene.add(wetInst);
 }
   curbL.instanceMatrix.needsUpdate=true;curbR.instanceMatrix.needsUpdate=true;
   scene.add(curbL);scene.add(curbR);
