@@ -2504,7 +2504,7 @@ for(let z=-100;z<=7000;z+=10){
 
   const inst=new THREE.InstancedMesh(geo,mat,bdata.length);
 
-  const biomes=[[0x2a3a55,0x334466,0x253555,0x3a4a66],[0x553322,0x664433,0x4a2a1a,0x6a4a33],[0x2a2a55,0x333366,0x222244,0x3a3a66],[0x224433,0x2a5544,0x1a3a2a,0x336644],[0x552233,0x663344,0x441a2a,0x774455],[0x1a4455,0x225566,0x153a4a,0x2a5566],[0x554422,0x664d33,0x4a3a1a,0x665544]];
+  const biomes=[[0x1a2a3a,0x223344,0x182838,0x2a3a4a],[0x3a2218,0x44332a,0x331a10,0x4a3322],[0x1a1a3a,0x222244,0x151530,0x2a2a44],[0x152a22,0x1a3a2a,0x10281a,0x224433],[0x3a1522,0x442233,0x30101a,0x553344],[0x102a3a,0x1a3a44,0x0e2830,0x1a3a44],[0x3a3018,0x443622,0x332810,0x443a2a]];
 
   function biomeColor(z,i){const idx=((Math.floor(z/180)%biomes.length)+biomes.length)%biomes.length;const b=biomes[idx];return b[i%b.length]}
 
@@ -2751,7 +2751,7 @@ for(let z=-100;z<=7000;z+=10){
 // ---- GROUND FLOOR STOREFRONTS ----
 {
   var sfGeo=new THREE.BoxGeometry(1,0.4,0.05);
-  var sfMat=new THREE.MeshStandardMaterial({roughness:0.4,metalness:0.1,emissive:0x442211,emissiveIntensity:0.5});
+  var sfMat=new THREE.MeshStandardMaterial({roughness:0.3,metalness:0.1,emissive:0x553318,emissiveIntensity:1.2});
   var SF_N=Math.min(200,bdata.length);
   var sfInst=new THREE.InstancedMesh(sfGeo,sfMat,SF_N);
   sfInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(SF_N*3),3);
