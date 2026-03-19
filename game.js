@@ -993,7 +993,7 @@ const skyMesh=new THREE.Mesh(skyGeo,skyMat);
 skyMesh.rotation.x=-0.25;
 
 scene.add(skyMesh);
-const dummy=new THREE.Object3D();
+var dummy=new THREE.Object3D();
 // ---- STARS ----
 {
   var starGeo=new THREE.BufferGeometry();
