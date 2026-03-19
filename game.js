@@ -2725,6 +2725,27 @@ for(let z=-100;z<=7000;z+=10){
   roofInst.instanceColor.needsUpdate=true;
   scene.add(roofInst);
 }
+// ---- DISTANT CITY SKYLINE (silhouettes) ----
+{
+  var skyGeo2=new THREE.BoxGeometry(1,1,1);
+  var skyMat2=new THREE.MeshBasicMaterial({color:0x0a0a18,fog:true});
+  var SKY_N=120;
+  var skyInst2=new THREE.InstancedMesh(skyGeo2,skyMat2,SKY_N);
+  for(var si2=0;si2<SKY_N;si2++){
+    var sz2=si2*60-100;
+    var side2=si2%2===0?-1:1;
+    var sx2=roadX(sz2)+side2*(35+Math.random()*30);
+    var sh2=8+Math.random()*25;
+    var sw2=3+Math.random()*5;
+    dummy.position.set(sx2,roadY(sz2)+sh2/2,sz2);
+    dummy.scale.set(sw2,sh2,sw2);
+    dummy.rotation.set(0,Math.random()*0.3,0);
+    dummy.updateMatrix();
+    skyInst2.setMatrixAt(si2,dummy.matrix);
+  }
+  skyInst2.instanceMatrix.needsUpdate=true;
+  scene.add(skyInst2);
+}
 
 
 // ---- GROUND FLOOR STOREFRONTS ----
@@ -2983,7 +3004,7 @@ function buildPrimitiveCar(){
   });
   // Headlight beam cone
   var _cbG=new THREE.ConeGeometry(3.5,14,8,1,true);
-  var _cbM=new THREE.MeshBasicMaterial({color:0xffffee,transparent:true,opacity:0.06,side:THREE.DoubleSide});
+  var _cbM=new THREE.MeshBasicMaterial({color:0xfffff0,transparent:true,opacity:0.04,side:THREE.DoubleSide,depthWrite:false});
   var beam=new THREE.Mesh(_cbG,_cbM);beam.position.set(0,0.3,9);beam.rotation.x=Math.PI/2;
   car.add(beam);window._carBeam=beam;
   // Real shadows via DirectionalLight (fake circle shadow removed)
