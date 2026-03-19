@@ -871,31 +871,16 @@ const cam=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,0.5,700);
 
 cam.position.set(0,8.5,16);
 // ---- POST-PROCESSING ----
-var _rt=new THREE.WebGLRenderTarget(innerWidth,innerHeight,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
-_rt.depthTexture=new THREE.DepthTexture();_rt.depthTexture.type=THREE.UnsignedShortType;
-const composer=new THREE.EffectComposer(renderer,_rt);
+const composer=new THREE.EffectComposer(renderer);
 const renderPass=new THREE.RenderPass(scene,cam);
 composer.addPass(renderPass);
-// SSAO pass
-var ssaoPass=new THREE.ShaderPass(THREE.SimpleSSAOShader);
-ssaoPass.uniforms['tDepth'].value=_rt.depthTexture;
-ssaoPass.uniforms['resolution'].value.set(1/innerWidth,1/innerHeight);
-ssaoPass.uniforms['cameraNear'].value=0.5;
-ssaoPass.uniforms['cameraFar'].value=700;
-ssaoPass.uniforms['aoStrength'].value=0.45;
-ssaoPass.uniforms['aoRadius'].value=0.12;
-composer.addPass(ssaoPass);
-window._ssaoPass=ssaoPass;
+// SSAO removed for performance
 
 const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.7,0.3,0.7);
 composer.addPass(bloomPass);
 window._bloomPass=bloomPass;
 
-// Chromatic Aberration (speed-reactive)
-const chromaPass=new THREE.ShaderPass(THREE.ChromaticAberrationShader);
-chromaPass.uniforms['intensity'].value=0.0;
-composer.addPass(chromaPass);
-window._chromaPass=chromaPass;
+// ChromaticAberration removed for performance
 
 // FXAA anti-aliasing
 const fxaaPass=new THREE.ShaderPass(THREE.FXAAShader);
@@ -1006,49 +991,6 @@ var dummy=new THREE.Object3D();
     starPositions[si*3+1]=r*Math.cos(phi)+50;
     starPositions[si*3+2]=r*Math.sin(phi)*Math.sin(theta);
   }
-
-// ---- ATMOSPHERIC DUST PARTICLES ----
-{
-  var dustGeo=new THREE.BufferGeometry();
-  var DUST_N=150;
-  var dustPos=new Float32Array(DUST_N*3);
-  var dustSizes=new Float32Array(DUST_N);
-  for(var di=0;di<DUST_N;di++){
-    dustPos[di*3]=(Math.random()-0.5)*60;
-    dustPos[di*3+1]=1+Math.random()*15;
-    dustPos[di*3+2]=Math.random()*100;
-    dustSizes[di]=0.3+Math.random()*0.5;
-  }
-
-// ---- LIGHT RAYS (volumetric fake) ----
-{
-  var rayGeo=new THREE.PlaneGeometry(0.5,20);
-  var rayMat=new THREE.MeshBasicMaterial({color:0xffeedd,transparent:true,opacity:0.02,side:THREE.DoubleSide,fog:true,depthWrite:false});
-  var RAY_N=15;
-  var rayInst=new THREE.InstancedMesh(rayGeo,rayMat,RAY_N);
-  for(var ri=0;ri<RAY_N;ri++){
-    var rz=Math.random()*2000;
-    var rx=roadX(rz)+(Math.random()-0.5)*20;
-    dummy.position.set(rx,10+Math.random()*5,rz);
-    dummy.rotation.set(0,Math.random()*Math.PI,0.1*(Math.random()-0.5));
-    dummy.scale.set(1+Math.random()*2,1,1);
-    dummy.updateMatrix();
-    rayInst.setMatrixAt(ri,dummy.matrix);
-  }
-  rayInst.instanceMatrix.needsUpdate=true;
-  scene.add(rayInst);
-}
-  dustGeo.setAttribute('position',new THREE.BufferAttribute(dustPos,3));
-  dustGeo.setAttribute('size',new THREE.BufferAttribute(dustSizes,1));
-  var dustMat=new THREE.PointsMaterial({color:0xaabbcc,size:0.4,transparent:true,opacity:0.15,fog:true,sizeAttenuation:true});
-  var dustMesh=new THREE.Points(dustGeo,dustMat);
-  scene.add(dustMesh);
-  window._dustMesh=dustMesh;
-}
-  starGeo.setAttribute('position',new THREE.BufferAttribute(starPositions,3));
-  var starMat=new THREE.PointsMaterial({color:0xffffff,size:0.8,transparent:true,opacity:0.7});
-  scene.add(new THREE.Points(starGeo,starMat));
-}
 
 
 let _skyLoaded=0;
@@ -1246,22 +1188,7 @@ scene.add((() => {
     curbR.setMatrixAt(ci,dummy.matrix);
   }
 
-// ---- WET ROAD PATCHES ----
-{
-  var wetGeo=new THREE.PlaneGeometry(3,4);
-  var wetMat=new THREE.MeshStandardMaterial({color:0x1a1a28,roughness:0.1,metalness:0.5,transparent:true,opacity:0.4,envMapIntensity:3});
-  var WET_N=40;
-  var wetInst=new THREE.InstancedMesh(wetGeo,wetMat,WET_N);
-  for(var wi2=0;wi2<WET_N;wi2++){
-    var wz=200+wi2*70+Math.random()*30;
-    var wx=roadX(wz)+(Math.random()-0.5)*8;
-    var wy=roadY(wz)+0.02;
-    dummy.position.set(wx,wy,wz);
-    dummy.rotation.set(-Math.PI/2,0,Math.random()*0.3);
-    dummy.scale.set(0.5+Math.random()*1.5,0.5+Math.random()*1,1);
-    dummy.updateMatrix();
-    wetInst.setMatrixAt(wi2,dummy.matrix);
-  }
+// Wet patches removed for performance
   wetInst.instanceMatrix.needsUpdate=true;
   scene.add(wetInst);
 }
@@ -4811,7 +4738,7 @@ function updateHUD(){
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.12?String(Math.min(0.9,(spd-0.12)*2.5)):'0';
 
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
-    if(window._chromaPass){var _ci=Math.min(0.008,spd*0.006);if(handbrake&&isDrifting)_ci*=2.5;window._chromaPass.uniforms['intensity'].value+=((_ci)-window._chromaPass.uniforms['intensity'].value)*0.1}
+    
 
   scene.fog.density=0.0006-spd*0.0003;scene.fog.color.setHex(spd>0.1?0x1e1e30:0x1a1a2e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(88,_tFov)-cam.fov)*0.03;cam.updateProjectionMatrix();
     // Dynamic vignette at speed
@@ -5842,7 +5769,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   updateInstances(obstacles,obsInst,MAX_OBS,false);updateInstances(powerups,powerupInst,MAX_POWERUPS,true);
 
-  updateParticles();fadeTireMarks();if(window._dustMesh){window._dustMesh.position.z=car.position.z;window._dustMesh.position.x=car.position.x;window._dustMesh.rotation.y+=0.001}
+  updateParticles();fadeTireMarks();
     // Traffic light cycling
     if(fc%180===0&&window._tlData){var _tld=window._tlData;for(var _ti3=0;_ti3<_tld.n;_ti3++){var _phase=(_ti3+Math.floor(fc/180))%3;_tld.redInst.setColorAt(_ti3,_col.setRGB(_phase===0?1:0.1,0,0));_tld.yelInst.setColorAt(_ti3,_col.setRGB(_phase===1?1:0.1,_phase===1?0.8:0.08,0));_tld.grnInst.setColorAt(_ti3,_col.setRGB(0,_phase===2?1:0.1,0))}_tld.redInst.instanceColor.needsUpdate=true;_tld.yelInst.instanceColor.needsUpdate=true;_tld.grnInst.instanceColor.needsUpdate=true}
     // Animate city lights (subtle window flicker)
@@ -6080,5 +6007,5 @@ const _ls=document.getElementById('loadScreen');if(_ls)setTimeout(()=>{_ls.class
 
 
 
-addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(typeof composer!=='undefined')composer.setSize(innerWidth,innerHeight);if(typeof fxaaPass!=='undefined')fxaaPass.uniforms['resolution'].value.set(1/innerWidth,1/innerHeight);if(window._ssaoPass)window._ssaoPass.uniforms['resolution'].value.set(1/innerWidth,1/innerHeight)});
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(typeof composer!=='undefined')composer.setSize(innerWidth,innerHeight);if(typeof fxaaPass!=='undefined')fxaaPass.uniforms['resolution'].value.set(1/innerWidth,1/innerHeight)});
 
