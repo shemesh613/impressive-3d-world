@@ -897,7 +897,7 @@ composer.addPass(colorPass);
 
 // Film Grain removed — cleaner image
 
-scene.fog=new THREE.FogExp2(0x1a1a2e,.00045);
+scene.fog=new THREE.FogExp2(0x141422,.0006);
 
 // Environment map for reflections
 var _pmremGen=new THREE.PMREMGenerator(renderer);
@@ -1094,7 +1094,7 @@ var _groundTex=(function(){
   var cv=document.createElement('canvas');cv.width=256;cv.height=256;
   var ctx=cv.getContext('2d');
   // Rich dark grass base
-  ctx.fillStyle='#0f2e12';ctx.fillRect(0,0,256,256);
+  ctx.fillStyle='#081a0a';ctx.fillRect(0,0,256,256);
   // Grass variation — multiple layers for depth
   for(var i=0;i<2500;i++){var x=Math.random()*256,y=Math.random()*256,g=38+Math.random()*40;ctx.fillStyle='rgb('+(12+Math.random()*15|0)+','+(g|0)+','+(8+Math.random()*12|0)+')';ctx.fillRect(x,y,2+Math.random()*3,1+Math.random()*2)}
   // Darker patches for natural variation
@@ -1112,7 +1112,7 @@ var _groundTex=(function(){
 
 scene.add((() => {
 
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.92,metalness:0.05,color:0x88aa88,map:_groundTex}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.92,metalness:0.05,color:0x446644,map:_groundTex}));
 
   m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;m.receiveShadow=true;return m;
 
@@ -1506,7 +1506,7 @@ scene.add((() => {
 
   const cwGeo=new THREE.PlaneGeometry(9,0.4);
 
-  const cwMat=new THREE.MeshStandardMaterial({color:0x999999,emissive:0x444444,emissiveIntensity:0.05,roughness:0.6,transparent:true,opacity:0.7});
+  const cwMat=new THREE.MeshStandardMaterial({color:0x666666,emissive:0x333333,emissiveIntensity:0.02,roughness:0.7,transparent:true,opacity:0.4});
 
   const cwInst=new THREE.InstancedMesh(cwGeo,cwMat,CW_N*5);
 
@@ -1690,7 +1690,7 @@ scene.add((() => {
 
   const zebraGeo=new THREE.PlaneGeometry(1.4,.6);
 
-  const zebraMat=new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.05,color:0xaaaaaa,transparent:true,opacity:0.6});
+  const zebraMat=new THREE.MeshStandardMaterial({roughness:0.7,metalness:0.05,color:0x777777,transparent:true,opacity:0.35});
 
   const zebraInst=new THREE.InstancedMesh(zebraGeo,zebraMat,crossN*5);
 
@@ -4753,7 +4753,7 @@ function updateHUD(){
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
     
 
-  scene.fog.density=0.0006-spd*0.0003;scene.fog.color.setHex(spd>0.1?0x1e1e30:0x1a1a2e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(88,_tFov)-cam.fov)*0.03;cam.updateProjectionMatrix();
+  scene.fog.density=0.0008-spd*0.0003;scene.fog.color.setHex(spd>0.1?0x1e1e30:0x1a1a2e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(88,_tFov)-cam.fov)*0.03;cam.updateProjectionMatrix();
     // Dynamic vignette at speed
     if(typeof colorPass!=='undefined'&&colorPass.uniforms){colorPass.uniforms['vignetteAmount'].value=0.35+spd*0.3}// fog clears at speed
 
