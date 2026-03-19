@@ -911,10 +911,10 @@ _envScene.add(new THREE.HemisphereLight(0x4466aa,0x0a0a1a,1.0));
 var _envRT=_pmremGen.fromScene(_envScene,0,0.1,100);
 scene.environment=_envRT.texture;
 
-const ambLight=new THREE.AmbientLight(0x334466,0.7);scene.add(ambLight);
-var hemiLight=new THREE.HemisphereLight(0x334488,0x112211,0.3);scene.add(hemiLight);
+const ambLight=new THREE.AmbientLight(0x1a2233,0.4);scene.add(ambLight);
+var hemiLight=new THREE.HemisphereLight(0x1a2244,0x050a05,0.2);scene.add(hemiLight);
 
-const dirLight=new THREE.DirectionalLight(0xffeedd,1.5);dirLight.position.set(30,50,40);
+const dirLight=new THREE.DirectionalLight(0xffeedd,1.8);dirLight.position.set(30,50,40);
 dirLight.castShadow=true;
 dirLight.shadow.mapSize.width=2048;dirLight.shadow.mapSize.height=2048;
 dirLight.shadow.camera.near=1;dirLight.shadow.camera.far=150;
@@ -4757,7 +4757,7 @@ function updateHUD(){
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
     
 
-  scene.fog.density=0.0008-spd*0.0003;scene.fog.color.setHex(spd>0.1?0x1e1e30:0x1a1a2e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(88,_tFov)-cam.fov)*0.03;cam.updateProjectionMatrix();
+  scene.fog.density=0.0008-spd*0.0003;scene.fog.color.setHex(spd>0.1?0x1e1e30:0x1a1a2e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=0.4+spd*0.3;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(88,_tFov)-cam.fov)*0.03;cam.updateProjectionMatrix();
     // Dynamic vignette at speed
     if(typeof colorPass!=='undefined'&&colorPass.uniforms){colorPass.uniforms['vignetteAmount'].value=0.35+spd*0.3}// fog clears at speed
 
