@@ -1131,7 +1131,7 @@ scene.add((() => {
 
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(14,SLEN+1.5),_roadMat,RSEGS);
 
-  const edgeMat=new THREE.MeshStandardMaterial({color:0x33dd66,emissive:0x22ff55,emissiveIntensity:2.5,roughness:0.2,metalness:0.1});window._edgeMat=edgeMat;
+  const edgeMat=new THREE.MeshStandardMaterial({color:0x22bb55,emissive:0x11cc44,emissiveIntensity:2.0,roughness:0.15,metalness:0.2});window._edgeMat=edgeMat;
 
   const edgeGeo=new THREE.PlaneGeometry(.5,SLEN+0.5);
 
@@ -1139,7 +1139,7 @@ scene.add((() => {
 
   const edgeR=new THREE.InstancedMesh(edgeGeo,edgeMat,RSEGS);
 
-  const glowMat=new THREE.MeshStandardMaterial({color:0x22c55e,emissive:0x11aa44,emissiveIntensity:0.6,roughness:0.4,metalness:0.1});
+  const glowMat=new THREE.MeshStandardMaterial({color:0x1a9944,emissive:0x0d7733,emissiveIntensity:0.4,roughness:0.5,metalness:0.1});
 
   const glowGeo=new THREE.PlaneGeometry(5,SLEN+0.5);
 
@@ -2495,11 +2495,11 @@ for(let z=-100;z<=7000;z+=10){
 
 {
 
-  const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshStandardMaterial({roughness:0.65,metalness:0.15,envMapIntensity:1.2});
+  const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshStandardMaterial({roughness:0.55,metalness:0.25,envMapIntensity:1.8});
 
   const inst=new THREE.InstancedMesh(geo,mat,bdata.length);
 
-  const biomes=[[0x5577aa,0x6688bb,0x4466aa,0x7799cc],[0xcc8844,0xddaa55,0xbb7733,0xeebb66],[0x5555aa,0x6666bb,0x444499,0x7777cc],[0x44aa66,0x55bb77,0x339955,0x66cc88],[0xaa4466,0xbb5577,0x993355,0xcc6688],[0x3388aa,0x4499bb,0x227799,0x55aacc],[0xaa8833,0xbb9944,0x997722,0xccaa55]];
+  const biomes=[[0x2a3a55,0x334466,0x253555,0x3a4a66],[0x553322,0x664433,0x4a2a1a,0x6a4a33],[0x2a2a55,0x333366,0x222244,0x3a3a66],[0x224433,0x2a5544,0x1a3a2a,0x336644],[0x552233,0x663344,0x441a2a,0x774455],[0x1a4455,0x225566,0x153a4a,0x2a5566],[0x554422,0x664d33,0x4a3a1a,0x665544]];
 
   function biomeColor(z,i){const idx=((Math.floor(z/180)%biomes.length)+biomes.length)%biomes.length;const b=biomes[idx];return b[i%b.length]}
 
