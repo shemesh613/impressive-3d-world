@@ -803,7 +803,8 @@ setInterval(function(){const sh=document.createElement('div');sh.className='shoo
 
 <script>document.getElementById('loadFill').style.width='50%'</script>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="./three.min.js"></script>
+<script src="./PostProcessing.js"></script>
 
 <script>document.getElementById('loadFill').style.width='80%'</script>
 
@@ -1655,7 +1656,7 @@ function updateBgMusicVol(){
 
 let renderer;try{
 
-renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance',stencil:false,alpha:false});
+renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance',stencil:true,alpha:false});
 
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
 
@@ -1678,6 +1679,13 @@ const scene=new THREE.Scene();
 const cam=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,0.5,700);
 
 cam.position.set(0,8.5,16);
+// ---- POST-PROCESSING ----
+const composer=new THREE.EffectComposer(renderer);
+const renderPass=new THREE.RenderPass(scene,cam);
+composer.addPass(renderPass);
+const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.5,0.4,0.88);
+composer.addPass(bloomPass);
+window._bloomPass=bloomPass;
 
 scene.fog=new THREE.FogExp2(0x1a2a40,.0005);
 
@@ -3460,7 +3468,7 @@ const car=new THREE.Group();
   const _p=new THREE.MeshStandardMaterial({color:0x22c55e,roughness:0.1,metalness:0.8});
   const _d=new THREE.MeshStandardMaterial({color:0x111111,roughness:0.4,metalness:0.3});
   const _g=new THREE.MeshStandardMaterial({color:0x88ccff,roughness:0,metalness:0.95,transparent:true,opacity:0.45});
-  const _ch=new THREE.MeshStandardMaterial({color:0xeeeeee,roughness:0.05,metalness:0.95});
+  const _ch=new THREE.MeshStandardMaterial({color:0xeeeeee,roughness:0.05,metalness:0.95,envMapIntensity:2});
   // Low-slung sporty body
   const _bs=new THREE.Shape();
   _bs.moveTo(-1.1,0.12);_bs.lineTo(-1.15,0.4);_bs.quadraticCurveTo(-1.15,0.75,-0.85,0.78);
@@ -3717,7 +3725,7 @@ function updateInstances(arr,inst,max,rotSpeed){
 
 // ---- PARTICLES ----
 
-const PART_MAX=50;const particles=[];
+const PART_MAX=120;const particles=[];
 
 const partInst=new THREE.InstancedMesh(new THREE.SphereGeometry(.1,4,4),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05}),PART_MAX);
 
@@ -3743,6 +3751,25 @@ function updateParticles(){
 
 
 
+
+// ---- ROOFTOP DETAILS ----
+{var _rtMax=80,_rtGeo=new THREE.CylinderGeometry(0.3,0.4,1.2,6),_rtMat=new THREE.MeshStandardMaterial({color:0x556677,roughness:0.6,metalness:0.4});
+var _rtInst=new THREE.InstancedMesh(_rtGeo,_rtMat,_rtMax);
+var _antGeo=new THREE.CylinderGeometry(0.03,0.03,2,4),_antMat=new THREE.MeshStandardMaterial({color:0x999999,roughness:0.3,metalness:0.9,emissive:0xff0000,emissiveIntensity:0.3});
+var _antInst=new THREE.InstancedMesh(_antGeo,_antMat,_rtMax);var _rti=0;
+if(typeof bdata!=="undefined"){for(var bi=0;bi<Math.min(bdata.length,_rtMax);bi++){var b=bdata[bi];if(!b||!b.x)continue;
+if(b.h>8&&_rti<_rtMax){dummy.position.set(b.x+(Math.random()-0.5)*b.w*0.4,b.y+b.h+0.6,b.z+(Math.random()-0.5)*b.d*0.4);dummy.scale.set(1+Math.random(),1,1+Math.random());dummy.rotation.set(0,Math.random()*Math.PI,0);dummy.updateMatrix();_rtInst.setMatrixAt(_rti,dummy.matrix);dummy.position.y+=1.5;dummy.scale.set(1,1+Math.random()*2,1);dummy.updateMatrix();_antInst.setMatrixAt(_rti,dummy.matrix);_rti++}}}
+_rtInst.count=_rti;_antInst.count=_rti;scene.add(_rtInst);scene.add(_antInst)}
+// ---- TIRE MARKS ----
+{var _tmGeo=new THREE.PlaneGeometry(0.3,0.8),_tmMat=new THREE.MeshBasicMaterial({color:0x111111,transparent:true,opacity:0.6,depthWrite:false});
+var _tmInst=new THREE.InstancedMesh(_tmGeo,_tmMat,200);_tmInst.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var _tmD=new THREE.Object3D();_tmD.position.set(0,-100,0);_tmD.updateMatrix();for(var i=0;i<200;i++)_tmInst.setMatrixAt(i,_tmD.matrix);scene.add(_tmInst);window._tireMarks={inst:_tmInst,idx:0,max:200}}
+// Drift tire screech
+window._driftOsc=null;
+window._startDriftSound=function(){if(!window._audioCtx||window._driftOsc)return;try{var ctx=window._audioCtx,osc=ctx.createOscillator(),gain=ctx.createGain(),flt=ctx.createBiquadFilter();osc.type="sawtooth";osc.frequency.value=200+Math.random()*100;flt.type="bandpass";flt.frequency.value=2000;flt.Q.value=5;gain.gain.value=0;osc.connect(flt);flt.connect(gain);gain.connect(ctx.destination);osc.start();window._driftOsc=osc;window._driftGain=gain}catch(e){}};
+window._updateDriftSound=function(intensity){if(!window._driftGain)return;try{window._driftGain.gain.linearRampToValueAtTime(intensity*0.08,window._audioCtx.currentTime+0.05)}catch(e){}};
+window._stopDriftSound=function(){if(!window._driftOsc)return;try{window._driftGain.gain.linearRampToValueAtTime(0,window._audioCtx.currentTime+0.1);var o=window._driftOsc,g=window._driftGain;window._driftOsc=null;window._driftGain=null;setTimeout(function(){try{o.stop();o.disconnect()}catch(e){}},150)}catch(e){window._driftOsc=null}};
+
 // ---- GAME STATE ----
 
 let score=0,lives=5,level=1,flow=85,greenCount=0,redCount=0,streak=0,bestStreak=0,shieldTimer=0,turboTimer=0,topSpeed=0;
@@ -3752,6 +3779,7 @@ let gameActive=false,spd=0,dir=0,fc=0,boostTimer=0,lastMilestone=0;
 let scenarioActive=false,scenarioTimer=0,scenarioTimeout=null,usedScenarios=[];
 
 let nextScenarioAt=0,scenariosAnswered=0;
+let lateralVel=0,driftAngle=0,isDrifting=false,driftIntensity=0;
 
 
 
@@ -5038,6 +5066,7 @@ function updateHUD(){
   const _cc=document.getElementById('choiceCounter');if(_cc)_cc.textContent='🟢'+greenCount+' 🔴'+redCount;
 
   const _curSpd=Math.round(spd*500);if(_curSpd>topSpeed)topSpeed=_curSpd;
+  if(window._drawSpeedo)window._drawSpeedo(_curSpd,210);
 
   document.getElementById('speedVal').textContent=_curSpd+'km/h';var _spEl=document.getElementById('speedVal').parentElement;if(_spEl){_spEl.style.transition='border-color .3s,transform .3s';if(_curSpd>140){_spEl.style.borderColor='rgba(239,68,68,.6)';_spEl.style.transform='scale('+(1+Math.sin(fc*0.2)*0.03)+')'}else if(_curSpd>100)_spEl.style.borderColor='rgba(251,191,36,.5)';else _spEl.style.borderColor=''}
 
@@ -5242,13 +5271,35 @@ function checkCollisions(){
 
 
 
+
+// ---- GRAPHICAL SPEEDOMETER ----
+window._drawSpeedo=function(speed,maxSpeed){
+var cv=document.getElementById("speedoCanvas");if(!cv)return;
+if(!window._speedoCtx)window._speedoCtx=cv.getContext("2d");
+var ctx=window._speedoCtx,w=cv.width,h=cv.height,cx=w/2,cy=h/2,r=w/2-10;
+ctx.clearRect(0,0,w,h);
+ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+var bg=ctx.createRadialGradient(cx,cy,r*0.3,cx,cy,r);bg.addColorStop(0,"rgba(20,20,40,0.85)");bg.addColorStop(1,"rgba(10,10,25,0.95)");ctx.fillStyle=bg;ctx.fill();
+ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle="rgba(100,200,255,0.3)";ctx.lineWidth=3;ctx.stroke();
+var sA=Math.PI*0.75,eA=Math.PI*2.25,sw=eA-sA,sr=Math.min(1,speed/maxSpeed),sa=sA+sw*sr;
+ctx.beginPath();ctx.arc(cx,cy,r-8,sA,eA);ctx.strokeStyle="rgba(60,60,80,0.5)";ctx.lineWidth=8;ctx.stroke();
+if(speed>2){ctx.beginPath();ctx.arc(cx,cy,r-8,sA,sa);ctx.strokeStyle=speed>140?"#ef4444":speed>80?"#eab308":"#22c55e";ctx.lineWidth=8;ctx.lineCap="round";ctx.stroke();
+ctx.shadowColor=speed>140?"#ef4444":speed>80?"#eab308":"#22c55e";ctx.shadowBlur=15*sr;ctx.beginPath();ctx.arc(cx,cy,r-8,Math.max(sA,sa-0.3),sa);ctx.strokeStyle=ctx.shadowColor;ctx.lineWidth=4;ctx.stroke();ctx.shadowBlur=0}
+for(var i=0;i<=10;i++){var a=sA+sw*(i/10),inn=i%2===0?r-22:r-18,out=r-12;ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*inn,cy+Math.sin(a)*inn);ctx.lineTo(cx+Math.cos(a)*out,cy+Math.sin(a)*out);ctx.strokeStyle=i<=sr*10?"rgba(255,255,255,0.9)":"rgba(100,100,120,0.5)";ctx.lineWidth=i%2===0?2:1;ctx.stroke();
+if(i%2===0){ctx.fillStyle=i<=sr*10?"#fff":"rgba(150,150,170,0.6)";ctx.font="bold 9px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(Math.round(maxSpeed*i/10),cx+Math.cos(a)*(r-32),cy+Math.sin(a)*(r-32))}}
+ctx.save();ctx.translate(cx,cy);ctx.rotate(sa);ctx.beginPath();ctx.moveTo(0,-2);ctx.lineTo(r-25,0);ctx.lineTo(0,2);ctx.closePath();ctx.fillStyle="#ef4444";ctx.fill();ctx.beginPath();ctx.arc(0,0,5,0,Math.PI*2);ctx.fillStyle="#fff";ctx.fill();ctx.restore();
+ctx.fillStyle="#fff";ctx.font="bold 28px Arial";ctx.textAlign="center";ctx.fillText(speed,cx,cy+25);
+ctx.fillStyle="rgba(180,180,200,0.7)";ctx.font="11px Arial";ctx.fillText("km/h",cx,cy+40);
+if(typeof isDrifting!=="undefined"&&isDrifting&&typeof driftIntensity!=="undefined"&&driftIntensity>0.2){ctx.fillStyle="rgba(255,165,0,"+(0.5+driftIntensity*0.5)+")";ctx.font="bold 12px Arial";ctx.fillText("DRIFT",cx,cy-20)}
+cv.style.opacity="1"};
+
 // ---- ANIMATE ----
 
 function animate(){
 
   requestAnimationFrame(animate);
 
-  if(_paused){renderer.toneMappingExposure=1.2+spd*0.3;renderer.render(scene,cam);return}
+  if(_paused){renderer.toneMappingExposure=1.2+spd*0.3;composer.render();return}
 
   fc++;
 
@@ -5291,6 +5342,10 @@ function animate(){
     }
 
     dir*=.94;
+    if(Math.abs(spd)>0.15&&Math.abs(window._steerSmooth||0)>0.015){lateralVel+=(window._steerSmooth||0)*spd*3;isDrifting=true}else{isDrifting=Math.abs(lateralVel)>0.015}
+    lateralVel*=isDrifting?0.965:0.88;driftIntensity=Math.min(1,Math.abs(lateralVel)*12);
+    if(Math.abs(lateralVel)>0.003)car.position.x+=lateralVel;
+    driftAngle=lateralVel*2.5;
 
 
 
@@ -5314,7 +5369,7 @@ function animate(){
 
     const curveAngle=Math.atan2(aheadX-curX,30)*.12;
 
-    car.rotation.y=dir+curveAngle;
+    car.rotation.y=dir+curveAngle+driftAngle;
 
     car.position.x+=Math.sin(dir)*spd;
 
@@ -5348,6 +5403,13 @@ function animate(){
 
     car.rotation.z=window._carLean;
     if(window._wheels){const wSpd=spd*8;window._wheels.forEach(w=>{w.children.forEach(c=>{c.rotation.x+=wSpd})})}
+    // Drift sound
+    if(isDrifting&&driftIntensity>0.2){if(!window._driftOsc)window._startDriftSound();window._updateDriftSound(driftIntensity)}else if(window._driftOsc)window._stopDriftSound();
+    // Drift smoke
+    if(isDrifting&&driftIntensity>0.2&&fc%3===0){var _dSx=car.position.x,_dSz=car.position.z-1.5,_dSy=car.position.y+0.1;emitParticles(_dSx-1.1,_dSy,_dSz,0xcccccc,Math.ceil(driftIntensity*3));emitParticles(_dSx+1.1,_dSy,_dSz,0xcccccc,Math.ceil(driftIntensity*3))}
+    // Tire marks
+    if(isDrifting&&driftIntensity>0.3&&window._tireMarks){var _tm=window._tireMarks,_ti=_tm.idx%_tm.max,_my=roadY(car.position.z)+0.02;dummy.position.set(car.position.x-1.1,_my,car.position.z-1.5);dummy.rotation.set(-Math.PI/2,0,car.rotation.y);dummy.scale.set(0.3,1+spd*3,1);dummy.updateMatrix();_tm.inst.setMatrixAt(_ti,dummy.matrix);_tm.inst.setColorAt(_ti,new THREE.Color(0x111111));dummy.position.x=car.position.x+1.1;dummy.updateMatrix();_tm.inst.setMatrixAt((_ti+1)%_tm.max,dummy.matrix);_tm.inst.setColorAt((_ti+1)%_tm.max,new THREE.Color(0x111111));_tm.idx+=2;_tm.inst.instanceMatrix.needsUpdate=true;if(_tm.inst.instanceColor)_tm.inst.instanceColor.needsUpdate=true}
+
 
 
 
@@ -6267,10 +6329,11 @@ const _ls=document.getElementById('loadScreen');if(_ls)setTimeout(()=>{_ls.class
 
 
 
-addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(typeof composer!=='undefined')composer.setSize(innerWidth,innerHeight)});
 
 </script>
 
+<canvas id="speedoCanvas" width="200" height="200" style="position:fixed;bottom:15px;right:15px;z-index:25;pointer-events:none;opacity:0;transition:opacity .5s"></canvas>
 </body>
 
 </html>
