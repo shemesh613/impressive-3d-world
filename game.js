@@ -1076,7 +1076,7 @@ scene.add((() => {
 
   const _roadMat=new THREE.MeshStandardMaterial({roughness:0.55,metalness:0.15,color:0x2a3050});window._roadMat=_roadMat;
 
-  const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(11.5,SLEN+0.5),_roadMat,RSEGS);
+  const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(14,SLEN+1),_roadMat,RSEGS);
 
   const edgeMat=new THREE.MeshStandardMaterial({color:0x22c55e,emissive:0x22c55e,emissiveIntensity:0.7,roughness:0.3,metalness:0.1});window._edgeMat=edgeMat;
 
@@ -1088,13 +1088,13 @@ scene.add((() => {
 
   const glowMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x0d3320});
 
-  const glowGeo=new THREE.PlaneGeometry(3.5,SLEN);
+  const glowGeo=new THREE.PlaneGeometry(5,SLEN+0.5);
 
   const glowL=new THREE.InstancedMesh(glowGeo,glowMat,RSEGS);
 
   const glowR=new THREE.InstancedMesh(glowGeo,glowMat,RSEGS);
 
-  for(let i=0;i<600;i++){
+  for(let i=0;i<RSEGS;i++){
 
     const z=-50+i*SLEN,zc=z+SLEN/2,x=roadX(zc),hy=roadY(zc);
 
