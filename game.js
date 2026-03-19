@@ -924,9 +924,10 @@ _envScene.add(new THREE.HemisphereLight(0x4466aa,0x1a1a2e,0.8));
 var _envRT=_pmremGen.fromScene(_envScene,0);
 scene.environment=_envRT.texture;
 
-const ambLight=new THREE.AmbientLight(0x6688aa,1.1);scene.add(ambLight);
+const ambLight=new THREE.AmbientLight(0x5577aa,1.3);scene.add(ambLight);
+var hemiLight=new THREE.HemisphereLight(0x4466aa,0x1a3a20,0.4);scene.add(hemiLight);
 
-const dirLight=new THREE.DirectionalLight(0xffeedd,1.8);dirLight.position.set(30,50,40);
+const dirLight=new THREE.DirectionalLight(0xffeedd,2.2);dirLight.position.set(30,50,40);
 dirLight.castShadow=true;
 dirLight.shadow.mapSize.width=2048;dirLight.shadow.mapSize.height=2048;
 dirLight.shadow.camera.near=1;dirLight.shadow.camera.far=120;
@@ -1110,7 +1111,7 @@ scene.add((() => {
 
   const edgeR=new THREE.InstancedMesh(edgeGeo,edgeMat,RSEGS);
 
-  const glowMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x0d3320});
+  const glowMat=new THREE.MeshStandardMaterial({color:0x22c55e,emissive:0x11aa44,emissiveIntensity:0.6,roughness:0.4,metalness:0.1});
 
   const glowGeo=new THREE.PlaneGeometry(5,SLEN+0.5);
 
@@ -1144,7 +1145,7 @@ scene.add((() => {
 // ---- SIDEWALKS ----
 {
   var swGeo=new THREE.PlaneGeometry(3,SLEN+0.5);
-  var swMat=new THREE.MeshStandardMaterial({color:0x555555,roughness:0.9,metalness:0.05});
+  var swMat=new THREE.MeshStandardMaterial({color:0x777788,roughness:0.8,metalness:0.1});
   var swInstL=new THREE.InstancedMesh(swGeo,swMat,RSEGS);
   var swInstR=new THREE.InstancedMesh(swGeo,swMat,RSEGS);
   for(var si=0;si<RSEGS;si++){
@@ -2471,7 +2472,7 @@ for(let z=-100;z<=7000;z+=10){
 
   const winGeo=new THREE.PlaneGeometry(0.4,0.5);
 
-  const winMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd55,emissiveIntensity:1.2,roughness:0.1,side:THREE.DoubleSide});
+  const winMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd55,emissiveIntensity:2.0,roughness:0.1,side:THREE.DoubleSide});
 
   const winInst=new THREE.InstancedMesh(winGeo,winMat,WIN_N);
 
@@ -2701,7 +2702,7 @@ for(let z=-100;z<=7000;z+=10){
   scene.add(sfInst);
 }
 
-// ---- TREES removed ----// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=7000;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshPhongMaterial({color:0x888888,shininess:20});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.4,6,6);  const glowMat2=new THREE.MeshStandardMaterial({color:0xffffcc,emissive:0xffdd66,emissiveIntensity:1.0,roughness:0.1,metalness:0.3});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
+// ---- TREES removed ----// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=7000;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshPhongMaterial({color:0x888888,shininess:20});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.4,6,6);  const glowMat2=new THREE.MeshStandardMaterial({color:0xffffcc,emissive:0xffdd66,emissiveIntensity:2.5,roughness:0.1,metalness:0.3});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
 
 // ---- ELECTRIC POLES WITH WIRES ----
 
