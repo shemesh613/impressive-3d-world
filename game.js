@@ -5863,9 +5863,9 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   const _cz=car.position.z;
 
-  const _camDist=12+spd*8;// pull back at speed
+  const _camDist=8+spd*5;// pull back at speed (closer)
 
-  const _camHeight=5.5+spd*4;// rise at speed
+  const _camHeight=3.5+spd*2.5;// rise at speed (lower)
 
   const _behindZ=_cz-_camDist;
 
@@ -5877,11 +5877,11 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   const _hillCamY=roadY(_behindZ);
 
-  const _lookAheadZ=_cz+20+spd*15;// look further at speed
+  const _lookAheadZ=_cz+15+spd*10;// look further at speed
 
   // Speed shake
 
-  const _shakeAmt=spd>0.25?((spd-0.25)*0.06):0;
+  const _shakeAmt=spd>0.35?((spd-0.35)*0.03):0;
 
   const _shakeX=_shakeAmt*(Math.sin(fc*7.3)*.4+Math.sin(fc*13.1)*.2);
 
@@ -5889,9 +5889,9 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   _cv.set(_camX+_shakeX,_hillCamY+_camHeight+cPh*4+_shakeY,_behindZ);
 
-  cam.position.lerp(_cv,.06);
+  cam.position.lerp(_cv,.08);
 
-  _ct.set(roadX(_lookAheadZ),roadY(_lookAheadZ)+1,_lookAheadZ);cam.lookAt(_ct);
+  _ct.set(roadX(_lookAheadZ),roadY(_lookAheadZ)+0.5,_lookAheadZ);cam.lookAt(_ct);
 
   // Dynamic FOV - widens at high speed
 
