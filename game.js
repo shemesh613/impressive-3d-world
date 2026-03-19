@@ -4820,7 +4820,7 @@ function animate(){
 
     car.position.z+=Math.cos(dir)*spd;
     // Road loop: teleport when near end
-    if(car.position.z>6500){car.position.z-=6000;car.position.x=roadX(car.position.z);car.position.y=roadY(car.position.z)+0.5;dir=Math.atan2(roadX(car.position.z+10)-roadX(car.position.z),10);lateralVel=0;driftAngle=0;isDrifting=false;if(typeof nextScenarioAt!=="undefined")nextScenarioAt-=6000}
+    if(car.position.z>5000){car.position.z-=4500;car.position.x=roadX(car.position.z);car.position.y=roadY(car.position.z)+0.5;dir=Math.atan2(roadX(car.position.z+10)-roadX(car.position.z),10);lateralVel=0;driftAngle=0;isDrifting=false;if(typeof nextScenarioAt!=="undefined")nextScenarioAt-=4500}
 
     const _baseY=roadY(car.position.z);
 
