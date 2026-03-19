@@ -1120,7 +1120,7 @@ scene.add((() => {
   m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;m.receiveShadow=false;return m;
 
 })());
-// ---- LOW GROUND FOG ----scene.add((function(){var fogMat=new THREE.MeshBasicMaterial({color:0x141422,transparent:true,opacity:0.25,side:THREE.DoubleSide,fog:true,depthWrite:false});var fogPlane=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),fogMat);fogPlane.rotation.x=-Math.PI/2;fogPlane.position.set(0,0.1,3500);fogPlane.renderOrder=1;return fogPlane})());
+// ---- LOW GROUND FOG ----scene.add((function(){var fogMat=new THREE.MeshBasicMaterial({color:0x141422,transparent:true,opacity:0.25,side:THREE.DoubleSide,fog:true,depthWrite:false});var fogPlane=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),fogMat);fogPlane.rotation.x=-Math.PI/2;fogPlane.position.set(0,0.1,3500);fogPlane.renderOrder=1;return fogPlane})());scene.add((function(){var fm2=new THREE.MeshBasicMaterial({color:0x0a0a18,transparent:true,opacity:0.12,side:THREE.DoubleSide,fog:true,depthWrite:false});var fp2=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),fm2);fp2.rotation.x=-Math.PI/2;fp2.position.set(0,0.5,3500);fp2.renderOrder=2;return fp2})());
 
 
 
@@ -1136,7 +1136,7 @@ scene.add((() => {
 
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(14,SLEN+1.5),_roadMat,RSEGS);
 
-  const edgeMat=new THREE.MeshStandardMaterial({color:0x22bb55,emissive:0x11cc44,emissiveIntensity:2.0,roughness:0.15,metalness:0.2});window._edgeMat=edgeMat;
+  const edgeMat=new THREE.MeshStandardMaterial({color:0x1a8844,emissive:0x0eaa33,emissiveIntensity:1.5,roughness:0.2,metalness:0.15});window._edgeMat=edgeMat;
 
   const edgeGeo=new THREE.PlaneGeometry(.5,SLEN+0.5);
 
@@ -1144,9 +1144,9 @@ scene.add((() => {
 
   const edgeR=new THREE.InstancedMesh(edgeGeo,edgeMat,RSEGS);
 
-  const glowMat=new THREE.MeshStandardMaterial({color:0x1a9944,emissive:0x0d7733,emissiveIntensity:0.4,roughness:0.5,metalness:0.1});
+  const glowMat=new THREE.MeshStandardMaterial({color:0x0a3318,emissive:0x052210,emissiveIntensity:0.2,roughness:0.7,metalness:0.05});
 
-  const glowGeo=new THREE.PlaneGeometry(5,SLEN+0.5);
+  const glowGeo=new THREE.PlaneGeometry(3,SLEN+0.5);
 
   const glowL=new THREE.InstancedMesh(glowGeo,glowMat,RSEGS);
 
