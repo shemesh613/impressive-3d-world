@@ -916,7 +916,7 @@ grainPass.uniforms['intensity'].value=0.04;
 composer.addPass(grainPass);
 window._grainPass=grainPass;
 
-scene.fog=new THREE.FogExp2(0x1a2a40,.0005);
+scene.fog=new THREE.FogExp2(0x1a2a30,.0004);
 
 // Environment map for reflections
 var _pmremGen=new THREE.PMREMGenerator(renderer);
@@ -1058,7 +1058,7 @@ function roadX(z){
 
 scene.add((() => {
 
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x0d1a2d}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.95,metalness:0.02,color:0x1a3a20}));
 
   m.rotation.x=-Math.PI/2;m.position.y=-2;m.position.z=3500;return m;
 
@@ -1117,6 +1117,43 @@ scene.add((() => {
   }
 
   [roadInst,edgeL,edgeR,glowL,glowR].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});
+// ---- SIDEWALKS ----
+{
+  var swGeo=new THREE.PlaneGeometry(3,SLEN+0.5);
+  var swMat=new THREE.MeshStandardMaterial({color:0x555555,roughness:0.9,metalness:0.05});
+  var swInstL=new THREE.InstancedMesh(swGeo,swMat,RSEGS);
+  var swInstR=new THREE.InstancedMesh(swGeo,swMat,RSEGS);
+  for(var si=0;si<RSEGS;si++){
+    var sz=-50+si*SLEN,szc=sz+SLEN/2,sx=roadX(szc),sy=roadY(szc);
+    var sca=Math.atan2(roadX(szc+2)-roadX(szc-2),4);
+    var sha=Math.atan2(roadY(szc+SLEN/2)-roadY(szc-SLEN/2),SLEN);
+    dummy.rotation.order='YXZ';dummy.rotation.set(-Math.PI/2+sha,sca,0);dummy.scale.setScalar(1);
+    dummy.position.set(sx-8.5*Math.cos(sca),sy+0.03,szc+8.5*Math.sin(sca));dummy.updateMatrix();swInstL.setMatrixAt(si,dummy.matrix);
+    dummy.position.set(sx+8.5*Math.cos(sca),sy+0.03,szc-8.5*Math.sin(sca));dummy.updateMatrix();swInstR.setMatrixAt(si,dummy.matrix);
+  }
+
+// ---- GRASS STRIPS ----
+{
+  var grGeo=new THREE.PlaneGeometry(8,SLEN+1);
+  var grMat=new THREE.MeshStandardMaterial({color:0x2d5a1e,roughness:0.95,metalness:0.0});
+  var grInstL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);
+  var grInstR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);
+  for(var gi=0;gi<RSEGS;gi++){
+    var gz=-50+gi*SLEN,gzc=gz+SLEN/2,gx=roadX(gzc),gy=roadY(gzc);
+    var gca=Math.atan2(roadX(gzc+2)-roadX(gzc-2),4);
+    var gha=Math.atan2(roadY(gzc+SLEN/2)-roadY(gzc-SLEN/2),SLEN);
+    dummy.rotation.order='YXZ';dummy.rotation.set(-Math.PI/2+gha,gca,0);dummy.scale.setScalar(1);
+    dummy.position.set(gx-12*Math.cos(gca),gy+0.005,gzc+12*Math.sin(gca));dummy.updateMatrix();grInstL.setMatrixAt(gi,dummy.matrix);
+    dummy.position.set(gx+12*Math.cos(gca),gy+0.005,gzc-12*Math.sin(gca));dummy.updateMatrix();grInstR.setMatrixAt(gi,dummy.matrix);
+  }
+  grInstL.instanceMatrix.needsUpdate=true;grInstR.instanceMatrix.needsUpdate=true;
+  scene.add(grInstL);scene.add(grInstR);
+}
+  swInstL.instanceMatrix.needsUpdate=true;swInstR.instanceMatrix.needsUpdate=true;
+  swInstL.receiveShadow=true;swInstR.receiveShadow=true;
+  scene.add(swInstL);scene.add(swInstR);
+}
+
 
 // Grass strips alongside road
 
@@ -4525,7 +4562,7 @@ function updateHUD(){
     if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
     if(window._chromaPass){var _ci=Math.min(0.008,spd*0.006);if(handbrake&&isDrifting)_ci*=2.5;window._chromaPass.uniforms['intensity'].value+=((_ci)-window._chromaPass.uniforms['intensity'].value)*0.1}
 
-  scene.fog.density=0.00075-spd*0.0005;scene.fog.color.setHex(spd>0.1?0x1e3050:0x1a2a40);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();// fog clears at speed
+  scene.fog.density=0.00075-spd*0.0005;scene.fog.color.setHex(spd>0.1?0x1e3040:0x1a2a30);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();// fog clears at speed
 
   moon.position.z=car.position.z+500;moonGlow.position.z=moon.position.z;
 
