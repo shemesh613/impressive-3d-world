@@ -1127,14 +1127,14 @@ function roadX(z){
 var _roadTex=(function(){
   var cv=document.createElement('canvas');cv.width=512;cv.height=512;
   var ctx=cv.getContext('2d');
-  ctx.fillStyle='#252530';ctx.fillRect(0,0,512,512);
+  ctx.fillStyle='#1e1e28';ctx.fillRect(0,0,512,512);
   // Asphalt noise
-  for(var i=0;i<6000;i++){var x=Math.random()*512,y=Math.random()*512,v=28+Math.random()*22;ctx.fillStyle='rgb('+v+','+v+','+(v+4)+')';ctx.fillRect(x,y,1+Math.random()*2,1+Math.random()*2)}
+  for(var i=0;i<10000;i++){var x=Math.random()*512,y=Math.random()*512,v=28+Math.random()*22;ctx.fillStyle='rgb('+v+','+v+','+(v+4)+')';ctx.fillRect(x,y,1+Math.random()*2,1+Math.random()*2)}
   // Center dashed line
-  ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.setLineDash([40,30]);ctx.beginPath();ctx.moveTo(256,0);ctx.lineTo(256,512);ctx.stroke();
+  ctx.strokeStyle='#ffffff';ctx.lineWidth=5;ctx.setLineDash([50,25]);ctx.beginPath();ctx.moveTo(256,0);ctx.lineTo(256,512);ctx.stroke();
   // Edge lines
   ctx.setLineDash([]);ctx.lineWidth=2;ctx.strokeStyle='#eeeeee';ctx.beginPath();ctx.moveTo(25,0);ctx.lineTo(25,512);ctx.moveTo(487,0);ctx.lineTo(487,512);ctx.stroke();
-  var t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1,50);
+  var t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1,35);
   if(renderer.capabilities&&renderer.capabilities.getMaxAnisotropy)t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
   return t;
 })();
@@ -1230,8 +1230,8 @@ scene.add((() => {
 
 // ---- CURBS ----
 {
-  var curbGeo=new THREE.BoxGeometry(0.3,0.2,SLEN+0.5);
-  var curbMat=new THREE.MeshStandardMaterial({color:0x999999,roughness:0.7,metalness:0.1});
+  var curbGeo=new THREE.BoxGeometry(0.4,0.3,SLEN+1);
+  var curbMat=new THREE.MeshStandardMaterial({color:0xbbbbbb,roughness:0.6,metalness:0.15,emissive:0x222222,emissiveIntensity:0.1});
   var curbL=new THREE.InstancedMesh(curbGeo,curbMat,RSEGS);
   var curbR=new THREE.InstancedMesh(curbGeo,curbMat,RSEGS);
   for(var ci=0;ci<RSEGS;ci++){
