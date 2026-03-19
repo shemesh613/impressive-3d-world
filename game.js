@@ -2419,11 +2419,11 @@ for(let z=-100;z<=7000;z+=10){
 
 {
 
-  const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.15,envMapIntensity:1.2});
+  const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshStandardMaterial({roughness:0.5,metalness:0.2,envMapIntensity:1.5});
 
   const inst=new THREE.InstancedMesh(geo,mat,bdata.length);
 
-  const biomes=[[0x5a7a98,0x6a8aa8,0x4a6a88,0x7a9ab8],[0x8a5a3a,0x9a6a4a,0x7a4a2a,0xaa7a5a],[0x4a4a7a,0x5a5a8a,0x3a3a6a,0x6a6a9a],[0x3a7a5a,0x4a8a6a,0x2a6a4a,0x5a9a7a],[0x7a3a5a,0x8a4a6a,0x6a2a4a,0x9a5a7a],[0x2a6a8a,0x3a7a9a,0x1a5a7a,0x4a8aaa],[0x8a7a3a,0x9a8a4a,0x7a6a2a,0xaa9a5a]];
+  const biomes=[[0x7a9ab8,0x8aaac8,0x6a8aa8,0x9abace],[0xb08050,0xc09060,0xa07040,0xd0a070],[0x6868a0,0x7878b0,0x585890,0x8888c0],[0x50a070,0x60b080,0x409060,0x70c090],[0xa05070,0xb06080,0x904060,0xc07090],[0x4090b0,0x50a0c0,0x3080a0,0x60b0d0],[0xb09050,0xc0a060,0xa08040,0xd0b070]];
 
   function biomeColor(z,i){const idx=((Math.floor(z/180)%biomes.length)+biomes.length)%biomes.length;const b=biomes[idx];return b[i%b.length]}
 
@@ -2443,11 +2443,11 @@ for(let z=-100;z<=7000;z+=10){
 
   // Building windows (emissive glow)
 
-  const WIN_N=Math.min(300,bdata.length*2);
+  const WIN_N=Math.min(600,bdata.length*2);
 
   const winGeo=new THREE.PlaneGeometry(0.4,0.5);
 
-  const winMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd55,emissiveIntensity:0.9,roughness:0.1,side:THREE.DoubleSide});
+  const winMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd55,emissiveIntensity:1.2,roughness:0.1,side:THREE.DoubleSide});
 
   const winInst=new THREE.InstancedMesh(winGeo,winMat,WIN_N);
 
