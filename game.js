@@ -1117,10 +1117,10 @@ scene.add((() => {
 
   const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshLambertMaterial({color:0x060806,map:_groundTex,reflectivity:0}));
 
-  m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;m.receiveShadow=true;return m;
+  m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;m.receiveShadow=false;return m;
 
 })());
-// ---- LOW GROUND FOG ----scene.add((function(){var fogMat=new THREE.MeshBasicMaterial({color:0x141422,transparent:true,opacity:0.15,side:THREE.DoubleSide,fog:true,depthWrite:false});var fogPlane=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),fogMat);fogPlane.rotation.x=-Math.PI/2;fogPlane.position.set(0,0.1,3500);fogPlane.renderOrder=1;return fogPlane})());
+// ---- LOW GROUND FOG ----scene.add((function(){var fogMat=new THREE.MeshBasicMaterial({color:0x141422,transparent:true,opacity:0.25,side:THREE.DoubleSide,fog:true,depthWrite:false});var fogPlane=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),fogMat);fogPlane.rotation.x=-Math.PI/2;fogPlane.position.set(0,0.1,3500);fogPlane.renderOrder=1;return fogPlane})());
 
 
 
@@ -2486,9 +2486,9 @@ for(let z=-100;z<=7000;z+=10){
 
     const h=zoneBase[zone]+Math.random()*zoneH[zone];
 
-    bdata.push([_rx-14,z,2.5+Math.random()*2,h,2.5+Math.random()*2]);
+    bdata.push([_rx-16,z,2.5+Math.random()*2,h,2.5+Math.random()*2]);
 
-    bdata.push([_rx+14,z,2.5+Math.random()*2,h*(.5+Math.random()*.5),2.5+Math.random()*2]);
+    bdata.push([_rx+16,z,2.5+Math.random()*2,h*(.5+Math.random()*.5),2.5+Math.random()*2]);
 
   }
 
