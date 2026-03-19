@@ -1112,7 +1112,7 @@ var _groundTex=(function(){
 
 scene.add((() => {
 
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.92,metalness:0.05,color:0x446644,map:_groundTex}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.92,metalness:0.05,color:0x223322,map:_groundTex}));
 
   m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;m.receiveShadow=true;return m;
 
@@ -3308,15 +3308,15 @@ function updateParticles(){
 {
   var TREE_N=400;
   var trunkGeo=new THREE.CylinderGeometry(0.15,0.2,1.5,5);
-  var trunkMat=new THREE.MeshStandardMaterial({color:0x8B5A2B,roughness:0.9,metalness:0.05});
+  var trunkMat=new THREE.MeshStandardMaterial({color:0x4a2a15,roughness:0.9,metalness:0.05});
   var trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,TREE_N);
   trunkInst.castShadow=true;
-  var leafGeo=new THREE.ConeGeometry(1.0,2.2,6);
-  var leafMat=new THREE.MeshStandardMaterial({color:0x228B22,roughness:0.8,metalness:0.05});
+  var leafGeo=new THREE.IcosahedronGeometry(1.2,1);
+  var leafMat=new THREE.MeshStandardMaterial({color:0x1a4a1a,roughness:0.85,metalness:0.08});
   var leafInst=new THREE.InstancedMesh(leafGeo,leafMat,TREE_N);
   leafInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(TREE_N*3),3);
   leafInst.castShadow=true;
-  var _treeColors=[0x228B22,0x2E8B57,0x006400,0x32CD32,0x3CB371,0x556B2F,0x6B8E23,0x008000];
+  var _treeColors=[0x0f3f0f,0x153a28,0x003200,0x1a4a1a,0x1a4028,0x2a3a1a,0x354a1a,0x004000];
   var _ti2=0;
   for(var tz=-50;tz<=7000;tz+=5){
     if(_ti2>=TREE_N)break;
@@ -3352,12 +3352,12 @@ function updateParticles(){
   leafInst.instanceMatrix.needsUpdate=true;
   leafInst.instanceColor.needsUpdate=true;
   // Mid leaf layer
-  var leafGeo2=new THREE.ConeGeometry(0.8,1.8,6);
+  var leafGeo2=new THREE.IcosahedronGeometry(0.9,1);
   var leafInst2=new THREE.InstancedMesh(leafGeo2,leafMat,TREE_N);
   leafInst2.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(TREE_N*3),3);
   leafInst2.castShadow=true;
   // Top leaf layer
-  var leafGeo3=new THREE.ConeGeometry(0.5,1.4,5);
+  var leafGeo3=new THREE.IcosahedronGeometry(0.6,0);
   var leafInst3=new THREE.InstancedMesh(leafGeo3,leafMat,TREE_N);
   leafInst3.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(TREE_N*3),3);
   leafInst3.castShadow=true;
