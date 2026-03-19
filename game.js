@@ -2799,10 +2799,19 @@ var headlightR=new THREE.SpotLight(0xffffee,2,40,Math.PI/6,0.5,1.5);
 headlightR.position.set(0.6,0.42,2.4);headlightR.target.position.set(0.6,0,20);
 car.add(headlightR);car.add(headlightR.target);
 
+// === Setup DRACOLoader for compressed GLB ===
+var _dracoLoader=null;
+if(typeof THREE.DRACOLoader!=='undefined'){
+  _dracoLoader=new THREE.DRACOLoader();
+  _dracoLoader.setDecoderPath('./draco/');
+  _dracoLoader.preload();
+}
+
 // === Load Ferrari 458 GLB model ===
 if(typeof THREE.GLTFLoader!=='undefined'){
   try{
     var _glbLoader=new THREE.GLTFLoader();
+    if(_dracoLoader)_glbLoader.setDRACOLoader(_dracoLoader);
     _glbLoader.load('./ferrari.glb',function(gltf){
       var model=gltf.scene;
       // Scale to fit our car dimensions
