@@ -1130,7 +1130,7 @@ scene.add((() => {
 
 {
 
-  const RSEGS=800,SLEN=9;
+  const RSEGS=900,SLEN=9;
 
   const _roadMat=new THREE.MeshStandardMaterial({roughness:0.38,metalness:0.25,color:0x2a2a38,envMapIntensity:1.2});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
 
@@ -1688,7 +1688,7 @@ scene.add((() => {
 
   const crossGeo=new THREE.PlaneGeometry(40,5);
 
-  const crossMat=new THREE.MeshBasicMaterial({color:0x2a2a35});
+  const crossMat=new THREE.MeshStandardMaterial({color:0x22222e,roughness:0.5,metalness:0.15});
 
   const crossInst=new THREE.InstancedMesh(crossGeo,crossMat,crossN);
 
@@ -1700,7 +1700,7 @@ scene.add((() => {
 
   const sideRoadGeo=new THREE.PlaneGeometry(8,30);
 
-  const sideRoadMat=new THREE.MeshBasicMaterial({color:0x3a4565});
+  const sideRoadMat=new THREE.MeshStandardMaterial({color:0x22222e,roughness:0.55,metalness:0.1});
 
   const sideRoadL=new THREE.InstancedMesh(sideRoadGeo,sideRoadMat,crossN);
 
@@ -3163,7 +3163,7 @@ const MAX_GREENS=3;
 
 const greens=[];
 
-const greenInst=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.8,1),new THREE.MeshStandardMaterial({color:0x22ff66,emissive:0x11cc44,emissiveIntensity:0.8,roughness:0.1,metalness:0.5,transparent:true,opacity:0.9}),MAX_GREENS);
+const greenInst=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.9,1),new THREE.MeshStandardMaterial({color:0x22ff66,emissive:0x11ff44,emissiveIntensity:1.5,roughness:0.05,metalness:0.7,transparent:true,opacity:0.95}),MAX_GREENS);
 
 greenInst.frustumCulled=false;scene.add(greenInst);
 
@@ -3171,9 +3171,9 @@ greenInst.frustumCulled=false;scene.add(greenInst);
 
 // ---- COLLECTIBLE BEAMS ----
 
-const beamGeo=new THREE.CylinderGeometry(.05,.05,5,4);
+const beamGeo=new THREE.CylinderGeometry(.08,.08,6,4);
 
-const beamMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x66ff88,transparent:true,opacity:0.6});
+const beamMat=new THREE.MeshStandardMaterial({color:0x44ff66,emissive:0x22ff44,emissiveIntensity:0.5,roughness:0.1,metalness:0.05,transparent:true,opacity:0.7});
 
 const beamInst=new THREE.InstancedMesh(beamGeo,beamMat,MAX_GREENS);
 
@@ -3225,7 +3225,7 @@ const MAX_OBS=2;
 
 const obstacles=[];
 
-const obsInst=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.7,1),new THREE.MeshStandardMaterial({color:0xff2222,emissive:0xff0000,emissiveIntensity:1.0,roughness:0.05,metalness:0.6,transparent:true,opacity:0.85}),MAX_OBS);
+const obsInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.9,0),new THREE.MeshStandardMaterial({color:0xff1111,emissive:0xff0000,emissiveIntensity:2.0,roughness:0.02,metalness:0.8,transparent:true,opacity:0.9}),MAX_OBS);
 
 obsInst.frustumCulled=false;scene.add(obsInst);
 
@@ -3233,7 +3233,7 @@ obsInst.frustumCulled=false;scene.add(obsInst);
 
 const obsRingGeo=new THREE.RingGeometry(1.2,1.8,16);
 
-const obsRingMat=new THREE.MeshBasicMaterial({color:0xff4444,transparent:true,opacity:0.25,side:THREE.DoubleSide});
+const obsRingMat=new THREE.MeshBasicMaterial({color:0xff2222,transparent:true,opacity:0.4,side:THREE.DoubleSide});
 
 const obsRingInst=new THREE.InstancedMesh(obsRingGeo,obsRingMat,MAX_OBS);
 
