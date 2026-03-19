@@ -916,7 +916,7 @@ grainPass.uniforms['intensity'].value=0.04;
 composer.addPass(grainPass);
 window._grainPass=grainPass;
 
-scene.fog=new THREE.FogExp2(0x1a2a30,.0004);
+scene.fog=new THREE.FogExp2(0x182a1e,.00045);
 
 // Environment map for reflections
 var _pmremGen=new THREE.PMREMGenerator(renderer);
@@ -1058,9 +1058,9 @@ function roadX(z){
 
 scene.add((() => {
 
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.95,metalness:0.02,color:0x1a3a20}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.95,metalness:0.02,color:0x1a4a1a}));
 
-  m.rotation.x=-Math.PI/2;m.position.y=-2;m.position.z=3500;return m;
+  m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;return m;
 
 })());
 
@@ -1135,7 +1135,7 @@ scene.add((() => {
 // ---- GRASS STRIPS ----
 {
   var grGeo=new THREE.PlaneGeometry(8,SLEN+1);
-  var grMat=new THREE.MeshStandardMaterial({color:0x2d5a1e,roughness:0.95,metalness:0.0});
+  var grMat=new THREE.MeshStandardMaterial({color:0x2a5518,roughness:0.95,metalness:0.0});
   var grInstL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);
   var grInstR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);
   for(var gi=0;gi<RSEGS;gi++){
@@ -4562,7 +4562,7 @@ function updateHUD(){
     if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
     if(window._chromaPass){var _ci=Math.min(0.008,spd*0.006);if(handbrake&&isDrifting)_ci*=2.5;window._chromaPass.uniforms['intensity'].value+=((_ci)-window._chromaPass.uniforms['intensity'].value)*0.1}
 
-  scene.fog.density=0.00075-spd*0.0005;scene.fog.color.setHex(spd>0.1?0x1e3040:0x1a2a30);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();// fog clears at speed
+  scene.fog.density=0.00075-spd*0.0005;scene.fog.color.setHex(spd>0.1?0x1e3530:0x182a1e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();// fog clears at speed
 
   moon.position.z=car.position.z+500;moonGlow.position.z=moon.position.z;
 
