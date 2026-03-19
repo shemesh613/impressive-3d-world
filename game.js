@@ -897,17 +897,18 @@ composer.addPass(colorPass);
 
 // Film Grain removed — cleaner image
 
-scene.fog=new THREE.FogExp2(0x1a1a2e,.00035);
+scene.fog=new THREE.FogExp2(0x1a1a2e,.00045);
 
 // Environment map for reflections
 var _pmremGen=new THREE.PMREMGenerator(renderer);
 _pmremGen.compileEquirectangularShader();
 var _envScene=new THREE.Scene();
-_envScene.background=new THREE.Color(0x1a1a2e);
-_envLight1=new THREE.DirectionalLight(0xffeedd,1.2);_envLight1.position.set(1,1,0.5);_envScene.add(_envLight1);
-_envScene.add(new THREE.HemisphereLight(0x4466aa,0x1a1a2e,0.8));
-var _envRT=_pmremGen.fromScene(_envScene,0);
-// City reflection blocks for realistic env map[{p:[10,0,0],c:0x334466},{p:[-10,0,0],c:0x334466},{p:[0,-5,0],c:0x222222},{p:[0,8,0],c:0x1a1a2e},{p:[5,3,5],c:0x224433},{p:[-5,3,-5],c:0x443322}].forEach(function(b){var bm=new THREE.Mesh(new THREE.BoxGeometry(20,10,20),new THREE.MeshBasicMaterial({color:b.c}));bm.position.set(b.p[0],b.p[1],b.p[2]);_envScene.add(bm)});
+_envScene.background=new THREE.Color(0x0d0d1e);
+var _envL1=new THREE.DirectionalLight(0xffeedd,1.5);_envL1.position.set(1,1.5,0.5);_envScene.add(_envL1);
+_envScene.add(new THREE.HemisphereLight(0x4466aa,0x0a0a1a,1.0));
+// City reflection geometry — buildings, ground, sky
+[{p:[12,4,0],c:0x1a2a44,s:[25,12,25]},{p:[-12,4,0],c:0x1a2a44,s:[25,12,25]},{p:[0,-6,0],c:0x111118,s:[40,4,40]},{p:[0,15,0],c:0x141428,s:[40,8,40]},{p:[8,2,8],c:0x1a3322,s:[15,8,15]},{p:[-8,2,-8],c:0x332211,s:[15,8,15]},{p:[0,6,12],c:0x223344,s:[20,15,8]},{p:[0,6,-12],c:0x223344,s:[20,15,8]},{p:[5,1,0],c:0xffdd55,s:[0.5,0.5,0.5]},{p:[-5,1,0],c:0xffdd55,s:[0.5,0.5,0.5]}].forEach(function(b){var bm=new THREE.Mesh(new THREE.BoxGeometry(b.s[0],b.s[1],b.s[2]),new THREE.MeshBasicMaterial({color:b.c}));bm.position.set(b.p[0],b.p[1],b.p[2]);_envScene.add(bm)});
+var _envRT=_pmremGen.fromScene(_envScene,0,0.1,100);
 scene.environment=_envRT.texture;
 
 const ambLight=new THREE.AmbientLight(0x334466,0.7);scene.add(ambLight);
@@ -1111,7 +1112,7 @@ var _groundTex=(function(){
 
 scene.add((() => {
 
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.95,metalness:0.02,color:0xffffff,map:_groundTex}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.92,metalness:0.05,color:0x88aa88,map:_groundTex}));
 
   m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;m.receiveShadow=true;return m;
 
@@ -2519,11 +2520,11 @@ for(let z=-100;z<=7000;z+=10){
 
   // Building windows (emissive glow)
 
-  const WIN_N=Math.min(400,bdata.length*2);
+  const WIN_N=Math.min(600,bdata.length*3);
 
   const winGeo=new THREE.PlaneGeometry(0.4,0.5);
 
-  const winMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd55,emissiveIntensity:3.0,roughness:0.1,side:THREE.DoubleSide});
+  const winMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd55,emissiveIntensity:3.5,roughness:0.05,side:THREE.DoubleSide});
 
   const winInst=new THREE.InstancedMesh(winGeo,winMat,WIN_N);
 
@@ -2541,7 +2542,7 @@ for(let z=-100;z<=7000;z+=10){
 
     for(let row=0;row<Math.min(3,Math.floor(bh/3));row++){
 
-      if(Math.random()>.6)continue;// some windows dark
+      if(Math.random()>.75)continue;// some windows dark
 
       const wy=ry+2+row*2.5;
 
