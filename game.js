@@ -5322,9 +5322,9 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
 
       // Day-night cycle: night→dawn→morning→midday→sunset→dusk→night
 
-      const skyColors=[0x0c1a2e,0x2a1a3a,0x4a6a8a,0x5588bb,0x885533,0x3a2244,0x101828];
+      const skyColors=[0x0c1a2e,0x12122e,0x0e1428,0x101830,0x1a1228,0x0e0e24,0x080818];
 
-      const fogColors=[0x0c1a2e,0x2a1a3a,0x5a7a9a,0x6699cc,0x996644,0x3a2244,0x101828];
+      const fogColors=[0x0c1a2e,0x12122e,0x0e1428,0x101830,0x1a1228,0x0e0e24,0x080818];
 
       const edgeColors=[0x22c55e,0xe040fb,0x00e5ff,0xff9100,0xff6b6b,0x40e0d0,0x536dfe];
 
@@ -5338,9 +5338,9 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
 
       // Adjust lighting for day-night cycle
 
-      const ambIntensity=[0.6,0.8,1.4,1.8,1.0,0.7,0.6];
+      const ambIntensity=[0.4,0.45,0.5,0.55,0.5,0.45,0.4];
 
-      const dirIntensity=[0.8,1.0,2.0,2.5,1.5,0.9,0.8];
+      const dirIntensity=[1.6,1.7,1.8,1.9,1.8,1.7,1.6];
 
       const aI=ambIntensity[zone]+(ambIntensity[nextZone]-ambIntensity[zone])*t;
 
