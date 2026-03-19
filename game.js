@@ -1126,7 +1126,7 @@ function roadX(z){
 var _roadTex=(function(){
   var cv=document.createElement('canvas');cv.width=512;cv.height=512;
   var ctx=cv.getContext('2d');
-  ctx.fillStyle='#2a2a38';ctx.fillRect(0,0,512,512);
+  ctx.fillStyle='#252530';ctx.fillRect(0,0,512,512);
   // Asphalt noise
   for(var i=0;i<6000;i++){var x=Math.random()*512,y=Math.random()*512,v=28+Math.random()*22;ctx.fillStyle='rgb('+v+','+v+','+(v+4)+')';ctx.fillRect(x,y,1+Math.random()*2,1+Math.random()*2)}
   // Center dashed line
@@ -1226,6 +1226,46 @@ scene.add((() => {
     dummy.position.set(sx-8.5*Math.cos(sca),sy+0.03,szc+8.5*Math.sin(sca));dummy.updateMatrix();swInstL.setMatrixAt(si,dummy.matrix);
     dummy.position.set(sx+8.5*Math.cos(sca),sy+0.03,szc-8.5*Math.sin(sca));dummy.updateMatrix();swInstR.setMatrixAt(si,dummy.matrix);
   }
+
+// ---- CURBS ----
+{
+  var curbGeo=new THREE.BoxGeometry(0.3,0.2,SLEN+0.5);
+  var curbMat=new THREE.MeshStandardMaterial({color:0x999999,roughness:0.7,metalness:0.1});
+  var curbL=new THREE.InstancedMesh(curbGeo,curbMat,RSEGS);
+  var curbR=new THREE.InstancedMesh(curbGeo,curbMat,RSEGS);
+  for(var ci=0;ci<RSEGS;ci++){
+    var cz=-50+ci*SLEN,czc=cz+SLEN/2,cx=roadX(czc),cy=roadY(czc);
+    var cca=Math.atan2(roadX(czc+2)-roadX(czc-2),4);
+    dummy.position.set(cx-7.2*Math.cos(cca),cy+0.12,czc+7.2*Math.sin(cca));
+    dummy.rotation.set(0,cca,0);dummy.scale.setScalar(1);dummy.updateMatrix();
+    curbL.setMatrixAt(ci,dummy.matrix);
+    dummy.position.set(cx+7.2*Math.cos(cca),cy+0.12,czc-7.2*Math.sin(cca));
+    dummy.updateMatrix();
+    curbR.setMatrixAt(ci,dummy.matrix);
+  }
+
+// ---- WET ROAD PATCHES ----
+{
+  var wetGeo=new THREE.PlaneGeometry(3,4);
+  var wetMat=new THREE.MeshStandardMaterial({color:0x1a1a28,roughness:0.1,metalness:0.5,transparent:true,opacity:0.4,envMapIntensity:3});
+  var WET_N=80;
+  var wetInst=new THREE.InstancedMesh(wetGeo,wetMat,WET_N);
+  for(var wi2=0;wi2<WET_N;wi2++){
+    var wz=200+wi2*70+Math.random()*30;
+    var wx=roadX(wz)+(Math.random()-0.5)*8;
+    var wy=roadY(wz)+0.02;
+    dummy.position.set(wx,wy,wz);
+    dummy.rotation.set(-Math.PI/2,0,Math.random()*0.3);
+    dummy.scale.set(0.5+Math.random()*1.5,0.5+Math.random()*1,1);
+    dummy.updateMatrix();
+    wetInst.setMatrixAt(wi2,dummy.matrix);
+  }
+  wetInst.instanceMatrix.needsUpdate=true;
+  scene.add(wetInst);
+}
+  curbL.instanceMatrix.needsUpdate=true;curbR.instanceMatrix.needsUpdate=true;
+  scene.add(curbL);scene.add(curbR);
+}
 
 // ---- GRASS STRIPS ----
 {
@@ -2690,7 +2730,7 @@ for(let z=-100;z<=7000;z+=10){
 // ---- BUILDING LEDGES (horizontal floor lines) ----
 {
   var ledgeGeo=new THREE.BoxGeometry(1.08,0.08,1.08);
-  var ledgeMat=new THREE.MeshStandardMaterial({color:0x333344,roughness:0.7,metalness:0.3});
+  var ledgeMat=new THREE.MeshStandardMaterial({color:0x555566,roughness:0.6,metalness:0.3});
   var LEDGE_N=Math.min(800,bdata.length*2);
   var ledgeInst=new THREE.InstancedMesh(ledgeGeo,ledgeMat,LEDGE_N);
   var li=0;
