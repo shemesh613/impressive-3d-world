@@ -931,8 +931,8 @@ const dirLight=new THREE.DirectionalLight(0xffeedd,1.5);dirLight.position.set(30
 dirLight.castShadow=true;
 dirLight.shadow.mapSize.width=2048;dirLight.shadow.mapSize.height=2048;
 dirLight.shadow.camera.near=1;dirLight.shadow.camera.far=120;
-dirLight.shadow.camera.left=-25;dirLight.shadow.camera.right=25;
-dirLight.shadow.camera.top=25;dirLight.shadow.camera.bottom=-25;
+dirLight.shadow.camera.left=-20;dirLight.shadow.camera.right=20;
+dirLight.shadow.camera.top=20;dirLight.shadow.camera.bottom=-20;
 dirLight.shadow.bias=-0.002;
 dirLight.shadow.normalBias=0.02;
 scene.add(dirLight);scene.add(dirLight.target);
@@ -1156,7 +1156,7 @@ scene.add((() => {
 
   const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.95,metalness:0.02,color:0xffffff,map:_groundTex}));
 
-  m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;return m;
+  m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;m.receiveShadow=true;return m;
 
 })());
 
@@ -1171,6 +1171,7 @@ scene.add((() => {
   const RSEGS=800,SLEN=9;
 
   const _roadMat=new THREE.MeshStandardMaterial({roughness:0.45,metalness:0.2,color:0x2a2a38,envMapIntensity:0.8});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
+  roadInst.receiveShadow=true;
 
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(14,SLEN+1.5),_roadMat,RSEGS);
 
@@ -3041,12 +3042,7 @@ function buildPrimitiveCar(){
   var _cbM=new THREE.MeshBasicMaterial({color:0xffffee,transparent:true,opacity:0.06,side:THREE.DoubleSide});
   var beam=new THREE.Mesh(_cbG,_cbM);beam.position.set(0,0.3,9);beam.rotation.x=Math.PI/2;
   car.add(beam);window._carBeam=beam;
-  // Ground shadow
-  var shadowGeo=new THREE.CircleGeometry(2.8,16);
-  var shadowMat=new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.35,side:THREE.DoubleSide});
-  var carShadow=new THREE.Mesh(shadowGeo,shadowMat);
-  carShadow.rotation.x=-Math.PI/2;carShadow.position.y=-0.3;
-  car.add(carShadow);
+  // Real shadows via DirectionalLight (fake circle shadow removed)
 }
 buildPrimitiveCar();
 
