@@ -3479,7 +3479,7 @@ function triggerScenario(){
 
   const gs=document.getElementById('gateSituation');
 
-  gs.textContent=s.situation;gs.style.display='block';gs.style.fontSize='clamp(18px,4vw,26px)';gs.style.padding='16px 24px';gs.style.maxWidth='min(92vw,600px)';gs.style.animation='gateSitPulse 1.5s ease-in-out infinite';
+  gs.textContent=s.situation;gs.style.display='block';gs.style.fontSize='';gs.style.padding='';gs.style.maxWidth='';gs.style.animation='gateSitPulse 1.5s ease-in-out infinite';
 
 
 
@@ -3515,7 +3515,7 @@ function triggerScenario(){
 
   scenarioActive=true;
   // Slow down for gates so player can read
-  if(spd>0.4)spd=0.4;
+  if(spd>0.25)spd=0.25;
 
   // Don't stop car for gates - player drives through!
 
@@ -3589,9 +3589,9 @@ function _updateGateLabels(){
 
   const sc=Math.max(0.7,Math.min(1.4,22/Math.max(5,distToGate)));
 
-  const lw=Math.round(Math.max(150,Math.min(250,sc*210)));
+  const lw=Math.round(Math.max(200,Math.min(320,sc*260)));
 
-  const fs=Math.round(Math.max(15,sc*19));
+  const fs=Math.round(Math.max(18,sc*24));
 
   // Each label is centered on its gate's screen X, clamped to bounds
 
