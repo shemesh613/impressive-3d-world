@@ -3767,7 +3767,7 @@ function _processGateChoice(isGreen){
 
   requestAnimationFrame(()=>{fb.style.animation='feedSlide .5s cubic-bezier(.22,1,.36,1)'});
 
-  setTimeout(()=>{fb.style.display='none'},2000);
+  setTimeout(()=>{fb.style.display='none'},4000);
 
 
 
@@ -3897,7 +3897,7 @@ function choose(type){
 
   requestAnimationFrame(()=>{fb.style.animation='feedSlide .5s cubic-bezier(.22,1,.36,1)'});
 
-  setTimeout(()=>{fb.style.display='none';spd=window._preScenarioSpd||0.15},2200);const tipEl=document.getElementById('tip');const tips=['💡 טיפ: דברים קטנים — לא שווה לריב עליהם!','💡 טיפ: כשמתגמשים — כולם נהנים יותר!','💡 טיפ: לפעמים ויתור = ניצחון!','💡 טיפ: חברים אוהבים מי שזורם!','💡 טיפ: מה שחשוב — עוצרים. מה שלא — ממשיכים!','💡 טיפ: בכביש ובחיים — זרימה זה הכוח!'];tipEl.textContent=tips[Math.floor(Math.random()*tips.length)];tipEl.style.display='block';setTimeout(()=>{tipEl.style.display='none'},3500);
+  setTimeout(()=>{fb.style.display='none';spd=window._preScenarioSpd||0.15},4500);const tipEl=document.getElementById('tip');const tips=['💡 טיפ: דברים קטנים — לא שווה לריב עליהם!','💡 טיפ: כשמתגמשים — כולם נהנים יותר!','💡 טיפ: לפעמים ויתור = ניצחון!','💡 טיפ: חברים אוהבים מי שזורם!','💡 טיפ: מה שחשוב — עוצרים. מה שלא — ממשיכים!','💡 טיפ: בכביש ובחיים — זרימה זה הכוח!'];tipEl.textContent=tips[Math.floor(Math.random()*tips.length)];tipEl.style.display='block';setTimeout(()=>{tipEl.style.display='none'},5500);
 
 
 
