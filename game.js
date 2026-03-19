@@ -4867,14 +4867,14 @@ function updateHUD(){
 
   // Dust puff behind car at speed
 
-  if(spd>0.08&&fc%4===0){
+  if(spd>0.15&&fc%8===0){
     // Exhaust heat particles (both sides)
     var _ecy=car.position.y+0.3,_ecz=car.position.z-2.3;
-    for(var _ei=0;_ei<2&&particles.length<PART_MAX;_ei++){
+    for(var _ei=0;_ei<1&&particles.length<PART_MAX;_ei++){
       particles.push({x:car.position.x+(_ei===0?-0.4:0.4),y:_ecy,z:_ecz,vx:(Math.random()-.5)*0.05,vy:0.03+Math.random()*0.02,vz:-0.05-Math.random()*0.03,life:0.6+Math.random()*0.3,color:spd>0.3?0xffaa44:0x888888,isSmoke:true});
     }
     // Road spray at high speed
-    if(spd>0.25&&fc%6===0){
+    if(spd>0.3&&fc%12===0){
       particles.push({x:car.position.x+(Math.random()-.5)*2,y:car.position.y+0.05,z:car.position.z-1.5,vx:(Math.random()-.5)*0.2,vy:Math.random()*0.1,vz:-0.1-Math.random()*0.1,life:0.4,color:0x667788,isSmoke:false});
     }
   }
@@ -4882,9 +4882,9 @@ function updateHUD(){
   // Tire sparks on sharp turns at speed
 
   const _steerAmt=Math.abs((keys.ArrowLeft||keys.KeyA)?1:(keys.ArrowRight||keys.KeyD)?-1:0);
-  if(_steerAmt>0&&spd>0.15&&fc%2===0){
+  if(_steerAmt>0&&spd>0.2&&fc%6===0){
     const sparkX=car.position.x+((keys.ArrowLeft||keys.KeyA)?1.1:-1.1);
-    for(var _sp2=0;_sp2<2&&particles.length<PART_MAX;_sp++){
+    for(var _sp2=0;_sp2<1&&particles.length<PART_MAX;_sp++){
       particles.push({x:sparkX+(Math.random()-.5)*0.3,y:car.position.y+0.15,z:car.position.z-1+Math.random()*0.5,vx:(Math.random()-.5)*0.3,vy:0.1+Math.random()*0.2,vz:(Math.random()-.5)*0.2,life:0.3+Math.random()*0.2,color:Math.random()>0.5?0xffcc44:0xff8833,isSmoke:false});
     }
   }
