@@ -3007,6 +3007,7 @@ function buildPrimitiveCar(){
   var _cbM=new THREE.MeshBasicMaterial({color:0xfffff0,transparent:true,opacity:0.04,side:THREE.DoubleSide,depthWrite:false});
   var beam=new THREE.Mesh(_cbG,_cbM);beam.position.set(0,0.3,9);beam.rotation.x=Math.PI/2;
   car.add(beam);window._carBeam=beam;
+// Underglow  var ugMat=new THREE.MeshBasicMaterial({color:0x22c55e,transparent:true,opacity:0.15,side:THREE.DoubleSide,depthWrite:false});  var ugMesh=new THREE.Mesh(new THREE.PlaneGeometry(3,5.5),ugMat);  ugMesh.rotation.x=-Math.PI/2;ugMesh.position.set(0,-0.05,0);  car.add(ugMesh);window._underGlow=ugMat;
   // Real shadows via DirectionalLight (fake circle shadow removed)
 }
 buildPrimitiveCar();
@@ -5147,6 +5148,7 @@ function animate(){
 
 
     if(boostTimer>0)boostTimer--;if(shieldTimer>0)shieldTimer--;if(turboTimer>0)turboTimer--;var _bodyMat=window._carBodyMat;if(_bodyMat){if(shieldTimer>0)_bodyMat.color.setHex(fc%10<5?0x60a5fa:0x3b82f6);else if(turboTimer>0)_bodyMat.color.setHex(fc%10<5?0xfbbf24:0xf59e0b);else if(boostTimer>0){_bodyMat.color.setHex(fc%10<5?0x4ade80:0x22c55e)}}
+if(window._underGlow){var ug=window._underGlow;if(shieldTimer>0){ug.color.setHex(0x60a5fa);ug.opacity=0.25}else if(turboTimer>0){ug.color.setHex(0xfbbf24);ug.opacity=0.3}else{ug.color.setHex(0x22c55e);ug.opacity=0.1+flow/100*0.15}}
 
     else if(window._carBodyMat){window._carBodyMat.color.setHex(0x22c55e)}
 
