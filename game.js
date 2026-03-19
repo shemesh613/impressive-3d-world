@@ -2970,9 +2970,9 @@ function updateInstances(arr,inst,max,rotSpeed){
 
 // ---- PARTICLES ----
 
-const PART_MAX=120;const particles=[];
+const PART_MAX=200;const particles=[];
 
-const partInst=new THREE.InstancedMesh(new THREE.SphereGeometry(.1,4,4),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05}),PART_MAX);
+const partInst=new THREE.InstancedMesh(new THREE.SphereGeometry(.25,5,5),new THREE.MeshStandardMaterial({roughness:0.9,metalness:0.0,transparent:true,opacity:0.7}),PART_MAX);
 
 partInst.frustumCulled=false;scene.add(partInst);
 
@@ -2980,7 +2980,7 @@ function emitParticles(x,y,z,color,n){for(let i=0;i<n&&particles.length<PART_MAX
 
 function updateParticles(){
 
-  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.z+=p.vz;p.vy-=.01;p.life-=.03;if(p.life<=0)particles.splice(i,1)}
+  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.z+=p.vz;p.vx*=0.96;p.vz*=0.96;p.vy=p.isSmoke?(p.vy*0.98+0.005):(p.vy-0.01);p.life-=p.isSmoke?0.015:0.03;if(p.life<=0)particles.splice(i,1)}
 
   for(let i=0;i<PART_MAX;i++){
 
@@ -3024,7 +3024,7 @@ let gameActive=false,spd=0,dir=0,fc=0,boostTimer=0,lastMilestone=0;
 let scenarioActive=false,scenarioTimer=0,scenarioTimeout=null,usedScenarios=[];
 
 let nextScenarioAt=0,scenariosAnswered=0;
-let lateralVel=0,driftAngle=0,isDrifting=false,driftIntensity=0;
+let lateralVel=0,driftAngle=0,isDrifting=false,driftIntensity=0,handbrake=false;
 
 
 
@@ -4535,7 +4535,7 @@ if(i%2===0){ctx.fillStyle=i<=sr*10?"#fff":"rgba(150,150,170,0.6)";ctx.font="bold
 ctx.save();ctx.translate(cx,cy);ctx.rotate(sa);ctx.beginPath();ctx.moveTo(0,-2);ctx.lineTo(r-25,0);ctx.lineTo(0,2);ctx.closePath();ctx.fillStyle="#ef4444";ctx.fill();ctx.beginPath();ctx.arc(0,0,5,0,Math.PI*2);ctx.fillStyle="#fff";ctx.fill();ctx.restore();
 ctx.fillStyle="#fff";ctx.font="bold 28px Arial";ctx.textAlign="center";ctx.fillText(speed,cx,cy+25);
 ctx.fillStyle="rgba(180,180,200,0.7)";ctx.font="11px Arial";ctx.fillText("km/h",cx,cy+40);
-if(typeof isDrifting!=="undefined"&&isDrifting&&typeof driftIntensity!=="undefined"&&driftIntensity>0.2){ctx.fillStyle="rgba(255,165,0,"+(0.5+driftIntensity*0.5)+")";ctx.font="bold 12px Arial";ctx.fillText("DRIFT",cx,cy-20)}
+if(typeof isDrifting!=="undefined"&&isDrifting&&typeof driftIntensity!=="undefined"&&driftIntensity>0.15){var _da=0.5+driftIntensity*0.5;ctx.save();ctx.fillStyle="rgba(255,165,0,"+_da+")";ctx.font="bold "+(14+Math.floor(driftIntensity*10))+"px Arial";ctx.shadowColor="rgba(255,100,0,0.8)";ctx.shadowBlur=10+driftIntensity*15;ctx.fillText(handbrake?"HANDBRAKE!":"DRIFT!",cx,cy-25);if(driftIntensity>0.5){ctx.fillStyle="rgba(255,220,0,"+(driftIntensity*0.6)+")";ctx.font="bold "+(10+Math.floor(driftIntensity*6))+"px Arial";ctx.fillText("x"+Math.floor(driftIntensity*10)/10,cx,cy-8)}ctx.restore()}
 cv.style.opacity="1"};
 
 // ---- ANIMATE ----
@@ -4587,10 +4587,14 @@ function animate(){
     }
 
     dir*=.94;
-    if(Math.abs(spd)>0.15&&Math.abs(window._steerSmooth||0)>0.015){lateralVel+=(window._steerSmooth||0)*spd*3;isDrifting=true}else{isDrifting=Math.abs(lateralVel)>0.015}
-    lateralVel*=isDrifting?0.965:0.88;driftIntensity=Math.min(1,Math.abs(lateralVel)*12);
-    if(Math.abs(lateralVel)>0.003)car.position.x+=lateralVel;
-    driftAngle=lateralVel*2.5;
+    handbrake=!!(keys.Space);
+    if(handbrake&&spd>0.1){lateralVel+=(window._steerSmooth||0)*spd*4.5;isDrifting=true;spd*=0.985}
+    else if(Math.abs(spd)>0.12&&Math.abs(window._steerSmooth||0)>0.012){lateralVel+=(window._steerSmooth||0)*spd*3.2;isDrifting=true}
+    else{isDrifting=Math.abs(lateralVel)>0.012}
+    lateralVel*=isDrifting?(handbrake?0.975:0.96):0.86;
+    driftIntensity=Math.min(1,Math.abs(lateralVel)*(handbrake?16:12));
+    if(Math.abs(lateralVel)>0.002)car.position.x+=lateralVel;
+    driftAngle=lateralVel*(2.5+driftIntensity*1.5);
 
 
 
@@ -4651,9 +4655,9 @@ function animate(){
     // Drift sound
     if(isDrifting&&driftIntensity>0.2){if(!window._driftOsc)window._startDriftSound();window._updateDriftSound(driftIntensity)}else if(window._driftOsc)window._stopDriftSound();
     // Drift smoke
-    if(isDrifting&&driftIntensity>0.2&&fc%3===0){var _dSx=car.position.x,_dSz=car.position.z-1.5,_dSy=car.position.y+0.1;emitParticles(_dSx-1.1,_dSy,_dSz,0xcccccc,Math.ceil(driftIntensity*3));emitParticles(_dSx+1.1,_dSy,_dSz,0xcccccc,Math.ceil(driftIntensity*3))}
+    if(isDrifting&&driftIntensity>0.15&&fc%2===0){var _dSx=car.position.x,_dSz=car.position.z-1.5,_dSy=car.position.y+0.05;var _sn=Math.ceil(driftIntensity*(handbrake?5:3));for(var _si=0;_si<_sn&&particles.length<PART_MAX;_si++){var _sv=0.08+driftIntensity*0.15;particles.push({x:_dSx-1.15+(Math.random()-.5)*.3,y:_dSy,z:_dSz+(Math.random()-.5)*.5,vx:(Math.random()-.5)*_sv,vy:0.02+Math.random()*0.04,vz:-Math.random()*_sv*0.5,life:1,color:0xdddddd,isSmoke:true});particles.push({x:_dSx+1.15+(Math.random()-.5)*.3,y:_dSy,z:_dSz+(Math.random()-.5)*.5,vx:(Math.random()-.5)*_sv,vy:0.02+Math.random()*0.04,vz:-Math.random()*_sv*0.5,life:1,color:0xdddddd,isSmoke:true})}}
     // Tire marks
-    if(isDrifting&&driftIntensity>0.3&&window._tireMarks){var _tm=window._tireMarks,_ti=_tm.idx%_tm.max,_my=roadY(car.position.z)+0.02;dummy.position.set(car.position.x-1.1,_my,car.position.z-1.5);dummy.rotation.set(-Math.PI/2,0,car.rotation.y);dummy.scale.set(0.3,1+spd*3,1);dummy.updateMatrix();_tm.inst.setMatrixAt(_ti,dummy.matrix);_tm.inst.setColorAt(_ti,new THREE.Color(0x111111));dummy.position.x=car.position.x+1.1;dummy.updateMatrix();_tm.inst.setMatrixAt((_ti+1)%_tm.max,dummy.matrix);_tm.inst.setColorAt((_ti+1)%_tm.max,new THREE.Color(0x111111));_tm.idx+=2;_tm.inst.instanceMatrix.needsUpdate=true;if(_tm.inst.instanceColor)_tm.inst.instanceColor.needsUpdate=true}
+    if(isDrifting&&driftIntensity>0.2&&window._tireMarks){var _tm=window._tireMarks,_ti=_tm.idx%_tm.max,_my=roadY(car.position.z)+0.015;var _mw=0.2+driftIntensity*0.25,_ml=0.8+spd*4;dummy.position.set(car.position.x-1.15,_my,car.position.z-1.5);dummy.rotation.set(-Math.PI/2,0,car.rotation.y);dummy.scale.set(_mw,_ml,1);dummy.updateMatrix();_tm.inst.setMatrixAt(_ti,dummy.matrix);var _mc=new THREE.Color(handbrake?0x222222:0x1a1a1a);_tm.inst.setColorAt(_ti,_mc);dummy.position.x=car.position.x+1.15;dummy.updateMatrix();_tm.inst.setMatrixAt((_ti+1)%_tm.max,dummy.matrix);_tm.inst.setColorAt((_ti+1)%_tm.max,_mc);_tm.idx+=2;_tm.inst.instanceMatrix.needsUpdate=true;if(_tm.inst.instanceColor)_tm.inst.instanceColor.needsUpdate=true}
 
 
 
