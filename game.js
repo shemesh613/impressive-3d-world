@@ -2825,7 +2825,7 @@ if(typeof THREE.GLTFLoader!=='undefined'){
       var center=new THREE.Vector3();box.getCenter(center);
       model.position.x=-center.x;
       model.position.z=-center.z;
-      model.position.y=-box.min.y+0.02;// sit on ground
+      model.position.y=-box.min.y+0.02;model.rotation.y=Math.PI;// face forward
       // Upgrade materials
       model.traverse(function(child){
         if(child.isMesh){
