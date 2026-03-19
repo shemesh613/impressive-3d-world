@@ -887,7 +887,7 @@ ssaoPass.uniforms['aoRadius'].value=0.12;
 composer.addPass(ssaoPass);
 window._ssaoPass=ssaoPass;
 
-const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.6,0.35,0.85);
+const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.7,0.3,0.7);
 composer.addPass(bloomPass);
 window._bloomPass=bloomPass;
 
@@ -1131,9 +1131,9 @@ var _roadTex=(function(){
   // Asphalt noise
   for(var i=0;i<6000;i++){var x=Math.random()*512,y=Math.random()*512,v=28+Math.random()*22;ctx.fillStyle='rgb('+v+','+v+','+(v+4)+')';ctx.fillRect(x,y,1+Math.random()*2,1+Math.random()*2)}
   // Center dashed line
-  ctx.strokeStyle='#dddddd';ctx.lineWidth=3;ctx.setLineDash([40,30]);ctx.beginPath();ctx.moveTo(256,0);ctx.lineTo(256,512);ctx.stroke();
+  ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.setLineDash([40,30]);ctx.beginPath();ctx.moveTo(256,0);ctx.lineTo(256,512);ctx.stroke();
   // Edge lines
-  ctx.setLineDash([]);ctx.lineWidth=2;ctx.strokeStyle='#cccccc';ctx.beginPath();ctx.moveTo(25,0);ctx.lineTo(25,512);ctx.moveTo(487,0);ctx.lineTo(487,512);ctx.stroke();
+  ctx.setLineDash([]);ctx.lineWidth=2;ctx.strokeStyle='#eeeeee';ctx.beginPath();ctx.moveTo(25,0);ctx.lineTo(25,512);ctx.moveTo(487,0);ctx.lineTo(487,512);ctx.stroke();
   var t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1,50);
   if(renderer.capabilities&&renderer.capabilities.getMaxAnisotropy)t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
   return t;
@@ -1174,7 +1174,7 @@ scene.add((() => {
 
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(14,SLEN+1),_roadMat,RSEGS);
 
-  const edgeMat=new THREE.MeshStandardMaterial({color:0x33dd66,emissive:0x22ff55,emissiveIntensity:1.5,roughness:0.2,metalness:0.1});window._edgeMat=edgeMat;
+  const edgeMat=new THREE.MeshStandardMaterial({color:0x33dd66,emissive:0x22ff55,emissiveIntensity:2.5,roughness:0.2,metalness:0.1});window._edgeMat=edgeMat;
 
   const edgeGeo=new THREE.PlaneGeometry(.5,SLEN+0.5);
 
@@ -2583,7 +2583,7 @@ for(let z=-100;z<=7000;z+=10){
 
   const winGeo=new THREE.PlaneGeometry(0.4,0.5);
 
-  const winMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd55,emissiveIntensity:2.0,roughness:0.1,side:THREE.DoubleSide});
+  const winMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd55,emissiveIntensity:3.0,roughness:0.1,side:THREE.DoubleSide});
 
   const winInst=new THREE.InstancedMesh(winGeo,winMat,WIN_N);
 
@@ -3038,7 +3038,7 @@ function buildPrimitiveCar(){
   });
   // Headlight beam cone
   var _cbG=new THREE.ConeGeometry(3.5,14,8,1,true);
-  var _cbM=new THREE.MeshBasicMaterial({color:0xffffee,transparent:true,opacity:0.035,side:THREE.DoubleSide});
+  var _cbM=new THREE.MeshBasicMaterial({color:0xffffee,transparent:true,opacity:0.06,side:THREE.DoubleSide});
   var beam=new THREE.Mesh(_cbG,_cbM);beam.position.set(0,0.3,9);beam.rotation.x=Math.PI/2;
   car.add(beam);window._carBeam=beam;
   // Ground shadow
@@ -3125,7 +3125,7 @@ if(typeof THREE.GLTFLoader!=='undefined'){
       var cs2=new THREE.Mesh(sg,sm);cs2.rotation.x=-Math.PI/2;cs2.position.y=0.01;car.add(cs2);
       // Re-add beam
       var bg=new THREE.ConeGeometry(3.5,14,8,1,true);
-      var bm=new THREE.MeshBasicMaterial({color:0xffffee,transparent:true,opacity:0.035,side:THREE.DoubleSide});
+      var bm=new THREE.MeshBasicMaterial({color:0xffffee,transparent:true,opacity:0.06,side:THREE.DoubleSide});
       var bMesh=new THREE.Mesh(bg,bm);bMesh.position.set(0,0.3,9);bMesh.rotation.x=Math.PI/2;
       car.add(bMesh);window._carBeam=bMesh;
       window._glbLoaded=true;
