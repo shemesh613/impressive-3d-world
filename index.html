@@ -808,6 +808,9 @@ setInterval(function(){const sh=document.createElement('div');sh.className='shoo
 <script>document.getElementById('loadFill').style.width='80%'</script>
 
 <script>
+// FORCE kill old service workers and caches
+if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(r){r.unregister()})})}
+if('caches' in window){caches.keys().then(function(names){names.forEach(function(n){caches.delete(n)})})}
 
 'use strict';
 
