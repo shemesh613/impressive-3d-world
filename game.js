@@ -973,17 +973,48 @@ let _skyReady=false,_currentSkyIdx=-1;
 
 const skyGeo=new THREE.SphereGeometry(340,48,24);
 
-const skyMat=new THREE.MeshBasicMaterial({side:THREE.BackSide,fog:false,color:0x1a2a40});
+// Procedural gradient sky texture
+var _skyCanvas=document.createElement('canvas');_skyCanvas.width=1;_skyCanvas.height=512;
+var _skyCtx=_skyCanvas.getContext('2d');
+var _skyGrad=_skyCtx.createLinearGradient(0,0,0,512);
+_skyGrad.addColorStop(0,'#0a0a1e');     // top: deep space
+_skyGrad.addColorStop(0.3,'#1a1a3e');   // upper: dark blue
+_skyGrad.addColorStop(0.5,'#2a2a4e');   // mid: purple-blue
+_skyGrad.addColorStop(0.7,'#3a2a3e');   // lower: warm purple
+_skyGrad.addColorStop(0.85,'#5a3a3e');  // horizon: warm rose
+_skyGrad.addColorStop(1.0,'#6a4a3a');   // bottom: amber glow
+_skyCtx.fillStyle=_skyGrad;_skyCtx.fillRect(0,0,1,512);
+var _skyGradTex=new THREE.CanvasTexture(_skyCanvas);
+_skyGradTex.needsUpdate=true;
+const skyMat=new THREE.MeshBasicMaterial({side:THREE.BackSide,fog:false,map:_skyGradTex});
 
 const skyMesh=new THREE.Mesh(skyGeo,skyMat);
 
 skyMesh.rotation.x=-0.25;
 
 scene.add(skyMesh);
+// ---- STARS ----
+{
+  var starGeo=new THREE.BufferGeometry();
+  var starPositions=new Float32Array(500*3);
+  for(var si=0;si<500;si++){
+    var theta=Math.random()*Math.PI*2;
+    var phi=Math.random()*Math.PI*0.6;// only upper hemisphere
+    var r=300;
+    starPositions[si*3]=r*Math.sin(phi)*Math.cos(theta);
+    starPositions[si*3+1]=r*Math.cos(phi)+50;
+    starPositions[si*3+2]=r*Math.sin(phi)*Math.sin(theta);
+  }
+  starGeo.setAttribute('position',new THREE.BufferAttribute(starPositions,3));
+  var starMat=new THREE.PointsMaterial({color:0xffffff,size:0.8,transparent:true,opacity:0.7});
+  scene.add(new THREE.Points(starGeo,starMat));
+}
+
 
 let _skyLoaded=0;
 
-_skyPaths.forEach(function(p,i){
+// Sky textures disabled - using procedural gradient
+if(false)_skyPaths.forEach(function(p,i){
 
 _skyLoader.load('./'+p,function(tex){
 
@@ -5294,7 +5325,7 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
 
         const skyIdx=_skyZoneMap[zone];
 
-        if(skyIdx!==_currentSkyIdx&&_skyTextures[skyIdx]){
+        if(false&&skyIdx!==_currentSkyIdx&&_skyTextures[skyIdx]){
 
           skyMat.map=_skyTextures[skyIdx];skyMat.needsUpdate=true;_currentSkyIdx=skyIdx;
 
