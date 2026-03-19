@@ -2785,7 +2785,7 @@ for(let z=-100;z<=7000;z+=10){
 // ---- GROUND FLOOR STOREFRONTS ----
 {
   var sfGeo=new THREE.BoxGeometry(1,0.4,0.05);
-  var sfMat=new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.1});
+  var sfMat=new THREE.MeshStandardMaterial({roughness:0.4,metalness:0.1,emissive:0x442211,emissiveIntensity:0.5});
   var SF_N=Math.min(200,bdata.length);
   var sfInst=new THREE.InstancedMesh(sfGeo,sfMat,SF_N);
   sfInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(SF_N*3),3);
@@ -5843,6 +5843,10 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
   updateInstances(obstacles,obsInst,MAX_OBS,false);updateInstances(powerups,powerupInst,MAX_POWERUPS,true);
 
   updateParticles();fadeTireMarks();if(window._dustMesh){window._dustMesh.position.z=car.position.z;window._dustMesh.position.x=car.position.x;window._dustMesh.rotation.y+=0.001}
+    // Traffic light cycling
+    if(fc%180===0&&window._tlData){var _tld=window._tlData;for(var _ti3=0;_ti3<_tld.n;_ti3++){var _phase=(_ti3+Math.floor(fc/180))%3;_tld.redInst.setColorAt(_ti3,_col.setRGB(_phase===0?1:0.1,0,0));_tld.yelInst.setColorAt(_ti3,_col.setRGB(_phase===1?1:0.1,_phase===1?0.8:0.08,0));_tld.grnInst.setColorAt(_ti3,_col.setRGB(0,_phase===2?1:0.1,0))}_tld.redInst.instanceColor.needsUpdate=true;_tld.yelInst.instanceColor.needsUpdate=true;_tld.grnInst.instanceColor.needsUpdate=true}
+    // Animate city lights (subtle window flicker)
+    if(fc%120===0&&window._winInst){var _fi=Math.floor(Math.random()*Math.min(400,window._winInst.count));for(var _fj=0;_fj<3&&_fi+_fj<window._winInst.count;_fj++){var _fv=0.5+Math.random()*0.5;window._winInst.instanceColor.setXYZ(_fi+_fj,_fv*1,_fv*0.87,_fv*0.33);window._winInst.instanceColor.needsUpdate=true}}
 
   if(fc%6===0){updateHUD();const pi=document.getElementById('powerIndicator');
 
