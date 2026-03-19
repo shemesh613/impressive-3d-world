@@ -857,7 +857,7 @@ renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 
-renderer.toneMappingExposure=1.6;
+renderer.toneMappingExposure=1.7;
 
 document.body.prepend(renderer.domElement);
 
@@ -924,10 +924,10 @@ _envScene.add(new THREE.HemisphereLight(0x4466aa,0x1a1a2e,0.8));
 var _envRT=_pmremGen.fromScene(_envScene,0);
 scene.environment=_envRT.texture;
 
-const ambLight=new THREE.AmbientLight(0x5577aa,1.3);scene.add(ambLight);
+const ambLight=new THREE.AmbientLight(0x334466,0.8);scene.add(ambLight);
 var hemiLight=new THREE.HemisphereLight(0x4466aa,0x1a3a20,0.4);scene.add(hemiLight);
 
-const dirLight=new THREE.DirectionalLight(0xffeedd,2.2);dirLight.position.set(30,50,40);
+const dirLight=new THREE.DirectionalLight(0xffeedd,1.5);dirLight.position.set(30,50,40);
 dirLight.castShadow=true;
 dirLight.shadow.mapSize.width=2048;dirLight.shadow.mapSize.height=2048;
 dirLight.shadow.camera.near=1;dirLight.shadow.camera.far=120;
@@ -2555,11 +2555,11 @@ for(let z=-100;z<=7000;z+=10){
 
 {
 
-  const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshStandardMaterial({roughness:0.55,metalness:0.25,envMapIntensity:1.8});
+  const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshStandardMaterial({roughness:0.65,metalness:0.15,envMapIntensity:1.2});
 
   const inst=new THREE.InstancedMesh(geo,mat,bdata.length);
 
-  const biomes=[[0x7a9ab8,0x8aaac8,0x6a8aa8,0x9abace],[0xb08050,0xc09060,0xa07040,0xd0a070],[0x6868a0,0x7878b0,0x585890,0x8888c0],[0x50a070,0x60b080,0x409060,0x70c090],[0xa05070,0xb06080,0x904060,0xc07090],[0x4090b0,0x50a0c0,0x3080a0,0x60b0d0],[0xb09050,0xc0a060,0xa08040,0xd0b070]];
+  const biomes=[[0x5577aa,0x6688bb,0x4466aa,0x7799cc],[0xcc8844,0xddaa55,0xbb7733,0xeebb66],[0x5555aa,0x6666bb,0x444499,0x7777cc],[0x44aa66,0x55bb77,0x339955,0x66cc88],[0xaa4466,0xbb5577,0x993355,0xcc6688],[0x3388aa,0x4499bb,0x227799,0x55aacc],[0xaa8833,0xbb9944,0x997722,0xccaa55]];
 
   function biomeColor(z,i){const idx=((Math.floor(z/180)%biomes.length)+biomes.length)%biomes.length;const b=biomes[idx];return b[i%b.length]}
 
