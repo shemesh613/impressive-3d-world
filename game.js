@@ -854,8 +854,10 @@ renderer.setSize(innerWidth,innerHeight);
 renderer.setClearColor(0x1a2a40);
 
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 
-renderer.toneMappingExposure=1.7;
+renderer.toneMappingExposure=1.8;
 
 document.body.prepend(renderer.domElement);
 
@@ -891,9 +893,27 @@ composer.addPass(colorPass);
 
 scene.fog=new THREE.FogExp2(0x1a2a40,.0005);
 
+// Environment map for reflections
+var _pmremGen=new THREE.PMREMGenerator(renderer);
+_pmremGen.compileEquirectangularShader();
+var _envScene=new THREE.Scene();
+_envScene.background=new THREE.Color(0x1a2a40);
+var _envLight1=new THREE.DirectionalLight(0xffeedd,0.8);_envLight1.position.set(1,1,1);_envScene.add(_envLight1);
+_envScene.add(new THREE.AmbientLight(0x6688aa,0.5));
+var _envRT=_pmremGen.fromScene(_envScene,0);
+scene.environment=_envRT.texture;
+
 const ambLight=new THREE.AmbientLight(0x6688aa,1.1);scene.add(ambLight);
 
-const dirLight=new THREE.DirectionalLight(0xffeedd,1.5);dirLight.position.set(30,50,40);scene.add(dirLight);
+const dirLight=new THREE.DirectionalLight(0xffeedd,1.8);dirLight.position.set(30,50,40);
+dirLight.castShadow=true;
+dirLight.shadow.mapSize.width=1024;dirLight.shadow.mapSize.height=1024;
+dirLight.shadow.camera.near=1;dirLight.shadow.camera.far=120;
+dirLight.shadow.camera.left=-25;dirLight.shadow.camera.right=25;
+dirLight.shadow.camera.top=25;dirLight.shadow.camera.bottom=-25;
+dirLight.shadow.bias=-0.002;
+dirLight.shadow.normalBias=0.02;
+scene.add(dirLight);scene.add(dirLight.target);
 
 // Moon
 
@@ -2337,7 +2357,7 @@ for(let z=-100;z<=3600;z+=10){
 
 {
 
-  const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05});
+  const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.15,envMapIntensity:1.2});
 
   const inst=new THREE.InstancedMesh(geo,mat,bdata.length);
 
@@ -2355,7 +2375,9 @@ for(let z=-100;z<=3600;z+=10){
 
   });
 
-  inst.instanceMatrix.needsUpdate=true;inst.instanceColor.needsUpdate=true;scene.add(inst);
+  inst.instanceMatrix.needsUpdate=true;inst.instanceColor.needsUpdate=true;
+  inst.castShadow=true;inst.receiveShadow=true;
+  scene.add(inst);
 
   // Building windows (emissive glow)
 
@@ -4639,6 +4661,8 @@ function animate(){
     car.position.y=_baseY+Math.abs(window._suspY)*0.3;
 
     car.rotation.x=-hillSlope;
+    // Shadow camera follows car
+    if(dirLight&&dirLight.shadow){dirLight.position.set(car.position.x+20,50,car.position.z+30);dirLight.target.position.set(car.position.x,0,car.position.z);dirLight.target.updateMatrixWorld()}
 
     // Body roll - lean into turns
 
