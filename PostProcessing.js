@@ -1002,4 +1002,117 @@ THREE.EffectComposer = EffectComposer;
 THREE.RenderPass = RenderPass;
 THREE.ShaderPass = ShaderPass;
 THREE.UnrealBloomPass = UnrealBloomPass;
+
+
+// === FXAAShader ===
+const FXAAShader = {
+	uniforms: {
+		'tDiffuse': { value: null },
+		'resolution': { value: new THREE.Vector2( 1 / 1024, 1 / 512 ) }
+	},
+	vertexShader: /* glsl */`
+		varying vec2 vUv;
+		void main() {
+			vUv = uv;
+			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+		}`,
+	fragmentShader: /* glsl */`
+		precision highp float;
+		uniform sampler2D tDiffuse;
+		uniform vec2 resolution;
+		varying vec2 vUv;
+
+		#define FXAA_REDUCE_MIN (1.0/128.0)
+		#define FXAA_REDUCE_MUL (1.0/8.0)
+		#define FXAA_SPAN_MAX 8.0
+
+		void main() {
+			vec2 res = resolution;
+			vec3 rgbNW = texture2D(tDiffuse, vUv + vec2(-1.0, -1.0) * res).xyz;
+			vec3 rgbNE = texture2D(tDiffuse, vUv + vec2(1.0, -1.0) * res).xyz;
+			vec3 rgbSW = texture2D(tDiffuse, vUv + vec2(-1.0, 1.0) * res).xyz;
+			vec3 rgbSE = texture2D(tDiffuse, vUv + vec2(1.0, 1.0) * res).xyz;
+			vec3 rgbM  = texture2D(tDiffuse, vUv).xyz;
+
+			vec3 luma = vec3(0.299, 0.587, 0.114);
+			float lumaNW = dot(rgbNW, luma);
+			float lumaNE = dot(rgbNE, luma);
+			float lumaSW = dot(rgbSW, luma);
+			float lumaSE = dot(rgbSE, luma);
+			float lumaM  = dot(rgbM,  luma);
+
+			float lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));
+			float lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));
+
+			vec2 dir;
+			dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));
+			dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));
+
+			float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) * (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
+			float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);
+			dir = min(vec2(FXAA_SPAN_MAX), max(vec2(-FXAA_SPAN_MAX), dir * rcpDirMin)) * res;
+
+			vec3 rgbA = 0.5 * (
+				texture2D(tDiffuse, vUv + dir * (1.0/3.0 - 0.5)).xyz +
+				texture2D(tDiffuse, vUv + dir * (2.0/3.0 - 0.5)).xyz);
+			vec3 rgbB = rgbA * 0.5 + 0.25 * (
+				texture2D(tDiffuse, vUv + dir * -0.5).xyz +
+				texture2D(tDiffuse, vUv + dir *  0.5).xyz);
+
+			float lumaB = dot(rgbB, luma);
+			if (lumaB < lumaMin || lumaB > lumaMax) {
+				gl_FragColor = vec4(rgbA, 1.0);
+			} else {
+				gl_FragColor = vec4(rgbB, 1.0);
+			}
+		}`
+};
+
+// === ColorGradingShader ===
+const ColorGradingShader = {
+	uniforms: {
+		'tDiffuse': { value: null },
+		'brightness': { value: 0.0 },
+		'contrast': { value: 1.05 },
+		'saturation': { value: 1.15 },
+		'vignetteAmount': { value: 0.3 },
+		'vignetteFalloff': { value: 0.5 }
+	},
+	vertexShader: /* glsl */`
+		varying vec2 vUv;
+		void main() {
+			vUv = uv;
+			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+		}`,
+	fragmentShader: /* glsl */`
+		precision highp float;
+		uniform sampler2D tDiffuse;
+		uniform float brightness;
+		uniform float contrast;
+		uniform float saturation;
+		uniform float vignetteAmount;
+		uniform float vignetteFalloff;
+		varying vec2 vUv;
+
+		void main() {
+			vec4 color = texture2D(tDiffuse, vUv);
+			// Brightness
+			color.rgb += brightness;
+			// Contrast
+			color.rgb = (color.rgb - 0.5) * contrast + 0.5;
+			// Saturation
+			float luminance = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+			color.rgb = mix(vec3(luminance), color.rgb, saturation);
+			// Vignette
+			vec2 uv = vUv * 2.0 - 1.0;
+			float vig = 1.0 - dot(uv * vignetteAmount, uv * vignetteAmount);
+			vig = clamp(pow(vig, vignetteFalloff), 0.0, 1.0);
+			color.rgb *= vig;
+			gl_FragColor = color;
+		}`
+};
+
+THREE.FXAAShader = FXAAShader;
+THREE.ColorGradingShader = ColorGradingShader;
+
 })();

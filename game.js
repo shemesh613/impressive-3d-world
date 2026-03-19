@@ -872,9 +872,22 @@ cam.position.set(0,8.5,16);
 const composer=new THREE.EffectComposer(renderer);
 const renderPass=new THREE.RenderPass(scene,cam);
 composer.addPass(renderPass);
-const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.5,0.4,0.88);
+const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.6,0.4,0.85);
 composer.addPass(bloomPass);
 window._bloomPass=bloomPass;
+
+// FXAA anti-aliasing
+const fxaaPass=new THREE.ShaderPass(THREE.FXAAShader);
+fxaaPass.uniforms['resolution'].value.set(1/innerWidth,1/innerHeight);
+composer.addPass(fxaaPass);
+
+// Color Grading
+const colorPass=new THREE.ShaderPass(THREE.ColorGradingShader);
+colorPass.uniforms['contrast'].value=1.08;
+colorPass.uniforms['saturation'].value=1.2;
+colorPass.uniforms['vignetteAmount'].value=0.35;
+colorPass.uniforms['vignetteFalloff'].value=0.55;
+composer.addPass(colorPass);
 
 scene.fog=new THREE.FogExp2(0x1a2a40,.0005);
 
@@ -5518,5 +5531,5 @@ const _ls=document.getElementById('loadScreen');if(_ls)setTimeout(()=>{_ls.class
 
 
 
-addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(typeof composer!=='undefined')composer.setSize(innerWidth,innerHeight)});
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(typeof composer!=='undefined')composer.setSize(innerWidth,innerHeight);if(typeof fxaaPass!=='undefined')fxaaPass.uniforms['resolution'].value.set(1/innerWidth,1/innerHeight)});
 
