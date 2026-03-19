@@ -3455,7 +3455,7 @@ const car=new THREE.Group();
   if(typeof THREE.GLTFLoader==='function'){
     try{
       new THREE.GLTFLoader().load('car-model.glb',function(gltf){
-        var m=gltf.scene;m.scale.set(1.2,1.2,1.2);m.rotation.y=Math.PI;m.position.y=0.1;
+        var m=gltf.scene;m.scale.set(1.2,1.2,1.2);m.rotation.y=0;m.position.y=0.1;
         m.traverse(function(ch){if(ch.isMesh){ch.castShadow=true}});
         car.add(m);_carLoaded=true;
       },undefined,function(){_buildFallbackCar()});
