@@ -871,9 +871,22 @@ const cam=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,0.5,700);
 
 cam.position.set(0,8.5,16);
 // ---- POST-PROCESSING ----
-const composer=new THREE.EffectComposer(renderer);
+var _rt=new THREE.WebGLRenderTarget(innerWidth,innerHeight,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
+_rt.depthTexture=new THREE.DepthTexture();_rt.depthTexture.type=THREE.UnsignedShortType;
+const composer=new THREE.EffectComposer(renderer,_rt);
 const renderPass=new THREE.RenderPass(scene,cam);
 composer.addPass(renderPass);
+// SSAO pass
+var ssaoPass=new THREE.ShaderPass(THREE.SimpleSSAOShader);
+ssaoPass.uniforms['tDepth'].value=_rt.depthTexture;
+ssaoPass.uniforms['resolution'].value.set(1/innerWidth,1/innerHeight);
+ssaoPass.uniforms['cameraNear'].value=0.5;
+ssaoPass.uniforms['cameraFar'].value=700;
+ssaoPass.uniforms['aoStrength'].value=0.45;
+ssaoPass.uniforms['aoRadius'].value=0.12;
+composer.addPass(ssaoPass);
+window._ssaoPass=ssaoPass;
+
 const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.75,0.4,0.75);
 composer.addPass(bloomPass);
 window._bloomPass=bloomPass;
@@ -896,6 +909,12 @@ colorPass.uniforms['saturation'].value=1.2;
 colorPass.uniforms['vignetteAmount'].value=0.45;
 colorPass.uniforms['vignetteFalloff'].value=0.6;
 composer.addPass(colorPass);
+
+// Film Grain (subtle)
+var grainPass=new THREE.ShaderPass(THREE.FilmGrainShader);
+grainPass.uniforms['intensity'].value=0.04;
+composer.addPass(grainPass);
+window._grainPass=grainPass;
 
 scene.fog=new THREE.FogExp2(0x1a2a40,.0005);
 
@@ -2679,7 +2698,7 @@ for(let z=-100;z<=3600;z+=10){
 
 // ---- CLOUDS ----
 
-const cloudGeo=new THREE.SphereGeometry(1,6,4);const cloudMat=new THREE.MeshBasicMaterial({color:0x1a2a3a,transparent:true,opacity:.3});const CLOUD_N=20;const cloudInst=new THREE.InstancedMesh(cloudGeo,cloudMat,CLOUD_N);const cloudData=[];for(let i=0;i<CLOUD_N;i++){cloudData.push({x:(Math.random()-.5)*80,y:18+Math.random()*12,z:Math.random()*400-50,sx:2+Math.random()*3,sy:.5+Math.random()*.3,sz:1+Math.random()*1.5,spd:.002+Math.random()*.003})}function updateClouds(){cloudData.forEach((c,i)=>{c.x+=c.spd;if(c.x>50)c.x=-50;dummy.position.set(c.x,c.y,c.z);dummy.scale.set(c.sx,c.sy,c.sz);dummy.rotation.set(0,0,0);dummy.updateMatrix();cloudInst.setMatrixAt(i,dummy.matrix)});cloudInst.instanceMatrix.needsUpdate=true}updateClouds();scene.add(cloudInst);
+const cloudGeo=new THREE.SphereGeometry(1,6,4);const cloudMat=new THREE.MeshBasicMaterial({color:0x2a3a5a,transparent:true,opacity:.4});const CLOUD_N=30;const cloudInst=new THREE.InstancedMesh(cloudGeo,cloudMat,CLOUD_N);const cloudData=[];for(let i=0;i<CLOUD_N;i++){cloudData.push({x:(Math.random()-.5)*80,y:18+Math.random()*12,z:Math.random()*400-50,sx:4+Math.random()*6,sy:.8+Math.random()*.5,sz:2+Math.random()*3,spd:.002+Math.random()*.003})}function updateClouds(){cloudData.forEach((c,i)=>{c.x+=c.spd;if(c.x>50)c.x=-50;dummy.position.set(c.x,c.y,c.z);dummy.scale.set(c.sx,c.sy,c.sz);dummy.rotation.set(0,0,0);dummy.updateMatrix();cloudInst.setMatrixAt(i,dummy.matrix)});cloudInst.instanceMatrix.needsUpdate=true}updateClouds();scene.add(cloudInst);
 
 scene.add(new THREE.Mesh(new THREE.SphereGeometry(200,8,4),new THREE.MeshBasicMaterial({color:0x0c1828,side:THREE.BackSide})));
 
@@ -4435,7 +4454,8 @@ function updateHUD(){
   var _sg=document.getElementById('speedGlow');if(_sg)_sg.style.opacity=spd>0.2?String(Math.min(0.8,(spd-0.2)*2)):'0';
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.12?String(Math.min(0.9,(spd-0.12)*2.5)):'0';
 
-  if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
+  if(window._grainPass)window._grainPass.uniforms['time'].value=performance.now()*0.001;
+    if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
     if(window._chromaPass){var _ci=Math.min(0.008,spd*0.006);if(handbrake&&isDrifting)_ci*=2.5;window._chromaPass.uniforms['intensity'].value+=((_ci)-window._chromaPass.uniforms['intensity'].value)*0.1}
 
   scene.fog.density=0.00075-spd*0.0005;scene.fog.color.setHex(spd>0.1?0x1e3050:0x1a2a40);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();// fog clears at speed
@@ -5691,5 +5711,5 @@ const _ls=document.getElementById('loadScreen');if(_ls)setTimeout(()=>{_ls.class
 
 
 
-addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(typeof composer!=='undefined')composer.setSize(innerWidth,innerHeight);if(typeof fxaaPass!=='undefined')fxaaPass.uniforms['resolution'].value.set(1/innerWidth,1/innerHeight)});
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(typeof composer!=='undefined')composer.setSize(innerWidth,innerHeight);if(typeof fxaaPass!=='undefined')fxaaPass.uniforms['resolution'].value.set(1/innerWidth,1/innerHeight);if(window._ssaoPass)window._ssaoPass.uniforms['resolution'].value.set(1/innerWidth,1/innerHeight)});
 
