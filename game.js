@@ -1115,7 +1115,7 @@ var _groundTex=(function(){
 
 scene.add((() => {
 
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshLambertMaterial({color:0x060806,map:_groundTex,reflectivity:0}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshBasicMaterial({color:0x050705,map:_groundTex}));
 
   m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;m.receiveShadow=false;return m;
 
