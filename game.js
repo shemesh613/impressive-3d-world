@@ -1010,7 +1010,7 @@ var dummy=new THREE.Object3D();
 // ---- ATMOSPHERIC DUST PARTICLES ----
 {
   var dustGeo=new THREE.BufferGeometry();
-  var DUST_N=300;
+  var DUST_N=150;
   var dustPos=new Float32Array(DUST_N*3);
   var dustSizes=new Float32Array(DUST_N);
   for(var di=0;di<DUST_N;di++){
@@ -1024,7 +1024,7 @@ var dummy=new THREE.Object3D();
 {
   var rayGeo=new THREE.PlaneGeometry(0.5,20);
   var rayMat=new THREE.MeshBasicMaterial({color:0xffeedd,transparent:true,opacity:0.02,side:THREE.DoubleSide,fog:true,depthWrite:false});
-  var RAY_N=30;
+  var RAY_N=15;
   var rayInst=new THREE.InstancedMesh(rayGeo,rayMat,RAY_N);
   for(var ri=0;ri<RAY_N;ri++){
     var rz=Math.random()*2000;
@@ -1168,11 +1168,11 @@ scene.add((() => {
 
 {
 
-  const RSEGS=1200,SLEN=6;
+  const RSEGS=800,SLEN=9;
 
   const _roadMat=new THREE.MeshStandardMaterial({roughness:0.45,metalness:0.2,color:0x2a2a38,envMapIntensity:0.8});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
 
-  const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(14,SLEN+1),_roadMat,RSEGS);
+  const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(14,SLEN+1.5),_roadMat,RSEGS);
 
   const edgeMat=new THREE.MeshStandardMaterial({color:0x33dd66,emissive:0x22ff55,emissiveIntensity:2.5,roughness:0.2,metalness:0.1});window._edgeMat=edgeMat;
 
@@ -1249,7 +1249,7 @@ scene.add((() => {
 {
   var wetGeo=new THREE.PlaneGeometry(3,4);
   var wetMat=new THREE.MeshStandardMaterial({color:0x1a1a28,roughness:0.1,metalness:0.5,transparent:true,opacity:0.4,envMapIntensity:3});
-  var WET_N=80;
+  var WET_N=40;
   var wetInst=new THREE.InstancedMesh(wetGeo,wetMat,WET_N);
   for(var wi2=0;wi2<WET_N;wi2++){
     var wz=200+wi2*70+Math.random()*30;
@@ -2579,7 +2579,7 @@ for(let z=-100;z<=7000;z+=10){
 
   // Building windows (emissive glow)
 
-  const WIN_N=Math.min(600,bdata.length*2);
+  const WIN_N=Math.min(400,bdata.length*2);
 
   const winGeo=new THREE.PlaneGeometry(0.4,0.5);
 
@@ -2732,7 +2732,7 @@ for(let z=-100;z<=7000;z+=10){
 {
   var ledgeGeo=new THREE.BoxGeometry(1.08,0.08,1.08);
   var ledgeMat=new THREE.MeshStandardMaterial({color:0x555566,roughness:0.6,metalness:0.3});
-  var LEDGE_N=Math.min(800,bdata.length*2);
+  var LEDGE_N=Math.min(400,bdata.length);
   var ledgeInst=new THREE.InstancedMesh(ledgeGeo,ledgeMat,LEDGE_N);
   var li=0;
   for(var bi=0;bi<bdata.length&&li<LEDGE_N;bi++){
@@ -2758,7 +2758,7 @@ for(let z=-100;z<=7000;z+=10){
 {
   var roofGeo=new THREE.BoxGeometry(1,0.15,1);
   var roofMat=new THREE.MeshStandardMaterial({color:0x2a2a3a,roughness:0.8,metalness:0.1});
-  var ROOF_N=Math.min(600,bdata.length);
+  var ROOF_N=Math.min(400,bdata.length);
   var roofInst=new THREE.InstancedMesh(roofGeo,roofMat,ROOF_N);
   roofInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(ROOF_N*3),3);
   var roofColors=[0x2a2a3a,0x3a2a2a,0x2a3a2a,0x3a3a2a,0x2a2a4a];
@@ -2786,7 +2786,7 @@ for(let z=-100;z<=7000;z+=10){
 {
   var sfGeo=new THREE.BoxGeometry(1,0.4,0.05);
   var sfMat=new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.1});
-  var SF_N=Math.min(400,bdata.length);
+  var SF_N=Math.min(200,bdata.length);
   var sfInst=new THREE.InstancedMesh(sfGeo,sfMat,SF_N);
   sfInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(SF_N*3),3);
   var sfColors=[0xdd8844,0x44aa88,0x8866cc,0xcc5555,0x55aadd,0xaaaa44];
@@ -2957,7 +2957,7 @@ for(let z=-100;z<=7000;z+=10){
 
 // ---- CLOUDS ----
 
-const cloudGeo=new THREE.SphereGeometry(1,6,4);const cloudMat=new THREE.MeshBasicMaterial({color:0x2a3a5a,transparent:true,opacity:.4});const CLOUD_N=30;const cloudInst=new THREE.InstancedMesh(cloudGeo,cloudMat,CLOUD_N);const cloudData=[];for(let i=0;i<CLOUD_N;i++){cloudData.push({x:(Math.random()-.5)*80,y:18+Math.random()*12,z:Math.random()*400-50,sx:4+Math.random()*6,sy:.8+Math.random()*.5,sz:2+Math.random()*3,spd:.002+Math.random()*.003})}function updateClouds(){cloudData.forEach((c,i)=>{c.x+=c.spd;if(c.x>50)c.x=-50;dummy.position.set(c.x,c.y,c.z);dummy.scale.set(c.sx,c.sy,c.sz);dummy.rotation.set(0,0,0);dummy.updateMatrix();cloudInst.setMatrixAt(i,dummy.matrix)});cloudInst.instanceMatrix.needsUpdate=true}updateClouds();scene.add(cloudInst);
+const cloudGeo=new THREE.SphereGeometry(1,6,4);const cloudMat=new THREE.MeshBasicMaterial({color:0x2a3a5a,transparent:true,opacity:.4});const CLOUD_N=15;const cloudInst=new THREE.InstancedMesh(cloudGeo,cloudMat,CLOUD_N);const cloudData=[];for(let i=0;i<CLOUD_N;i++){cloudData.push({x:(Math.random()-.5)*80,y:18+Math.random()*12,z:Math.random()*400-50,sx:4+Math.random()*6,sy:.8+Math.random()*.5,sz:2+Math.random()*3,spd:.002+Math.random()*.003})}function updateClouds(){cloudData.forEach((c,i)=>{c.x+=c.spd;if(c.x>50)c.x=-50;dummy.position.set(c.x,c.y,c.z);dummy.scale.set(c.sx,c.sy,c.sz);dummy.rotation.set(0,0,0);dummy.updateMatrix();cloudInst.setMatrixAt(i,dummy.matrix)});cloudInst.instanceMatrix.needsUpdate=true}updateClouds();scene.add(cloudInst);
 
 scene.add(new THREE.Mesh(new THREE.SphereGeometry(200,8,4),new THREE.MeshBasicMaterial({color:0x0c1828,side:THREE.BackSide})));
 
@@ -3370,7 +3370,7 @@ function updateParticles(){
 
 // ---- TREES (instanced) ----
 {
-  var TREE_N=600;
+  var TREE_N=400;
   var trunkGeo=new THREE.CylinderGeometry(0.15,0.2,1.5,5);
   var trunkMat=new THREE.MeshStandardMaterial({color:0x8B5A2B,roughness:0.9,metalness:0.05});
   var trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,TREE_N);
