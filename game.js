@@ -1115,7 +1115,7 @@ var _groundTex=(function(){
 
 scene.add((() => {
 
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.98,metalness:0.0,color:0x080a08,map:_groundTex}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshLambertMaterial({color:0x060806,map:_groundTex,reflectivity:0}));
 
   m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;m.receiveShadow=true;return m;
 
@@ -4770,7 +4770,7 @@ function updateHUD(){
 
   // Dynamic road reflectivity — more reflective at speed
 
-  if(window._roadMat){window._roadMat.roughness=0.55-spd*0.3;window._roadMat.metalness=0.15+spd*0.25}
+  if(window._roadMat){window._roadMat.roughness=0.45-spd*0.12;window._roadMat.metalness=0.2+spd*0.1}
 
   var _sg=document.getElementById('speedGlow');if(_sg)_sg.style.opacity=spd>0.2?String(Math.min(0.8,(spd-0.2)*2)):'0';
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.12?String(Math.min(0.9,(spd-0.12)*2.5)):'0';
