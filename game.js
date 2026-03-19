@@ -1058,9 +1058,9 @@ function roadX(z){
 
 scene.add((() => {
 
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,6000),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x0d1a2d}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x0d1a2d}));
 
-  m.rotation.x=-Math.PI/2;m.position.y=-2;return m;
+  m.rotation.x=-Math.PI/2;m.position.y=-2;m.position.z=3500;return m;
 
 })());
 
@@ -1072,7 +1072,7 @@ scene.add((() => {
 
 {
 
-  const RSEGS=600,SLEN=6;
+  const RSEGS=1200,SLEN=6;
 
   const _roadMat=new THREE.MeshStandardMaterial({roughness:0.55,metalness:0.15,color:0x2a3050});window._roadMat=_roadMat;
 
@@ -1374,7 +1374,7 @@ scene.add((() => {
 
 // ---- TRAFFIC LIGHTS ----
 
-{  const TL_N=15;  const tlPoleGeo=new THREE.CylinderGeometry(.06,.06,4,6);  const tlPoleMat=new THREE.MeshPhongMaterial({color:0x444444,shininess:5});  const tlPoleInst=new THREE.InstancedMesh(tlPoleGeo,tlPoleMat,TL_N);  const tlBoxGeo=new THREE.BoxGeometry(.5,1.2,.3);  const tlBoxMat=new THREE.MeshPhongMaterial({color:0x222222,shininess:5});  const tlBoxInst=new THREE.InstancedMesh(tlBoxGeo,tlBoxMat,TL_N);  const tlLightGeo=new THREE.SphereGeometry(.15,8,8);  const tlRedMat=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0xff0000,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlYelMat=new THREE.MeshStandardMaterial({color:0xffcc00,emissive:0xffcc00,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlGrnMat=new THREE.MeshStandardMaterial({color:0x00ff00,emissive:0x00ff00,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlRedInst=new THREE.InstancedMesh(tlLightGeo,tlRedMat,TL_N);  const tlYelInst=new THREE.InstancedMesh(tlLightGeo,tlYelMat,TL_N);  const tlGrnInst=new THREE.InstancedMesh(tlLightGeo,tlGrnMat,TL_N);  const tlPositions=[];  for(let i=0;i<TL_N;i++){    const side=i%2===0?-4.5:4.5;    const z=i*200+100;    tlPositions.push({x:side,z:z});    dummy.position.set(side,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    tlPoleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,4.2,z);dummy.updateMatrix();    tlBoxInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.55,z);dummy.updateMatrix();tlRedInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,4.2,z);dummy.updateMatrix();tlYelInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+3.85,z);dummy.updateMatrix();tlGrnInst.setMatrixAt(i,dummy.matrix);  }  tlPoleInst.instanceMatrix.needsUpdate=true;tlBoxInst.instanceMatrix.needsUpdate=true;  tlRedInst.instanceMatrix.needsUpdate=true;tlYelInst.instanceMatrix.needsUpdate=true;tlGrnInst.instanceMatrix.needsUpdate=true;  scene.add(tlPoleInst);scene.add(tlBoxInst);scene.add(tlRedInst);scene.add(tlYelInst);scene.add(tlGrnInst);  window._tlData={redInst:tlRedInst,yelInst:tlYelInst,grnInst:tlGrnInst,positions:tlPositions,n:TL_N};
+{  const TL_N=30;  const tlPoleGeo=new THREE.CylinderGeometry(.06,.06,4,6);  const tlPoleMat=new THREE.MeshPhongMaterial({color:0x444444,shininess:5});  const tlPoleInst=new THREE.InstancedMesh(tlPoleGeo,tlPoleMat,TL_N);  const tlBoxGeo=new THREE.BoxGeometry(.5,1.2,.3);  const tlBoxMat=new THREE.MeshPhongMaterial({color:0x222222,shininess:5});  const tlBoxInst=new THREE.InstancedMesh(tlBoxGeo,tlBoxMat,TL_N);  const tlLightGeo=new THREE.SphereGeometry(.15,8,8);  const tlRedMat=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0xff0000,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlYelMat=new THREE.MeshStandardMaterial({color:0xffcc00,emissive:0xffcc00,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlGrnMat=new THREE.MeshStandardMaterial({color:0x00ff00,emissive:0x00ff00,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlRedInst=new THREE.InstancedMesh(tlLightGeo,tlRedMat,TL_N);  const tlYelInst=new THREE.InstancedMesh(tlLightGeo,tlYelMat,TL_N);  const tlGrnInst=new THREE.InstancedMesh(tlLightGeo,tlGrnMat,TL_N);  const tlPositions=[];  for(let i=0;i<TL_N;i++){    const side=i%2===0?-4.5:4.5;    const z=i*200+100;    tlPositions.push({x:side,z:z});    dummy.position.set(side,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    tlPoleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,4.2,z);dummy.updateMatrix();    tlBoxInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.55,z);dummy.updateMatrix();tlRedInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,4.2,z);dummy.updateMatrix();tlYelInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+3.85,z);dummy.updateMatrix();tlGrnInst.setMatrixAt(i,dummy.matrix);  }  tlPoleInst.instanceMatrix.needsUpdate=true;tlBoxInst.instanceMatrix.needsUpdate=true;  tlRedInst.instanceMatrix.needsUpdate=true;tlYelInst.instanceMatrix.needsUpdate=true;tlGrnInst.instanceMatrix.needsUpdate=true;  scene.add(tlPoleInst);scene.add(tlBoxInst);scene.add(tlRedInst);scene.add(tlYelInst);scene.add(tlGrnInst);  window._tlData={redInst:tlRedInst,yelInst:tlYelInst,grnInst:tlGrnInst,positions:tlPositions,n:TL_N};
 
 }
 
@@ -1566,7 +1566,7 @@ scene.add((() => {
 
 {
 
-  const crossN=20;
+  const crossN=40;
 
   const crossGeo=new THREE.PlaneGeometry(40,5);
 
@@ -2350,7 +2350,7 @@ scene.add((() => {
 
 const bdata=[];
 
-for(let z=-100;z<=3600;z+=10){
+for(let z=-100;z<=7000;z+=10){
 
   const _rx=roadX(z);
 
@@ -2554,7 +2554,7 @@ for(let z=-100;z<=3600;z+=10){
 
 
 
-// ---- TREES removed ----// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=2800;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshPhongMaterial({color:0x888888,shininess:20});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.4,6,6);  const glowMat2=new THREE.MeshStandardMaterial({color:0xffffcc,emissive:0xffdd66,emissiveIntensity:1.0,roughness:0.1,metalness:0.3});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
+// ---- TREES removed ----// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=7000;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshPhongMaterial({color:0x888888,shininess:20});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.4,6,6);  const glowMat2=new THREE.MeshStandardMaterial({color:0xffffcc,emissive:0xffdd66,emissiveIntensity:1.0,roughness:0.1,metalness:0.3});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
 
 // ---- ELECTRIC POLES WITH WIRES ----
 
@@ -2855,7 +2855,7 @@ if(typeof THREE.GLTFLoader!=='undefined'){
       var bMesh=new THREE.Mesh(bg,bm);bMesh.position.set(0,0.3,9);bMesh.rotation.x=Math.PI/2;
       car.add(bMesh);window._carBeam=bMesh;
       window._glbLoaded=true;
-      console.log('Ferrari GLB loaded, wheels:',window._glbWheels.length);
+      console.log('Ferrari GLB loaded, meshes:',model.children.length,'wheels:',window._glbWheels.length);
     },null,function(err){
       console.warn('Ferrari failed, trying Kenney:',err);
       // Fallback to Kenney race car
@@ -3108,7 +3108,7 @@ function updateParticles(){
   leafInst.castShadow=true;
   var _treeColors=[0x228B22,0x2E8B57,0x006400,0x32CD32,0x3CB371,0x556B2F,0x6B8E23,0x008000];
   var _ti2=0;
-  for(var tz=-50;tz<=3600;tz+=5){
+  for(var tz=-50;tz<=7000;tz+=5){
     if(_ti2>=TREE_N)break;
     var _trx=roadX(tz);
     var zone2=Math.floor(tz/300)%7;
