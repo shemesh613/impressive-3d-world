@@ -907,7 +907,7 @@ const ambLight=new THREE.AmbientLight(0x6688aa,1.1);scene.add(ambLight);
 
 const dirLight=new THREE.DirectionalLight(0xffeedd,1.8);dirLight.position.set(30,50,40);
 dirLight.castShadow=true;
-dirLight.shadow.mapSize.width=1024;dirLight.shadow.mapSize.height=1024;
+dirLight.shadow.mapSize.width=2048;dirLight.shadow.mapSize.height=2048;
 dirLight.shadow.camera.near=1;dirLight.shadow.camera.far=120;
 dirLight.shadow.camera.left=-25;dirLight.shadow.camera.right=25;
 dirLight.shadow.camera.top=25;dirLight.shadow.camera.bottom=-25;
@@ -2695,7 +2695,7 @@ function buildPrimitiveCar(){
   while(car.children.length)car.remove(car.children[0]);
   const _p=new THREE.MeshStandardMaterial({color:0x22c55e,roughness:0.08,metalness:0.85,envMapIntensity:2.5});
   const _d=new THREE.MeshStandardMaterial({color:0x111111,roughness:0.4,metalness:0.3});
-  const _g=new THREE.MeshStandardMaterial({color:0x88ccff,roughness:0,metalness:0.95,transparent:true,opacity:0.4,side:THREE.DoubleSide});
+  const _g=new THREE.MeshStandardMaterial({color:0xccddff,roughness:0.02,metalness:0,transparent:true,opacity:0.65,side:THREE.DoubleSide,envMapIntensity:1.5});
   const _ch=new THREE.MeshStandardMaterial({color:0xeeeeee,roughness:0.03,metalness:0.98,envMapIntensity:3});
   // Sporty body - lower, wider
   const _bs=new THREE.Shape();
@@ -3019,6 +3019,82 @@ function updateParticles(){
 
 
 
+// ---- TREES (instanced) ----
+{
+  var TREE_N=800;
+  var trunkGeo=new THREE.CylinderGeometry(0.15,0.2,1.5,5);
+  var trunkMat=new THREE.MeshStandardMaterial({color:0x8B5A2B,roughness:0.9,metalness:0.05});
+  var trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,TREE_N);
+  trunkInst.castShadow=true;
+  var leafGeo=new THREE.ConeGeometry(1.2,3,6);
+  var leafMat=new THREE.MeshStandardMaterial({color:0x228B22,roughness:0.8,metalness:0.05});
+  var leafInst=new THREE.InstancedMesh(leafGeo,leafMat,TREE_N);
+  leafInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(TREE_N*3),3);
+  leafInst.castShadow=true;
+  var _treeColors=[0x228B22,0x2E8B57,0x006400,0x32CD32,0x3CB371,0x556B2F,0x6B8E23,0x008000];
+  var _ti2=0;
+  for(var tz=-50;tz<=3600;tz+=5){
+    if(_ti2>=TREE_N)break;
+    var _trx=roadX(tz);
+    var zone2=Math.floor(tz/300)%7;
+    // More trees in parks(3) and residential(5), fewer in downtown(0) and industrial(4)
+    var treeChance=[0.08,0.2,0.15,0.5,0.05,0.3,0.12][zone2];
+    if(Math.random()>treeChance)continue;
+    // Place on both sides of road
+    var sides=[-1,1];
+    for(var si=0;si<sides.length&&_ti2<TREE_N;si++){
+      var tx=_trx+sides[si]*(8+Math.random()*18);
+      var ty=roadY(tz);
+      var tScale=0.6+Math.random()*0.8;
+      // Trunk
+      dummy.position.set(tx,ty+tScale*0.75,tz);
+      dummy.scale.set(tScale,tScale,tScale);
+      dummy.rotation.set(0,Math.random()*Math.PI*2,0);
+      dummy.updateMatrix();
+      trunkInst.setMatrixAt(_ti2,dummy.matrix);
+      // Leaves
+      dummy.position.set(tx,ty+tScale*2.5,tz);
+      dummy.scale.set(tScale*(0.8+Math.random()*0.4),tScale*(0.8+Math.random()*0.5),tScale*(0.8+Math.random()*0.4));
+      dummy.updateMatrix();
+      leafInst.setMatrixAt(_ti2,dummy.matrix);
+      var _tc=new THREE.Color(_treeColors[Math.floor(Math.random()*_treeColors.length)]);
+      leafInst.instanceColor.setXYZ(_ti2,_tc.r,_tc.g,_tc.b);
+      _ti2++;
+    }
+  }
+  trunkInst.count=_ti2;leafInst.count=_ti2;
+  trunkInst.instanceMatrix.needsUpdate=true;
+  leafInst.instanceMatrix.needsUpdate=true;
+  leafInst.instanceColor.needsUpdate=true;
+  scene.add(trunkInst);scene.add(leafInst);
+  console.log('Trees planted:',_ti2);
+}
+
+// Tire mark fade function
+function fadeTireMarks(){
+  if(!window._tireMarks)return;
+  var tm=window._tireMarks,changed=false;
+  for(var i=0;i<tm.max;i++){
+    if(tm.ages[i]>0){
+      tm.ages[i]+=0.004;// age speed
+      if(tm.ages[i]>1){
+        // fully faded - hide
+        tm.ages[i]=0;
+        dummy.position.set(0,-100,0);dummy.scale.setScalar(0);dummy.updateMatrix();
+        tm.inst.setMatrixAt(i,dummy.matrix);
+        changed=true;
+      }else{
+        // fade color from dark to transparent
+        var fade=1-tm.ages[i];
+        var c=0.07*fade;
+        tm.inst.instanceColor.setXYZ(i,c,c,c);
+        changed=true;
+      }
+    }
+  }
+  if(changed){tm.inst.instanceMatrix.needsUpdate=true;tm.inst.instanceColor.needsUpdate=true}
+}
+
 // ---- ROOFTOP DETAILS ----
 {var _rtMax=80,_rtGeo=new THREE.CylinderGeometry(0.3,0.4,1.2,6),_rtMat=new THREE.MeshStandardMaterial({color:0x556677,roughness:0.6,metalness:0.4});
 var _rtInst=new THREE.InstancedMesh(_rtGeo,_rtMat,_rtMax);
@@ -3029,8 +3105,11 @@ if(b.h>8&&_rti<_rtMax){dummy.position.set(b.x+(Math.random()-0.5)*b.w*0.4,b.y+b.
 _rtInst.count=_rti;_antInst.count=_rti;scene.add(_rtInst);scene.add(_antInst)}
 // ---- TIRE MARKS ----
 {var _tmGeo=new THREE.PlaneGeometry(0.3,0.8),_tmMat=new THREE.MeshBasicMaterial({color:0x111111,transparent:true,opacity:0.6,depthWrite:false});
-var _tmInst=new THREE.InstancedMesh(_tmGeo,_tmMat,200);_tmInst.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-var _tmD=new THREE.Object3D();_tmD.position.set(0,-100,0);_tmD.updateMatrix();for(var i=0;i<200;i++)_tmInst.setMatrixAt(i,_tmD.matrix);scene.add(_tmInst);window._tireMarks={inst:_tmInst,idx:0,max:200}}
+var _tmInst=new THREE.InstancedMesh(_tmGeo,_tmMat,300);_tmInst.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+_tmInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(300*3),3);
+var _tmD=new THREE.Object3D();_tmD.position.set(0,-100,0);_tmD.updateMatrix();for(var i=0;i<300;i++){_tmInst.setMatrixAt(i,_tmD.matrix);_tmInst.instanceColor.setXYZ(i,0.07,0.07,0.07)}
+_tmInst.instanceColor.needsUpdate=true;
+scene.add(_tmInst);window._tireMarks={inst:_tmInst,idx:0,max:300,ages:new Float32Array(300)}}
 // Drift tire screech
 window._driftOsc=null;
 window._startDriftSound=function(){if(!window._audioCtx||window._driftOsc)return;try{var ctx=window._audioCtx,osc=ctx.createOscillator(),gain=ctx.createGain(),flt=ctx.createBiquadFilter();osc.type="sawtooth";osc.frequency.value=200+Math.random()*100;flt.type="bandpass";flt.frequency.value=2000;flt.Q.value=5;gain.gain.value=0;osc.connect(flt);flt.connect(gain);gain.connect(ctx.destination);osc.start();window._driftOsc=osc;window._driftGain=gain}catch(e){}};
@@ -3046,7 +3125,7 @@ let gameActive=false,spd=0,dir=0,fc=0,boostTimer=0,lastMilestone=0;
 let scenarioActive=false,scenarioTimer=0,scenarioTimeout=null,usedScenarios=[];
 
 let nextScenarioAt=0,scenariosAnswered=0;
-let lateralVel=0,driftAngle=0,isDrifting=false,driftIntensity=0,handbrake=false;
+let lateralVel=0,driftAngle=0,isDrifting=false,driftIntensity=0,handbrake=false,driftChain=0,driftChainTimer=0;
 
 
 
@@ -4609,8 +4688,8 @@ function animate(){
     }
 
     dir*=.94;
-    handbrake=!!(keys.Space);
-    if(handbrake&&spd>0.1){lateralVel+=(window._steerSmooth||0)*spd*4.5;isDrifting=true;spd*=0.985}
+    var _prevBrake=handbrake;handbrake=!!(keys.Space);
+    if(handbrake&&spd>0.1){if(!_prevBrake){lateralVel+=(window._steerSmooth||0)*spd*6;spd*=0.97}else{lateralVel+=(window._steerSmooth||0)*spd*4.5}isDrifting=true;spd*=0.985}
     else if(Math.abs(spd)>0.12&&Math.abs(window._steerSmooth||0)>0.012){lateralVel+=(window._steerSmooth||0)*spd*3.2;isDrifting=true}
     else{isDrifting=Math.abs(lateralVel)>0.012}
     lateralVel*=isDrifting?(handbrake?0.975:0.96):0.86;
@@ -4677,11 +4756,11 @@ function animate(){
     car.rotation.z=window._carLean;
     if(window._wheels){const wSpd=spd*8;window._wheels.forEach(w=>{w.children.forEach(c=>{c.rotation.x+=wSpd})})}
     // Drift sound
-    if(isDrifting&&driftIntensity>0.2){if(!window._driftOsc)window._startDriftSound();window._updateDriftSound(driftIntensity)}else if(window._driftOsc)window._stopDriftSound();
+    if(isDrifting&&driftIntensity>0.2){if(!window._driftOsc)window._startDriftSound();window._updateDriftSound(driftIntensity);driftChain+=driftIntensity*(handbrake?2:1);driftChainTimer=0}else{if(window._driftOsc)window._stopDriftSound();if(driftChain>30){score+=Math.floor(driftChain);var _dsc=document.createElement('div');_dsc.textContent='DRIFT +'+Math.floor(driftChain);_dsc.style.cssText='position:fixed;top:35%;left:50%;transform:translateX(-50%);z-index:55;font-size:clamp(20px,4vw,32px);font-weight:900;color:#fbbf24;text-shadow:0 0 20px rgba(251,191,36,.7);pointer-events:none;transition:all 1.5s;opacity:1';document.body.appendChild(_dsc);setTimeout(function(){_dsc.style.opacity='0';_dsc.style.top='25%'},50);setTimeout(function(){_dsc.remove()},1600);var _sv2=document.getElementById('scoreVal');if(_sv2)_sv2.textContent=score}driftChain=0}
     // Drift smoke
     if(isDrifting&&driftIntensity>0.15&&fc%2===0){var _dSx=car.position.x,_dSz=car.position.z-1.5,_dSy=car.position.y+0.05;var _sn=Math.ceil(driftIntensity*(handbrake?5:3));for(var _si=0;_si<_sn&&particles.length<PART_MAX;_si++){var _sv=0.08+driftIntensity*0.15;particles.push({x:_dSx-1.15+(Math.random()-.5)*.3,y:_dSy,z:_dSz+(Math.random()-.5)*.5,vx:(Math.random()-.5)*_sv,vy:0.02+Math.random()*0.04,vz:-Math.random()*_sv*0.5,life:1,color:0xdddddd,isSmoke:true});particles.push({x:_dSx+1.15+(Math.random()-.5)*.3,y:_dSy,z:_dSz+(Math.random()-.5)*.5,vx:(Math.random()-.5)*_sv,vy:0.02+Math.random()*0.04,vz:-Math.random()*_sv*0.5,life:1,color:0xdddddd,isSmoke:true})}}
     // Tire marks
-    if(isDrifting&&driftIntensity>0.2&&window._tireMarks){var _tm=window._tireMarks,_ti=_tm.idx%_tm.max,_my=roadY(car.position.z)+0.015;var _mw=0.2+driftIntensity*0.25,_ml=0.8+spd*4;dummy.position.set(car.position.x-1.15,_my,car.position.z-1.5);dummy.rotation.set(-Math.PI/2,0,car.rotation.y);dummy.scale.set(_mw,_ml,1);dummy.updateMatrix();_tm.inst.setMatrixAt(_ti,dummy.matrix);var _mc=new THREE.Color(handbrake?0x222222:0x1a1a1a);_tm.inst.setColorAt(_ti,_mc);dummy.position.x=car.position.x+1.15;dummy.updateMatrix();_tm.inst.setMatrixAt((_ti+1)%_tm.max,dummy.matrix);_tm.inst.setColorAt((_ti+1)%_tm.max,_mc);_tm.idx+=2;_tm.inst.instanceMatrix.needsUpdate=true;if(_tm.inst.instanceColor)_tm.inst.instanceColor.needsUpdate=true}
+    if(isDrifting&&driftIntensity>0.2&&window._tireMarks){var _tm=window._tireMarks,_ti=_tm.idx%_tm.max,_my=roadY(car.position.z)+0.015;var _mw=0.2+driftIntensity*0.25,_ml=0.8+spd*4;dummy.position.set(car.position.x-1.15,_my,car.position.z-1.5);dummy.rotation.set(-Math.PI/2,0,car.rotation.y);dummy.scale.set(_mw,_ml,1);dummy.updateMatrix();_tm.inst.setMatrixAt(_ti,dummy.matrix);var _mc=new THREE.Color(handbrake?0x222222:0x1a1a1a);_tm.inst.setColorAt(_ti,_mc);dummy.position.x=car.position.x+1.15;dummy.updateMatrix();_tm.inst.setMatrixAt((_ti+1)%_tm.max,dummy.matrix);_tm.inst.setColorAt((_ti+1)%_tm.max,_mc);if(_tm.ages){_tm.ages[_ti]=0.01;_tm.ages[(_ti+1)%_tm.max]=0.01}_tm.idx+=2;_tm.inst.instanceMatrix.needsUpdate=true;if(_tm.inst.instanceColor)_tm.inst.instanceColor.needsUpdate=true}
 
 
 
@@ -5368,7 +5447,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   updateInstances(obstacles,obsInst,MAX_OBS,false);updateInstances(powerups,powerupInst,MAX_POWERUPS,true);
 
-  updateParticles();_updateGateLabels();
+  updateParticles();fadeTireMarks();_updateGateLabels();
 
   if(fc%6===0){updateHUD();const pi=document.getElementById('powerIndicator');
 
