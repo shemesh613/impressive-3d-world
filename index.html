@@ -102,7 +102,7 @@
 
     /* HUD */
 
-    #hud{position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;display:none;padding:10px 15px}
+    #hud{position:fixed;top:0;left:0;right:0;backdrop-filter:blur(4px);z-index:20;pointer-events:none;display:none;padding:10px 15px}
 
     #hud.hud-enter{animation:hudSlide .6s cubic-bezier(.22,1,.36,1)}
 
@@ -316,7 +316,7 @@
 
     #flowGlow{position:fixed;inset:0;z-index:12;pointer-events:none;opacity:0;transition:opacity .5s;background:radial-gradient(ellipse at center,transparent 60%,rgba(74,222,128,.1) 100%)}
 
-    #motionBlur{position:fixed;inset:0;z-index:13;pointer-events:none;opacity:0;transition:opacity .2s;background:radial-gradient(ellipse at 50% 60%,transparent 35%,rgba(0,5,15,.35) 100%);mix-blend-mode:multiply}
+    #motionBlur{position:fixed;inset:0;z-index:13;pointer-events:none;opacity:0;transition:opacity .2s;background:radial-gradient(ellipse at 50% 60%,transparent 30%,rgba(0,5,15,.45) 100%);mix-blend-mode:multiply}
 
     #starfield{position:fixed;top:0;left:0;right:0;height:40vh;z-index:1;pointer-events:none;opacity:.6}
 
@@ -340,7 +340,8 @@
 
     #boostTrail{position:fixed;bottom:15%;left:50%;transform:translateX(-50%);width:8px;height:0;z-index:11;pointer-events:none;background:linear-gradient(to top,rgba(74,222,128,.5),rgba(74,222,128,0));border-radius:4px;transition:height .3s,opacity .3s;opacity:0;filter:blur(3px)}
 
-    /* Screen flash */    #speedLines{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:repeating-linear-gradient(90deg,transparent 0%,transparent 48%,rgba(255,255,255,0.1) 49%,transparent 50%,transparent 98%,rgba(255,255,255,0.1) 99%,transparent 100%);background-size:20px 100%}
+    /* Screen flash */    #speedGlow{position:fixed;top:0;left:0;right:0;height:30%;z-index:12;pointer-events:none;opacity:0;transition:opacity .3s;background:linear-gradient(to bottom,rgba(74,222,128,.08) 0%,transparent 100%)}
+    #speedLines{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:repeating-linear-gradient(90deg,transparent 0%,transparent 48%,rgba(255,255,255,0.1) 49%,transparent 50%,transparent 98%,rgba(255,255,255,0.1) 99%,transparent 100%);background-size:20px 100%}
 
     #screenFlash{position:fixed;inset:0;z-index:15;pointer-events:none;opacity:0;transition:opacity .1s}    .flash-green{background:rgba(34,197,94,.25);opacity:1!important}    .flash-red{background:rgba(239,68,68,.25);opacity:1!important}    .flash-gold{background:rgba(251,191,36,.2);opacity:1!important}
 
@@ -748,6 +749,7 @@
 
 <div id="flowGlow"></div>
 
+<div id="speedGlow"></div>
 <div id="motionBlur"></div>
 
 <div id="rainOverlay"></div>
@@ -5047,6 +5049,7 @@ function updateHUD(){
 
   if(window._roadMat){window._roadMat.roughness=0.55-spd*0.3;window._roadMat.metalness=0.15+spd*0.25}
 
+  var _sg=document.getElementById('speedGlow');if(_sg)_sg.style.opacity=spd>0.2?String(Math.min(0.8,(spd-0.2)*2)):'0';
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.12?String(Math.min(0.9,(spd-0.12)*2.5)):'0';
 
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
