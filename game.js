@@ -5103,6 +5103,7 @@ function animate(){
     car.position.x+=curvePull;
 
     const _offRoad=Math.abs(car.position.x-curX);
+    if(_offRoad>12)car.position.x+=(curX-car.position.x)*0.1;// hard pull back if too far
 
     const _dv=document.getElementById('dangerVignette');if(_dv)_dv.style.opacity=_offRoad>3?String(Math.min(1,(_offRoad-3)*0.15)):'0';
 
