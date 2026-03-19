@@ -891,8 +891,8 @@ composer.addPass(fxaaPass);
 const colorPass=new THREE.ShaderPass(THREE.ColorGradingShader);
 colorPass.uniforms['contrast'].value=1.12;
 colorPass.uniforms['saturation'].value=1.15;
-colorPass.uniforms['vignetteAmount'].value=0.35;
-colorPass.uniforms['vignetteFalloff'].value=0.5;
+colorPass.uniforms['vignetteAmount'].value=0.42;
+colorPass.uniforms['vignetteFalloff'].value=0.45;
 composer.addPass(colorPass);
 
 // Film Grain removed — cleaner image
@@ -964,12 +964,14 @@ const skyGeo=new THREE.SphereGeometry(340,48,24);
 var _skyCanvas=document.createElement('canvas');_skyCanvas.width=1;_skyCanvas.height=512;
 var _skyCtx=_skyCanvas.getContext('2d');
 var _skyGrad=_skyCtx.createLinearGradient(0,0,0,512);
-_skyGrad.addColorStop(0,'#0a0a1e');     // top: deep space
-_skyGrad.addColorStop(0.3,'#1a1a3e');   // upper: dark blue
-_skyGrad.addColorStop(0.5,'#2a2a4e');   // mid: purple-blue
-_skyGrad.addColorStop(0.7,'#3a2a3e');   // lower: warm purple
-_skyGrad.addColorStop(0.85,'#5a3a3e');  // horizon: warm rose
-_skyGrad.addColorStop(1.0,'#6a4a3a');   // bottom: amber glow
+_skyGrad.addColorStop(0,'#050510');     // top: near-black space
+_skyGrad.addColorStop(0.15,'#0a0a20');  // upper: very dark blue
+_skyGrad.addColorStop(0.35,'#12123a');  // mid-upper: deep blue
+_skyGrad.addColorStop(0.55,'#1e1a3e');  // mid: muted purple
+_skyGrad.addColorStop(0.72,'#2a1e35');  // lower: dark wine
+_skyGrad.addColorStop(0.85,'#3a2530');  // horizon: subtle warmth
+_skyGrad.addColorStop(0.95,'#4a3028');  // near-bottom: muted amber
+_skyGrad.addColorStop(1.0,'#3a2520');   // bottom: dark warm
 _skyCtx.fillStyle=_skyGrad;_skyCtx.fillRect(0,0,1,512);
 var _skyGradTex=new THREE.CanvasTexture(_skyCanvas);
 _skyGradTex.needsUpdate=true;
@@ -2987,10 +2989,10 @@ function buildPrimitiveCar(){
 buildPrimitiveCar();
 
 // Real SpotLight headlights
-var headlightL=new THREE.SpotLight(0xffffee,3,50,Math.PI/5,0.4,1.2);
+var headlightL=new THREE.SpotLight(0xffffee,4,60,Math.PI/4.5,0.5,1.0);
 headlightL.position.set(-0.6,0.42,2.4);headlightL.target.position.set(-0.6,0,20);
 car.add(headlightL);car.add(headlightL.target);
-var headlightR=new THREE.SpotLight(0xffffee,3,50,Math.PI/5,0.4,1.2);
+var headlightR=new THREE.SpotLight(0xffffee,4,60,Math.PI/4.5,0.5,1.0);
 headlightR.position.set(0.6,0.42,2.4);headlightR.target.position.set(0.6,0,20);
 car.add(headlightR);car.add(headlightR.target);
 
