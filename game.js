@@ -2727,7 +2727,7 @@ function buildPrimitiveCar(){
   _bs.moveTo(-1.15,0.08);_bs.lineTo(-1.2,0.35);_bs.quadraticCurveTo(-1.2,0.72,-0.9,0.76);
   _bs.lineTo(0.9,0.76);_bs.quadraticCurveTo(1.2,0.72,1.2,0.35);_bs.lineTo(1.15,0.08);_bs.lineTo(-1.15,0.08);
   var body=new THREE.Mesh(new THREE.ExtrudeGeometry(_bs,{depth:4.8,bevelEnabled:true,bevelThickness:0.14,bevelSize:0.12,bevelSegments:6}),_p);
-  body.position.set(0,0,-2.4);body.castShadow=true;car.add(body);
+  body.position.set(0,0,-2.4);body.castShadow=true;car.add(body);window._carBodyMat=_p;
   // Cabin
   const _cs=new THREE.Shape();
   _cs.moveTo(-0.68,0);_cs.quadraticCurveTo(-0.72,0.36,-0.25,0.4);
@@ -2841,6 +2841,7 @@ if(typeof THREE.GLTFLoader!=='undefined'){
                 mat.color.setHex(0x22c55e);
                 mat.roughness=0.08;
                 mat.metalness=0.85;
+                if(!window._carBodyMat)window._carBodyMat=mat;
               }
             }
           });
@@ -4881,9 +4882,9 @@ function animate(){
 
 
 
-    if(boostTimer>0)boostTimer--;if(shieldTimer>0)shieldTimer--;if(turboTimer>0)turboTimer--;if(shieldTimer>0)car.children[0].material.color.setHex(fc%10<5?0x60a5fa:0x3b82f6);else if(turboTimer>0)car.children[0].material.color.setHex(fc%10<5?0xfbbf24:0xf59e0b);else if(boostTimer>0){car.children[0].material.color.setHex(fc%10<5?0x4ade80:0x22c55e)}
+    if(boostTimer>0)boostTimer--;if(shieldTimer>0)shieldTimer--;if(turboTimer>0)turboTimer--;var _bodyMat=window._carBodyMat;if(_bodyMat){if(shieldTimer>0)_bodyMat.color.setHex(fc%10<5?0x60a5fa:0x3b82f6);else if(turboTimer>0)_bodyMat.color.setHex(fc%10<5?0xfbbf24:0xf59e0b);else if(boostTimer>0){_bodyMat.color.setHex(fc%10<5?0x4ade80:0x22c55e)}}
 
-    else{car.children[0].material.color.setHex(0x22c55e)}
+    else if(window._carBodyMat){window._carBodyMat.color.setHex(0x22c55e)}
 
 
 
