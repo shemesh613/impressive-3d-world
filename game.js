@@ -2865,10 +2865,10 @@ window._glbLoaded=false;
 // === Enhanced Primitive Car ===
 function buildPrimitiveCar(){
   while(car.children.length)car.remove(car.children[0]);
-  const _p=new THREE.MeshStandardMaterial({color:0x22c55e,roughness:0.08,metalness:0.85,envMapIntensity:2.5});
+  const _p=new THREE.MeshStandardMaterial({color:0x22c55e,roughness:0.06,metalness:0.9,envMapIntensity:3.5});
   const _d=new THREE.MeshStandardMaterial({color:0x111111,roughness:0.4,metalness:0.3});
   const _g=new THREE.MeshStandardMaterial({color:0xccddff,roughness:0.02,metalness:0,transparent:true,opacity:0.65,side:THREE.DoubleSide,envMapIntensity:1.5});
-  const _ch=new THREE.MeshStandardMaterial({color:0xeeeeee,roughness:0.03,metalness:0.98,envMapIntensity:3});
+  const _ch=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.01,metalness:1.0,envMapIntensity:4});
   // Sporty body - lower, wider
   const _bs=new THREE.Shape();
   _bs.moveTo(-1.15,0.08);_bs.lineTo(-1.2,0.35);_bs.quadraticCurveTo(-1.2,0.72,-0.9,0.76);
@@ -2902,15 +2902,15 @@ function buildPrimitiveCar(){
   // Racing stripe
   car.add(new THREE.Mesh(new THREE.BoxGeometry(.18,.01,4.8),new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.15,metalness:0.6}))).position.set(0,.78,0);
   // LED Headlights
-  var hlG=new THREE.BoxGeometry(.4,.08,.04);var hlM=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffee,emissiveIntensity:1.2,roughness:0.05,metalness:0.5});
+  var hlG=new THREE.BoxGeometry(.4,.08,.04);var hlM=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffee,emissiveIntensity:2.5,roughness:0.05,metalness:0.5});
   [-.6,.6].forEach(function(x){var hl=new THREE.Mesh(hlG,hlM);hl.position.set(x,.42,2.38);car.add(hl)});
   // DRL strip
-  var drlG=new THREE.BoxGeometry(.55,.03,.03);var drlM=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:0.8});
+  var drlG=new THREE.BoxGeometry(.55,.03,.03);var drlM=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:2.0});
   [-.55,.55].forEach(function(x){var d=new THREE.Mesh(drlG,drlM);d.position.set(x,.35,2.38);car.add(d)});
   // Taillights LED strip
-  var tlG=new THREE.BoxGeometry(.4,.06,.04);var tlM=new THREE.MeshStandardMaterial({color:0xff3333,emissive:0xff1100,emissiveIntensity:0.5,roughness:0.15,metalness:0.2});window._brakeMat=tlM;
+  var tlG=new THREE.BoxGeometry(.4,.06,.04);var tlM=new THREE.MeshStandardMaterial({color:0xff3333,emissive:0xff1100,emissiveIntensity:2.0,roughness:0.15,metalness:0.2});window._brakeMat=tlM;
   [-.65,.65].forEach(function(x){var tl=new THREE.Mesh(tlG,tlM);tl.position.set(x,.42,-2.38);car.add(tl)});
-  var tlStrip=new THREE.Mesh(new THREE.BoxGeometry(1.1,.03,.03),new THREE.MeshStandardMaterial({color:0xff2222,emissive:0xff0000,emissiveIntensity:0.3}));
+  var tlStrip=new THREE.Mesh(new THREE.BoxGeometry(1.1,.03,.03),new THREE.MeshStandardMaterial({color:0xff2222,emissive:0xff0000,emissiveIntensity:1.5}));
   tlStrip.position.set(0,.42,-2.38);car.add(tlStrip);
   // Wheels with rims + spokes
   window._wheels=[];
@@ -2939,10 +2939,10 @@ function buildPrimitiveCar(){
 buildPrimitiveCar();
 
 // Real SpotLight headlights
-var headlightL=new THREE.SpotLight(0xffffee,2,40,Math.PI/6,0.5,1.5);
+var headlightL=new THREE.SpotLight(0xffffee,3,50,Math.PI/5,0.4,1.2);
 headlightL.position.set(-0.6,0.42,2.4);headlightL.target.position.set(-0.6,0,20);
 car.add(headlightL);car.add(headlightL.target);
-var headlightR=new THREE.SpotLight(0xffffee,2,40,Math.PI/6,0.5,1.5);
+var headlightR=new THREE.SpotLight(0xffffee,3,50,Math.PI/5,0.4,1.2);
 headlightR.position.set(0.6,0.42,2.4);headlightR.target.position.set(0.6,0,20);
 car.add(headlightR);car.add(headlightR.target);
 
