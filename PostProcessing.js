@@ -1115,4 +1115,94 @@ const ColorGradingShader = {
 THREE.FXAAShader = FXAAShader;
 THREE.ColorGradingShader = ColorGradingShader;
 
+
+
+// === Simple SSAO (Screen-Space Ambient Occlusion) ===
+const SimpleSSAOShader = {
+	uniforms: {
+		'tDiffuse': { value: null },
+		'tDepth': { value: null },
+		'resolution': { value: new THREE.Vector2(1/1024, 1/512) },
+		'cameraNear': { value: 0.5 },
+		'cameraFar': { value: 700 },
+		'aoStrength': { value: 0.5 },
+		'aoRadius': { value: 0.15 }
+	},
+	vertexShader: /* glsl */`
+		varying vec2 vUv;
+		void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+	fragmentShader: /* glsl */`
+		precision highp float;
+		uniform sampler2D tDiffuse;
+		uniform sampler2D tDepth;
+		uniform vec2 resolution;
+		uniform float cameraNear;
+		uniform float cameraFar;
+		uniform float aoStrength;
+		uniform float aoRadius;
+		varying vec2 vUv;
+
+		float getDepth(vec2 uv) {
+			float d = texture2D(tDepth, uv).x;
+			return cameraNear * cameraFar / (cameraFar - d * (cameraFar - cameraNear));
+		}
+
+		void main() {
+			vec4 color = texture2D(tDiffuse, vUv);
+			float depth = getDepth(vUv);
+			if(depth > cameraFar * 0.95) { gl_FragColor = color; return; }
+
+			float ao = 0.0;
+			float radius = aoRadius / depth;
+			const int SAMPLES = 8;
+			float angles[8];
+			angles[0]=0.0;angles[1]=0.785;angles[2]=1.571;angles[3]=2.356;
+			angles[4]=3.142;angles[5]=3.927;angles[6]=4.712;angles[7]=5.498;
+
+			for(int i = 0; i < SAMPLES; i++) {
+				float angle = angles[i];
+				vec2 offset = vec2(cos(angle), sin(angle)) * radius;
+				float sampleDepth = getDepth(vUv + offset);
+				float diff = depth - sampleDepth;
+				if(diff > 0.01 && diff < 1.0) ao += 1.0;
+			}
+			ao = 1.0 - (ao / float(SAMPLES)) * aoStrength;
+			ao = clamp(ao, 0.0, 1.0);
+			gl_FragColor = vec4(color.rgb * ao, color.a);
+		}`
+};
+
+// === ChromaticAberrationShader ===
+const ChromaticAberrationShader = {
+	uniforms: {
+		'tDiffuse': { value: null },
+		'intensity': { value: 0.003 },
+		'direction': { value: new THREE.Vector2(1.0, 0.0) }
+	},
+	vertexShader: /* glsl */`
+		varying vec2 vUv;
+		void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+	fragmentShader: /* glsl */`
+		precision highp float;
+		uniform sampler2D tDiffuse;
+		uniform float intensity;
+		uniform vec2 direction;
+		varying vec2 vUv;
+		void main() {
+			vec2 offset = direction * intensity;
+			vec2 uv = vUv;
+			// Distance from center increases effect
+			vec2 fromCenter = uv - 0.5;
+			float dist = length(fromCenter);
+			offset *= dist * 2.0;
+			float r = texture2D(tDiffuse, uv + offset).r;
+			float g = texture2D(tDiffuse, uv).g;
+			float b = texture2D(tDiffuse, uv - offset).b;
+			gl_FragColor = vec4(r, g, b, 1.0);
+		}`
+};
+
+THREE.SimpleSSAOShader = SimpleSSAOShader;
+THREE.ChromaticAberrationShader = ChromaticAberrationShader;
+
 })();

@@ -878,6 +878,12 @@ const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeig
 composer.addPass(bloomPass);
 window._bloomPass=bloomPass;
 
+// Chromatic Aberration (speed-reactive)
+const chromaPass=new THREE.ShaderPass(THREE.ChromaticAberrationShader);
+chromaPass.uniforms['intensity'].value=0.0;
+composer.addPass(chromaPass);
+window._chromaPass=chromaPass;
+
 // FXAA anti-aliasing
 const fxaaPass=new THREE.ShaderPass(THREE.FXAAShader);
 fxaaPass.uniforms['resolution'].value.set(1/innerWidth,1/innerHeight);
@@ -4430,6 +4436,7 @@ function updateHUD(){
   var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.12?String(Math.min(0.9,(spd-0.12)*2.5)):'0';
 
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
+    if(window._chromaPass){var _ci=Math.min(0.008,spd*0.006);if(handbrake&&isDrifting)_ci*=2.5;window._chromaPass.uniforms['intensity'].value+=((_ci)-window._chromaPass.uniforms['intensity'].value)*0.1}
 
   scene.fog.density=0.00075-spd*0.0005;scene.fog.color.setHex(spd>0.1?0x1e3050:0x1a2a40);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=1.4+spd*0.5;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.2+spd*0.3;var _tFov=68+spd*25;cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();// fog clears at speed
 
