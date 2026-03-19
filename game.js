@@ -3258,12 +3258,12 @@ function updateParticles(){
 
 // ---- TREES (instanced) ----
 {
-  var TREE_N=800;
+  var TREE_N=600;
   var trunkGeo=new THREE.CylinderGeometry(0.15,0.2,1.5,5);
   var trunkMat=new THREE.MeshStandardMaterial({color:0x8B5A2B,roughness:0.9,metalness:0.05});
   var trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,TREE_N);
   trunkInst.castShadow=true;
-  var leafGeo=new THREE.ConeGeometry(1.2,3,6);
+  var leafGeo=new THREE.ConeGeometry(1.0,2.2,6);
   var leafMat=new THREE.MeshStandardMaterial({color:0x228B22,roughness:0.8,metalness:0.05});
   var leafInst=new THREE.InstancedMesh(leafGeo,leafMat,TREE_N);
   leafInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(TREE_N*3),3);
@@ -3290,7 +3290,7 @@ function updateParticles(){
       dummy.updateMatrix();
       trunkInst.setMatrixAt(_ti2,dummy.matrix);
       // Leaves
-      dummy.position.set(tx,ty+tScale*2.5,tz);
+      dummy.position.set(tx,ty+tScale*2.0,tz);
       dummy.scale.set(tScale*(0.8+Math.random()*0.4),tScale*(0.8+Math.random()*0.5),tScale*(0.8+Math.random()*0.4));
       dummy.updateMatrix();
       leafInst.setMatrixAt(_ti2,dummy.matrix);
@@ -3303,7 +3303,42 @@ function updateParticles(){
   trunkInst.instanceMatrix.needsUpdate=true;
   leafInst.instanceMatrix.needsUpdate=true;
   leafInst.instanceColor.needsUpdate=true;
-  scene.add(trunkInst);scene.add(leafInst);
+  // Mid leaf layer
+  var leafGeo2=new THREE.ConeGeometry(0.8,1.8,6);
+  var leafInst2=new THREE.InstancedMesh(leafGeo2,leafMat,TREE_N);
+  leafInst2.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(TREE_N*3),3);
+  leafInst2.castShadow=true;
+  // Top leaf layer
+  var leafGeo3=new THREE.ConeGeometry(0.5,1.4,5);
+  var leafInst3=new THREE.InstancedMesh(leafGeo3,leafMat,TREE_N);
+  leafInst3.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(TREE_N*3),3);
+  leafInst3.castShadow=true;
+  // Copy positions with vertical offset
+  for(var tci=0;tci<_ti2;tci++){
+    // Get position from first layer
+    leafInst.getMatrixAt(tci,dummy.matrix);
+    dummy.matrix.decompose(dummy.position,dummy.quaternion,dummy.scale);
+    // Mid layer: higher and smaller
+    dummy.position.y+=1.4*dummy.scale.y;
+    dummy.scale.multiplyScalar(0.8);
+    dummy.updateMatrix();
+    leafInst2.setMatrixAt(tci,dummy.matrix);
+    var mc2=new THREE.Color(_treeColors[Math.floor(Math.random()*_treeColors.length)]);
+    mc2.multiplyScalar(0.9);// slightly darker
+    leafInst2.instanceColor.setXYZ(tci,mc2.r,mc2.g,mc2.b);
+    // Top layer: even higher and smaller
+    dummy.position.y+=1.0*dummy.scale.y;
+    dummy.scale.multiplyScalar(0.7);
+    dummy.updateMatrix();
+    leafInst3.setMatrixAt(tci,dummy.matrix);
+    var mc3=new THREE.Color(_treeColors[Math.floor(Math.random()*_treeColors.length)]);
+    mc3.multiplyScalar(0.85);
+    leafInst3.instanceColor.setXYZ(tci,mc3.r,mc3.g,mc3.b);
+  }
+  leafInst2.count=_ti2;leafInst3.count=_ti2;
+  leafInst2.instanceMatrix.needsUpdate=true;leafInst3.instanceMatrix.needsUpdate=true;
+  leafInst2.instanceColor.needsUpdate=true;leafInst3.instanceColor.needsUpdate=true;
+  scene.add(trunkInst);scene.add(leafInst);scene.add(leafInst2);scene.add(leafInst3);
   console.log('Trees planted:',_ti2);
 }
 
