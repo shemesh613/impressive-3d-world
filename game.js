@@ -2830,15 +2830,20 @@ if(typeof THREE.GLTFLoader!=='undefined'){
       model.traverse(function(child){
         if(child.isMesh){
           child.castShadow=true;child.receiveShadow=true;
-          if(child.material){
-            child.material.envMapIntensity=2.5;
-            // Make car body green to match our theme
-            if(child.material.color&&child.name&&(child.name.toLowerCase().indexOf('body')>=0||child.name.toLowerCase().indexOf('paint')>=0)){
-              child.material.color.setHex(0x22c55e);
-              child.material.roughness=0.08;
-              child.material.metalness=0.85;
+          var mats=Array.isArray(child.material)?child.material:[child.material];
+          mats.forEach(function(mat){
+            if(!mat)return;
+            if(mat.envMapIntensity!==undefined)mat.envMapIntensity=2.5;
+            // Color body parts green
+            if(mat.color&&child.name){
+              var n=child.name.toLowerCase();
+              if(n.indexOf('body')>=0||n.indexOf('paint')>=0||n.indexOf('car')>=0||n.indexOf('hood')>=0||n.indexOf('door')>=0||n.indexOf('fender')>=0){
+                mat.color.setHex(0x22c55e);
+                mat.roughness=0.08;
+                mat.metalness=0.85;
+              }
             }
-          }
+          });
         }
       });
       // Find wheels for rotation
