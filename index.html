@@ -1670,7 +1670,7 @@ const scene=new THREE.Scene();
 
 const cam=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,0.5,700);
 
-cam.position.set(0,10,18);var _tFov=68+spd*25;cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();
+cam.position.set(0,10,18);
 
 scene.fog=new THREE.FogExp2(0x1a2a40,.0005);
 
@@ -5035,7 +5035,7 @@ function updateHUD(){
 
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
 
-  scene.fog.density=0.00075-spd*0.0005;// fog clears at speed
+  scene.fog.density=0.00075-spd*0.0005;var _tFov=68+spd*25;cam.fov+=(Math.min(85,_tFov)-cam.fov)*0.05;cam.updateProjectionMatrix();
 
   moon.position.z=car.position.z+500;moonGlow.position.z=moon.position.z;
 
