@@ -3455,7 +3455,7 @@ const car=new THREE.Group();
   if(typeof THREE.GLTFLoader==='function'){
     try{
       new THREE.GLTFLoader().load('car-model.glb',function(gltf){
-        var m=gltf.scene;m.scale.set(2.0,2.0,2.0);m.rotation.y=0;m.position.y=0.15;m.traverse(function(ch){if(ch.isMesh){ch.material=new THREE.MeshStandardMaterial({color:0x15803d,roughness:0.08,metalness:0.85})}});
+        var m=gltf.scene;m.scale.set(2.5,2.5,2.5);m.rotation.y=0;m.position.y=0.15;m.traverse(function(ch){if(ch.isMesh){ch.material=new THREE.MeshStandardMaterial({color:0x22c55e,roughness:0.1,metalness:0.7,emissive:0x0a4a1e,emissiveIntensity:0.3})}});
         m.traverse(function(ch){if(ch.isMesh){ch.castShadow=true}});window._glbLoaded=true;
         car.add(m);_carLoaded=true;
       },undefined,function(){_buildFallbackCar()});
