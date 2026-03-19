@@ -40,7 +40,7 @@
 
     @keyframes startFade{0%{opacity:0;transform:translateY(15px)}100%{opacity:1;transform:translateY(0)}}
 
-    #startScreen .instructions p{color:#d1fae5;font-size:clamp(14px,2.8vw,18px);margin:12px 0;direction:rtl;line-height:1.8;
+    #startScreen .instructions p{color:#d1fae5;font-size:clamp(16px,3.5vw,22px);margin:12px 0;direction:rtl;line-height:1.8;
 
       text-shadow:0 1px 2px rgba(0,0,0,.4)}
 
@@ -114,7 +114,7 @@
 
     #scenario{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:40;display:none;
 
-      width:min(90vw,500px);background:linear-gradient(160deg,rgba(5,15,25,.94),rgba(0,8,16,.96));border:1px solid rgba(74,222,128,.2);border-radius:28px;
+      width:min(94vw,650px);background:linear-gradient(160deg,rgba(5,15,25,.94),rgba(0,8,16,.96));border:1px solid rgba(74,222,128,.2);border-radius:28px;
 
       padding:28px 24px;text-align:center;backdrop-filter:blur(16px);animation:scenarioSlide .45s cubic-bezier(.22,1,.36,1);
 
@@ -124,13 +124,13 @@
 
     @keyframes scenarioSlide{0%{transform:translate(-50%,-30%) scale(.9);opacity:0;filter:blur(8px)}60%{filter:blur(0)}100%{transform:translate(-50%,-50%) scale(1);opacity:1;filter:blur(0)}}
 
-    #scenario .situation{color:#f0fdf4;font-size:clamp(17px,3.5vw,21px);font-weight:600;margin-bottom:20px;line-height:1.7;direction:rtl;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+    #scenario .situation{color:#f0fdf4;font-size:clamp(20px,4.5vw,28px);font-weight:600;margin-bottom:20px;line-height:1.7;direction:rtl;text-shadow:0 1px 3px rgba(0,0,0,.4)}
 
     #scenario .choices{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
 
-    .choice-btn{flex:1;min-width:140px;padding:16px 12px;border-radius:18px;border:none;cursor:pointer;
+    .choice-btn{flex:1;min-width:180px;padding:20px 16px;border-radius:18px;border:none;cursor:pointer;
 
-      font-size:clamp(14px,2.8vw,18px);font-weight:700;color:#fff;transition:all .2s ease;line-height:1.4;direction:rtl;
+      font-size:clamp(16px,3.5vw,22px);font-weight:700;color:#fff;transition:all .2s ease;line-height:1.4;direction:rtl;
 
       opacity:0;animation:btnSlideIn .4s ease forwards}
 
@@ -178,9 +178,9 @@
 
     @keyframes feedSlide{0%{transform:translateX(-50%) translateY(20px) scale(.9);opacity:0}100%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}}
 
-    #feedback .fb-icon{font-size:clamp(40px,10vw,70px)}
+    #feedback .fb-icon{font-size:clamp(50px,12vw,90px)}
 
-    #feedback .fb-text{color:#fff;font-size:clamp(16px,3.5vw,22px);font-weight:700;margin-top:8px;line-height:1.5;direction:rtl}
+    #feedback .fb-text{color:#fff;font-size:clamp(20px,4.5vw,28px);font-weight:700;margin-top:8px;line-height:1.5;direction:rtl}
 
 
 

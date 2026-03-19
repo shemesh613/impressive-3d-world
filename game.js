@@ -3449,7 +3449,7 @@ function triggerScenario(){
 
   // Place gates 60m ahead
 
-  _gateZ=car.position.z+80;
+  _gateZ=car.position.z+120;
 
   const rx=roadX(_gateZ);const ry=roadY(_gateZ);
 
@@ -3479,7 +3479,7 @@ function triggerScenario(){
 
   const gs=document.getElementById('gateSituation');
 
-  gs.textContent=s.situation;gs.style.display='block';gs.style.animation='gateSitPulse 1.5s ease-in-out infinite';
+  gs.textContent=s.situation;gs.style.display='block';gs.style.fontSize='clamp(18px,4vw,26px)';gs.style.padding='16px 24px';gs.style.maxWidth='min(92vw,600px)';gs.style.animation='gateSitPulse 1.5s ease-in-out infinite';
 
 
 
@@ -3514,6 +3514,8 @@ function triggerScenario(){
   _gateActive=true;
 
   scenarioActive=true;
+  // Slow down for gates so player can read
+  if(spd>0.4)spd=0.4;
 
   // Don't stop car for gates - player drives through!
 
@@ -3627,9 +3629,9 @@ function _updateGateLabels(){
 
   if(vecL.z<1&&vecR.z<1){
 
-    gl1.style.cssText='display:block;position:fixed;left:'+x1+'px;top:'+yL+'px;opacity:'+opacity+';font-size:'+fs+'px;max-width:'+lw+'px;width:'+lw+'px;z-index:52;animation:gatePulse 2s ease-in-out infinite;background:rgba(5,15,30,.95);border:2px solid '+gl1.style.borderColor+';border-radius:16px;padding:12px 16px;color:'+gl1.style.color+';font-weight:800;text-align:center;direction:rtl;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px);pointer-events:none;white-space:normal';
+    gl1.style.cssText='display:block;position:fixed;left:'+x1+'px;top:'+yL+'px;opacity:'+opacity+';font-size:'+Math.max(18,fs+4)+'px;max-width:'+Math.max(200,lw+40)+'px;width:'+Math.max(200,lw+40)+'px;z-index:52;animation:gatePulse 2s ease-in-out infinite;background:rgba(5,15,30,.95);border:2px solid '+gl1.style.borderColor+';border-radius:16px;padding:12px 16px;color:'+gl1.style.color+';font-weight:800;text-align:center;direction:rtl;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px);pointer-events:none;white-space:normal';
 
-    gl2.style.cssText='display:block;position:fixed;left:'+x2+'px;top:'+yR+'px;opacity:'+opacity+';font-size:'+fs+'px;max-width:'+lw+'px;width:'+lw+'px;z-index:52;animation:gatePulse 2s ease-in-out infinite;background:rgba(5,15,30,.95);border:2px solid '+gl2.style.borderColor+';border-radius:16px;padding:12px 16px;color:'+gl2.style.color+';font-weight:800;text-align:center;direction:rtl;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px);pointer-events:none;white-space:normal';
+    gl2.style.cssText='display:block;position:fixed;left:'+x2+'px;top:'+yR+'px;opacity:'+opacity+';font-size:'+Math.max(18,fs+4)+'px;max-width:'+Math.max(200,lw+40)+'px;width:'+Math.max(200,lw+40)+'px;z-index:52;animation:gatePulse 2s ease-in-out infinite;background:rgba(5,15,30,.95);border:2px solid '+gl2.style.borderColor+';border-radius:16px;padding:12px 16px;color:'+gl2.style.color+';font-weight:800;text-align:center;direction:rtl;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,.7);box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(6px);pointer-events:none;white-space:normal';
 
   }else{gl1.style.display='none';gl2.style.display='none'}
 
