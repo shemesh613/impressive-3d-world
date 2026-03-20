@@ -4850,7 +4850,7 @@ function updateHUD(){
   const _steerAmt=Math.abs((keys.ArrowLeft||keys.KeyA)?1:(keys.ArrowRight||keys.KeyD)?-1:0);
   if(_steerAmt>0&&spd>0.2&&fc%6===0){
     const sparkX=car.position.x+((keys.ArrowLeft||keys.KeyA)?1.1:-1.1);
-    for(var _sp2=0;_sp2<1&&particles.length<PART_MAX;_sp++){
+    for(var _sp2=0;_sp2<1&&particles.length<PART_MAX;_sp2++){
       particles.push({x:sparkX+(Math.random()-.5)*0.3,y:car.position.y+0.15,z:car.position.z-1+Math.random()*0.5,vx:(Math.random()-.5)*0.3,vy:0.1+Math.random()*0.2,vz:(Math.random()-.5)*0.2,life:0.3+Math.random()*0.2,color:Math.random()>0.5?0xffcc44:0xff8833,isSmoke:false});
     }
   }
