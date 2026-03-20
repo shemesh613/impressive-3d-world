@@ -1029,15 +1029,15 @@ for(var j=0;j<5;j++){if(_skyTextures[j]){skyMat.map=_skyTextures[j];skyMat.color
 
 // Trail marks mesh
 
-const _trailGeo=new THREE.PlaneGeometry(1,1);
+const _trailGeo=new THREE.PlaneGeometry(0.3,1.5);
 
-const _trailMat=new THREE.MeshBasicMaterial({color:0x22c55e,transparent:true,opacity:0.4,side:THREE.DoubleSide});
+const _trailMat=new THREE.MeshBasicMaterial({color:0x111111,transparent:true,opacity:0.5,side:THREE.DoubleSide,depthWrite:false});
 
-const _trailInst=new THREE.InstancedMesh(_trailGeo,_trailMat,30);
+const _trailInst=new THREE.InstancedMesh(_trailGeo,_trailMat,60);
 
-_trailInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(30*3),3);
+_trailInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(60*3),3);
 
-for(let i=0;i<30;i++){dummy.position.set(0,-100,0);dummy.updateMatrix();_trailInst.setMatrixAt(i,dummy.matrix)}
+for(let i=0;i<60;i++){dummy.position.set(0,-100,0);dummy.updateMatrix();_trailInst.setMatrixAt(i,dummy.matrix)}
 
 _trailInst.instanceMatrix.needsUpdate=true;scene.add(_trailInst);window._trailInst=_trailInst;
 
@@ -1230,7 +1230,7 @@ scene.add((() => {
   swInstL.instanceMatrix.needsUpdate=true;swInstR.instanceMatrix.needsUpdate=true;
   swInstL.receiveShadow=true;swInstR.receiveShadow=true;
   scene.add(swInstL);scene.add(swInstR);
-}
+}// ---- GUARDRAILS (road barriers) ----{  var grGeo=new THREE.BoxGeometry(0.15,0.6,SLEN+2);  var grMat=new THREE.MeshStandardMaterial({color:0x888899,roughness:0.4,metalness:0.6,envMapIntensity:1.5});  var grPostGeo=new THREE.BoxGeometry(0.12,0.7,0.12);  var grL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  var grR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  for(var gi2=0;gi2<RSEGS;gi2++){    var gz2=-50+gi2*SLEN,gzc2=gz2+SLEN/2,gx2=roadX(gzc2),gy2=roadY(gzc2);    var ga2=Math.atan2(roadX(gzc2+2)-roadX(gzc2-2),4);    dummy.position.set(gx2-7.5*Math.cos(ga2),gy2+0.35,gzc2+7.5*Math.sin(ga2));    dummy.rotation.set(0,ga2,0);dummy.scale.setScalar(1);dummy.updateMatrix();    grL.setMatrixAt(gi2,dummy.matrix);    dummy.position.set(gx2+7.5*Math.cos(ga2),gy2+0.35,gzc2-7.5*Math.sin(ga2));    dummy.updateMatrix();    grR.setMatrixAt(gi2,dummy.matrix);  }  grL.instanceMatrix.needsUpdate=true;grR.instanceMatrix.needsUpdate=true;  grL.castShadow=true;grR.castShadow=true;  scene.add(grL);scene.add(grR);
 
 
 // Grass strips alongside road
@@ -4792,9 +4792,9 @@ function updateHUD(){
 
   if(window._trailMarks&&spd>0.15&&fc%8===0){
 
-    window._trailMarks.push({x:car.position.x,y:car.position.y+0.04,z:car.position.z,life:1});
+    var _trot=driftAngle||0;window._trailMarks.push({x:car.position.x-0.5,y:roadY(car.position.z)+0.05,z:car.position.z,life:1,rot:_trot});if(isDrifting&&driftIntensity>0.2)window._trailMarks.push({x:car.position.x+0.5,y:roadY(car.position.z)+0.05,z:car.position.z,life:1,rot:_trot});
 
-    if(window._trailMarks.length>30)window._trailMarks.shift();
+    if(window._trailMarks.length>60)window._trailMarks.shift();
 
   }
 
@@ -4802,13 +4802,13 @@ function updateHUD(){
 
     const ti=window._trailInst;
 
-    for(let i=0;i<30;i++){
+    for(let i=0;i<60;i++){
 
-      if(i<window._trailMarks.length){const t=window._trailMarks[i];t.life-=0.015;
+      if(i<window._trailMarks.length){const t=window._trailMarks[i];t.life-=0.008;
 
-        dummy.position.set(t.x,t.y,t.z);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.set(0.3,1.5,1);dummy.updateMatrix();
+        dummy.position.set(t.x,t.y,t.z);dummy.rotation.set(-Math.PI/2,0,t.rot||0);dummy.scale.set(0.4,2.0,1);dummy.updateMatrix();
 
-        ti.setMatrixAt(i,dummy.matrix);ti.setColorAt(i,_col.setRGB(0.13*t.life,0.77*t.life,0.37*t.life));
+        ti.setMatrixAt(i,dummy.matrix);ti.setColorAt(i,_col.setRGB(0.08*t.life,0.08*t.life,0.08*t.life));
 
       } else {dummy.position.set(0,-100,0);dummy.updateMatrix();ti.setMatrixAt(i,dummy.matrix)}
 
