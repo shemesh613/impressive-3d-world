@@ -880,11 +880,8 @@ const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeig
 composer.addPass(bloomPass);
 window._bloomPass=bloomPass;
 
-// ChromaticAberration - subtle, speed-dependent
-var chromaPass=new THREE.ShaderPass(THREE.ChromaticAberrationShader);
-chromaPass.uniforms["intensity"].value=0.0;
-composer.addPass(chromaPass);
-window._chromaPass=chromaPass;
+// ChromaticAberration disabled — crashes ShaderPass init
+window._chromaPass=null;
 
 // FXAA anti-aliasing
 const fxaaPass=new THREE.ShaderPass(THREE.FXAAShader);
@@ -5953,7 +5950,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
   cam.updateProjectionMatrix();
   // Dynamic bloom + exposure
   if(window._bloomPass){window._bloomPass.strength=0.25+spd*0.3+(isDrifting?0.15:0);window._bloomPass.threshold=0.92-spd*0.05}
-  if(window._chromaPass){window._chromaPass.uniforms["intensity"].value=spd>0.2?Math.min(0.003,(spd-0.2)*0.008)+(isDrifting?0.002:0):0}
+  // chromaPass disabled
   renderer.toneMappingExposure=1.3+spd*0.2+(turboTimer>0?0.15:0);
 
 
