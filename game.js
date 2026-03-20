@@ -897,7 +897,7 @@ composer.addPass(colorPass);
 
 // Film Grain removed — cleaner image
 
-scene.fog=new THREE.FogExp2(0x141422,.0006);
+scene.fog=new THREE.FogExp2(0x0e0e1a,.0009);
 
 // Environment map for reflections
 var _pmremGen=new THREE.PMREMGenerator(renderer);
@@ -4773,7 +4773,7 @@ function updateHUD(){
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
     
 
-  scene.fog.density=0.0008-spd*0.0003;scene.fog.color.setHex(spd>0.1?0x1e1e30:0x1a1a2e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=0.25+spd*0.15;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.5+spd*0.2;var _tFov=68+spd*25;cam.fov+=(Math.min(88,_tFov)-cam.fov)*0.03;cam.updateProjectionMatrix();
+  scene.fog.density=0.0008-spd*0.0003;scene.fog.color.setHex(spd>0.1?0x1e1e30:0x1a1a2e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=0.25+spd*0.15;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.0+spd*0.15;var _tFov=68+spd*25;cam.fov+=(Math.min(88,_tFov)-cam.fov)*0.03;cam.updateProjectionMatrix();
     // Dynamic vignette at speed
     if(typeof colorPass!=='undefined'&&colorPass.uniforms){colorPass.uniforms['vignetteAmount'].value=0.3+spd*0.15}// fog clears at speed
 
@@ -5299,6 +5299,11 @@ if(window._underGlow){var ug=window._underGlow;if(shieldTimer>0){ug.color.setHex
     const _rainEl=document.getElementById('rainOverlay');
 
     if(_rainEl){const rz=Math.floor(car.position.z/600)%3;_rainEl.style.opacity=rz===1?'0.7':'0'}
+    // Rain sound
+    if(rz===1&&!window._rainSound&&audioCtx){try{var rb=audioCtx.createBuffer(1,audioCtx.sampleRate*3,audioCtx.sampleRate);var rd=rb.getChannelData(0);for(var ri=0;ri<rd.length;ri++)rd[ri]=(Math.random()*2-1);var rs=audioCtx.createBufferSource();rs.buffer=rb;rs.loop=true;var rf=audioCtx.createBiquadFilter();rf.type="lowpass";rf.frequency.value=1200;var rg=audioCtx.createGain();rg.gain.value=0;rs.connect(rf);rf.connect(rg);rg.connect(audioCtx.destination);rs.start();window._rainSound={src:rs,gain:rg}}catch(e){}}
+    if(window._rainSound){window._rainSound.gain.gain.value=rz===1?(0.025*_masterVol):0}
+    // Wet road in rain
+    if(window._roadMat){if(rz===1){window._roadMat.roughness=0.15;window._roadMat.metalness=0.3;window._roadMat.envMapIntensity=0.8}else{window._roadMat.roughness=0.65;window._roadMat.metalness=0.08;window._roadMat.envMapIntensity=0.4}}
 
     // Speed zone — glowing road section
 
