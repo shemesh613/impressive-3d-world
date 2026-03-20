@@ -880,7 +880,11 @@ const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeig
 composer.addPass(bloomPass);
 window._bloomPass=bloomPass;
 
-// ChromaticAberration removed for performance
+// ChromaticAberration - subtle, speed-dependent
+var chromaPass=new THREE.ShaderPass(THREE.ChromaticAberrationShader);
+chromaPass.uniforms["amount"].value=0.0;
+composer.addPass(chromaPass);
+window._chromaPass=chromaPass;
 
 // FXAA anti-aliasing
 const fxaaPass=new THREE.ShaderPass(THREE.FXAAShader);
@@ -1134,7 +1138,7 @@ scene.add((() => {
 
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(16,SLEN+2.5),_roadMat,RSEGS);
 
-  const edgeMat=new THREE.MeshStandardMaterial({color:0x1a8844,emissive:0x0a7722,emissiveIntensity:0.6,roughness:0.2,metalness:0.15});window._edgeMat=edgeMat;
+  const edgeMat=new THREE.MeshStandardMaterial({color:0x1a8844,emissive:0x064411,emissiveIntensity:0.25,roughness:0.2,metalness:0.15});window._edgeMat=edgeMat;
 
   const edgeGeo=new THREE.PlaneGeometry(.5,SLEN+2);
 
@@ -4768,7 +4772,7 @@ function updateHUD(){
   if(window._roadMat){window._roadMat.roughness=0.45-spd*0.12;window._roadMat.metalness=0.2+spd*0.1}
 
   var _sg=document.getElementById('speedGlow');if(_sg)_sg.style.opacity=spd>0.2?String(Math.min(0.8,(spd-0.2)*2)):'0';
-  var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.12?String(Math.min(0.9,(spd-0.12)*2.5)):'0';
+  var _mb=document.getElementById('motionBlur');if(_mb)_mb.style.opacity=spd>0.2?String(Math.min(0.5,(spd-0.2)*1.5)):'0';
 
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
     
@@ -5949,6 +5953,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
   cam.updateProjectionMatrix();
   // Dynamic bloom + exposure
   if(window._bloomPass){window._bloomPass.strength=0.25+spd*0.3+(isDrifting?0.15:0);window._bloomPass.threshold=0.92-spd*0.05}
+  if(window._chromaPass){window._chromaPass.uniforms["amount"].value=spd>0.2?Math.min(0.003,(spd-0.2)*0.008)+(isDrifting?0.002:0):0}
   renderer.toneMappingExposure=1.3+spd*0.2+(turboTimer>0?0.15:0);
 
 
