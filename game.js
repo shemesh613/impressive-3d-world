@@ -5718,9 +5718,9 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
   const _cz=car.position.z;
 
-  const _camDist=14+spd*6;// pull back at speed (closer)
+  const _camDist=18+spd*8;// pull back at speed (closer)
 
-  const _camHeight=6+spd*3;// rise at speed (lower)
+  const _camHeight=10+spd*4;// rise at speed (lower)
 
   const _behindZ=_cz-_camDist;
 
