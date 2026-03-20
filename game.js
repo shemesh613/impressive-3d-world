@@ -1178,8 +1178,8 @@ scene.add((() => {
   [roadInst,edgeL,edgeR,glowL,glowR].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});
 // ---- SIDEWALKS ----
 {
-  var swGeo=new THREE.PlaneGeometry(3,SLEN+0.5);
-  var swMat=new THREE.MeshStandardMaterial({color:0x777788,roughness:0.8,metalness:0.1});
+  var swGeo=new THREE.PlaneGeometry(10,SLEN+2.5);
+  var swMat=new THREE.MeshStandardMaterial({color:0x333340,roughness:0.85,metalness:0.05});
   var swInstL=new THREE.InstancedMesh(swGeo,swMat,RSEGS);
   var swInstR=new THREE.InstancedMesh(swGeo,swMat,RSEGS);
   for(var si=0;si<RSEGS;si++){
@@ -1187,8 +1187,8 @@ scene.add((() => {
     var sca=Math.atan2(roadX(szc+2)-roadX(szc-2),4);
     var sha=Math.atan2(roadY(szc+SLEN/2)-roadY(szc-SLEN/2),SLEN);
     dummy.rotation.order='YXZ';dummy.rotation.set(-Math.PI/2+sha,sca,0);dummy.scale.setScalar(1);
-    dummy.position.set(sx-8.5*Math.cos(sca),sy+0.03,szc+8.5*Math.sin(sca));dummy.updateMatrix();swInstL.setMatrixAt(si,dummy.matrix);
-    dummy.position.set(sx+8.5*Math.cos(sca),sy+0.03,szc-8.5*Math.sin(sca));dummy.updateMatrix();swInstR.setMatrixAt(si,dummy.matrix);
+    dummy.position.set(sx-13*Math.cos(sca),sy+0.02,szc+13*Math.sin(sca));dummy.updateMatrix();swInstL.setMatrixAt(si,dummy.matrix);
+    dummy.position.set(sx+13*Math.cos(sca),sy+0.02,szc-13*Math.sin(sca));dummy.updateMatrix();swInstR.setMatrixAt(si,dummy.matrix);
   }
 
 // ---- CURBS ----
