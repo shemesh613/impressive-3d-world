@@ -1502,7 +1502,7 @@ scene.add((() => {
 
   }
 
-  barrierInst.instanceMatrix.needsUpdate=true;scene.add(barrierInst);
+  barrierInst.instanceMatrix.needsUpdate=true;// barrierInst removed — orange blocks confusing
 
   window._barrierData={inst:barrierInst,data:barrierData,n:BARRIER_N};
 
@@ -1548,7 +1548,7 @@ scene.add((() => {
 
   redEdgeL.instanceMatrix.needsUpdate=true;redEdgeR.instanceMatrix.needsUpdate=true;
 
-  scene.add(redEdgeL);scene.add(redEdgeR);
+  // redEdge removed — unclear grey strips
 
   window._redEdges={data:redEdgeData,n:RED_EDGE_N};
 
@@ -1580,7 +1580,7 @@ scene.add((() => {
 
   }
 
-  arrowInst.instanceMatrix.needsUpdate=true;scene.add(arrowInst);
+  arrowInst.instanceMatrix.needsUpdate=true;// arrowInst removed — confusing green triangles
 
   window._arrowData={inst:arrowInst,n:ARROW_N,positions:[]};
 
@@ -1608,7 +1608,7 @@ scene.add((() => {
 
   }
 
-  bumpInst.instanceMatrix.needsUpdate=true;scene.add(bumpInst);
+  // bumpInst removed — unclear yellow blobs on road
 
 }
 
@@ -5191,7 +5191,7 @@ if(window._underGlow){var ug=window._underGlow;if(shieldTimer>0){ug.color.setHex
 
   // Barrier collisions
 
-  if(window._barrierData){const bd=window._barrierData;for(let i=0;i<bd.n;i++){const b=bd.data[i];const dz=Math.abs(car.position.z-b.z);if(dz<1){const dx=Math.abs(car.position.x-b.x);if(dx<b.w*.6){spd*=.5;if(!b._hit){b._hit=true;flow=Math.max(0,flow-1);emitParticles(car.position.x,1,car.position.z,0xff6600,4)}}}else{b._hit=false}}}
+  if(false&&window._barrierData){const bd=window._barrierData;for(let i=0;i<bd.n;i++){const b=bd.data[i];const dz=Math.abs(car.position.z-b.z);if(dz<1){const dx=Math.abs(car.position.x-b.x);if(dx<b.w*.6){spd*=.5;if(!b._hit){b._hit=true;flow=Math.max(0,flow-1);emitParticles(car.position.x,1,car.position.z,0xff6600,4)}}}else{b._hit=false}}}
 
 
 
@@ -6075,7 +6075,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   // Animate green arrows - float & spin
 
-  if(window._arrowData&&fc%2===0){const ad=window._arrowData;const t=performance.now()*.001;for(let i=0;i<ad.n;i++){const p=ad.positions[i];dummy.position.set(p.x,p.y+Math.sin(t*2+i)*0.4,p.z);dummy.rotation.set(0,t*1.5+i,p.side*Math.PI/2);dummy.scale.setScalar(0.9+Math.sin(t*3+i)*0.15);dummy.updateMatrix();ad.inst.setMatrixAt(i,dummy.matrix)}ad.inst.instanceMatrix.needsUpdate=true}
+  if(false&&window._arrowData&&fc%2===0){const ad=window._arrowData;const t=performance.now()*.001;for(let i=0;i<ad.n;i++){const p=ad.positions[i];dummy.position.set(p.x,p.y+Math.sin(t*2+i)*0.4,p.z);dummy.rotation.set(0,t*1.5+i,p.side*Math.PI/2);dummy.scale.setScalar(0.9+Math.sin(t*3+i)*0.15);dummy.updateMatrix();ad.inst.setMatrixAt(i,dummy.matrix)}ad.inst.instanceMatrix.needsUpdate=true}
 
 
 
