@@ -1053,9 +1053,9 @@ function roadX(z){
 
   const s=z%600;
 
-  const base=Math.sin(z*.005)*16+Math.sin(z*.013)*10+Math.sin(z*.003)*6;
+  const base=Math.sin(z*.005)*10+Math.sin(z*.013)*6+Math.sin(z*.003)*4;
 
-  const sharp=(s<120)?0:(s<200)?((s-120)/80)*35:(s<350)?35-((s-200)/150)*70:(s<450)?-35+((s-350)/100)*35:0;
+  const sharp=(s<120)?0:(s<200)?((s-120)/80)*12:(s<350)?12-((s-200)/150)*24:(s<450)?-12+((s-350)/100)*12:0;
 
   const twist=Math.floor(z/600)%2===0?1:-1;
 
@@ -1134,11 +1134,11 @@ scene.add((() => {
 
   const _roadMat=new THREE.MeshStandardMaterial({roughness:0.38,metalness:0.25,color:0x2a2a38,envMapIntensity:1.2});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
 
-  const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(14,SLEN+1.5),_roadMat,RSEGS);
+  const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(16,SLEN+2.5),_roadMat,RSEGS);
 
   const edgeMat=new THREE.MeshStandardMaterial({color:0x1a8844,emissive:0x0eaa33,emissiveIntensity:1.5,roughness:0.2,metalness:0.15});window._edgeMat=edgeMat;
 
-  const edgeGeo=new THREE.PlaneGeometry(.5,SLEN+0.5);
+  const edgeGeo=new THREE.PlaneGeometry(.5,SLEN+2);
 
   const edgeL=new THREE.InstancedMesh(edgeGeo,edgeMat,RSEGS);
 
@@ -1146,7 +1146,7 @@ scene.add((() => {
 
   const glowMat=new THREE.MeshStandardMaterial({color:0x0a3318,emissive:0x052210,emissiveIntensity:0.2,roughness:0.7,metalness:0.05});
 
-  const glowGeo=new THREE.PlaneGeometry(3,SLEN+0.5);
+  const glowGeo=new THREE.PlaneGeometry(3,SLEN+2);
 
   const glowL=new THREE.InstancedMesh(glowGeo,glowMat,RSEGS);
 
