@@ -5744,7 +5744,7 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
   if(_cm===1){_cv.set(car.position.x,car.position.y+1.8,_cz+0.3);_ct.set(roadX(_cz+30),roadY(_cz+30)+1,_cz+30)}else if(_cm===2){_cv.set(car.position.x,car.position.y+0.7,_cz+1.5);_ct.set(roadX(_cz+40),roadY(_cz+40)+0.5,_cz+40)}else if(_cm===3){var _cinA=fc*0.003;_cv.set(car.position.x+Math.sin(_cinA)*12,car.position.y+6+Math.sin(fc*0.005)*2,_cz-5+Math.cos(_cinA)*8);_ct.set(car.position.x,car.position.y+1,_cz)}else{_cv.set(_camX+_shakeX,_hillCamY+_camHeight+cPh*4+_shakeY,_behindZ);_ct.set(roadX(_lookAheadZ),roadY(_lookAheadZ)+0.5,_lookAheadZ)}
 
-  cam.position.lerp(_cv,_cm===0?.08:_cm===3?.03:.15);
+  cam.position.lerp(_cv,_cm===0?.25:_cm===3?.03:.15);
   cam.lookAt(_ct);
   _ct.set(roadX(_lookAheadZ),roadY(_lookAheadZ)+0.5,_lookAheadZ);cam.lookAt(_ct);
 
