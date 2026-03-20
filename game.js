@@ -4641,6 +4641,8 @@ function _realStartGame(){
   document.getElementById('followers').style.display='block';
 
   gameActive=true;startBgMusic();
+  // Start ambient city sound
+  if(audioCtx&&!window._ambientCity){try{var ab=audioCtx.createBuffer(1,audioCtx.sampleRate*4,audioCtx.sampleRate);var ad=ab.getChannelData(0);for(var ai=0;ai<ad.length;ai++){ad[ai]=(Math.random()*2-1)}var asrc=audioCtx.createBufferSource();asrc.buffer=ab;asrc.loop=true;var af=audioCtx.createBiquadFilter();af.type="lowpass";af.frequency.value=400;var ag=audioCtx.createGain();ag.gain.value=0.015*_masterVol;asrc.connect(af);af.connect(ag);ag.connect(audioCtx.destination);asrc.start();window._ambientCity={src:asrc,gain:ag,filter:af}}catch(e){}}
   var _ch=document.getElementById("camHint");if(_ch){_ch.style.display="block";setTimeout(function(){_ch.style.display="none"},8000)}
 
   score=0;lives=5;level=1;flow=85;greenCount=0;redCount=0;streak=0;bestStreak=0;topSpeed=0;
@@ -4904,7 +4906,7 @@ function checkCollisions(){
 
       const now=performance.now();window._collectStreak=now-window._lastCollect<2000?window._collectStreak+1:1;window._lastCollect=now;
 
-      const combo=window._collectStreak;const bonus=Math.min(combo,5);score+=8+bonus;flow=Math.min(100,flow+6);lives=Math.min(5,lives+0.3);
+      const combo=window._collectStreak;const bonus=Math.min(combo,5);var _spdMult=spd>0.3?2:spd>0.15?1.5:1;var _driftMult=isDrifting?1.5:1;var _totalPts=Math.floor((8+bonus)*_spdMult*_driftMult);score+=_totalPts;flow=Math.min(100,flow+6);lives=Math.min(5,lives+0.3);
 
       sfxCollect();emitParticles(g.x,g.y,g.z,0x22c55e,6+combo);
 
@@ -4914,7 +4916,7 @@ function checkCollisions(){
 
       if(combo>=3)showPopup('🔥 x'+combo+' קומבו! +'+(8+bonus),(px),(py-30),'#fbbf24');
 
-      else showPopup('🟢 +'+(8+bonus),(px),(py),'#4ade80');
+      else showPopup('🟢 +'+_totalPts+(_spdMult>1?' ⚡':'')+(isDrifting?' 🌀':''),(px),(py),'#4ade80');
 
       greens.splice(i,1);
 
@@ -5421,7 +5423,7 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
 
     // Trigger scenario
 
-    // Scenarios disabled for facelift
+    if(car.position.z>=nextScenarioAt)triggerScenario();
     // if(car.position.z>=nextScenarioAt)triggerScenario();
 
 
