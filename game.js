@@ -1699,17 +1699,17 @@ scene.add((() => {
 
   const CT_N=6;
 
-  const ctGeo=new THREE.BoxGeometry(2,0.6,1.1);
+  var _cts=new THREE.Shape();_cts.moveTo(-0.8,0.05);_cts.lineTo(-0.85,0.3);_cts.quadraticCurveTo(-0.85,0.5,-0.6,0.52);_cts.lineTo(0.6,0.52);_cts.quadraticCurveTo(0.85,0.5,0.85,0.3);_cts.lineTo(0.8,0.05);_cts.lineTo(-0.8,0.05);const ctGeo=new THREE.ExtrudeGeometry(_cts,{depth:2.8,bevelEnabled:true,bevelThickness:0.06,bevelSize:0.05,bevelSegments:2});
 
-  const ctRoofGeo=new THREE.BoxGeometry(1.4,0.35,0.85);
+  var _ctrs=new THREE.Shape();_ctrs.moveTo(-0.5,0);_ctrs.quadraticCurveTo(-0.52,0.25,-0.2,0.28);_ctrs.lineTo(0.2,0.28);_ctrs.quadraticCurveTo(0.52,0.25,0.5,0);_ctrs.lineTo(-0.5,0);const ctRoofGeo=new THREE.ExtrudeGeometry(_ctrs,{depth:1.1,bevelEnabled:true,bevelThickness:0.04,bevelSize:0.03,bevelSegments:2});
 
   const ctColors=[0xe74c3c,0xf1c40f,0x3498db,0xe67e22,0x9b59b6,0x1abc9c];
 
-  const ctBodyInst=new THREE.InstancedMesh(ctGeo,new THREE.MeshStandardMaterial({roughness:0.35,metalness:0.4,color:0xffffff}),CT_N);
+  const ctBodyInst=new THREE.InstancedMesh(ctGeo,new THREE.MeshStandardMaterial({roughness:0.08,metalness:0.85,envMapIntensity:2.5,color:0xffffff}),CT_N);
 
   ctBodyInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(CT_N*3),3);
 
-  const ctRoofInst=new THREE.InstancedMesh(ctRoofGeo,new THREE.MeshStandardMaterial({roughness:0.15,metalness:0.7,color:0x1a2a3a}),CT_N);
+  const ctRoofInst=new THREE.InstancedMesh(ctRoofGeo,new THREE.MeshStandardMaterial({roughness:0.05,metalness:0.85,color:0x111820,envMapIntensity:2.0}),CT_N);
 
   const _ctc=new THREE.Color();
 
@@ -1927,17 +1927,17 @@ scene.add((() => {
 
   const PARKED_N=25;
 
-  const pCarBodyGeo=new THREE.BoxGeometry(1.1,0.55,2);
+  var _pcs=new THREE.Shape();_pcs.moveTo(-0.9,0.06);_pcs.lineTo(-0.95,0.3);_pcs.quadraticCurveTo(-0.95,0.55,-0.7,0.58);_pcs.lineTo(0.7,0.58);_pcs.quadraticCurveTo(0.95,0.55,0.95,0.3);_pcs.lineTo(0.9,0.06);_pcs.lineTo(-0.9,0.06);const pCarBodyGeo=new THREE.ExtrudeGeometry(_pcs,{depth:3.2,bevelEnabled:true,bevelThickness:0.08,bevelSize:0.06,bevelSegments:3});
 
-  const pCarRoofGeo=new THREE.BoxGeometry(0.85,0.35,1.1);
+  var _pcrs=new THREE.Shape();_pcrs.moveTo(-0.52,0);_pcrs.quadraticCurveTo(-0.55,0.28,-0.2,0.32);_pcrs.lineTo(0.2,0.32);_pcrs.quadraticCurveTo(0.55,0.28,0.52,0);_pcrs.lineTo(-0.52,0);const pCarRoofGeo=new THREE.ExtrudeGeometry(_pcrs,{depth:1.2,bevelEnabled:true,bevelThickness:0.04,bevelSize:0.03,bevelSegments:2});
 
   const pCarColors=[0x2c3e50,0x7f8c8d,0xbdc3c7,0x34495e,0x95a5a6,0xc0392b,0x2980b9,0x27ae60,0xf1c40f,0x8e44ad];
 
-  const pCarBodyInst=new THREE.InstancedMesh(pCarBodyGeo,new THREE.MeshStandardMaterial({roughness:0.35,metalness:0.4,color:0xffffff}),PARKED_N);
+  const pCarBodyInst=new THREE.InstancedMesh(pCarBodyGeo,new THREE.MeshStandardMaterial({roughness:0.08,metalness:0.85,envMapIntensity:2.5,color:0xffffff}),PARKED_N);
 
   pCarBodyInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(PARKED_N*3),3);
 
-  const pCarRoofInst=new THREE.InstancedMesh(pCarRoofGeo,new THREE.MeshStandardMaterial({roughness:0.15,metalness:0.7,color:0x1a2a3a}),PARKED_N);
+  const pCarRoofInst=new THREE.InstancedMesh(pCarRoofGeo,new THREE.MeshStandardMaterial({roughness:0.05,metalness:0.85,color:0x111820,envMapIntensity:2.0}),PARKED_N);
 
   const _pc=new THREE.Color();
 
@@ -1953,7 +1953,7 @@ scene.add((() => {
 
     pCarBodyInst.instanceColor.setXYZ(i,_pc.r,_pc.g,_pc.b);
 
-    dummy.position.set(side,0.35,z);
+    dummy.position.set(side,0.0,z-1.6);
 
     dummy.scale.setScalar(1);
 
@@ -1963,7 +1963,7 @@ scene.add((() => {
 
     pCarBodyInst.setMatrixAt(i,dummy.matrix);
 
-    dummy.position.set(side,0.7,z-0.1);
+    dummy.position.set(side,0.58,z-1.0);
 
     dummy.updateMatrix();
 
@@ -2267,17 +2267,17 @@ scene.add((() => {
 
   const ONC_N=8;
 
-  const oncBodyGeo=new THREE.BoxGeometry(1.8,0.9,3);
+  var _ocs=new THREE.Shape();_ocs.moveTo(-0.85,0.06);_ocs.lineTo(-0.9,0.35);_ocs.quadraticCurveTo(-0.9,0.6,-0.65,0.62);_ocs.lineTo(0.65,0.62);_ocs.quadraticCurveTo(0.9,0.6,0.9,0.35);_ocs.lineTo(0.85,0.06);_ocs.lineTo(-0.85,0.06);const oncBodyGeo=new THREE.ExtrudeGeometry(_ocs,{depth:3.5,bevelEnabled:true,bevelThickness:0.1,bevelSize:0.07,bevelSegments:3});
 
-  const oncRoofGeo=new THREE.BoxGeometry(1.3,0.5,1.6);
+  var _ocrs=new THREE.Shape();_ocrs.moveTo(-0.5,0);_ocrs.quadraticCurveTo(-0.55,0.35,-0.2,0.38);_ocrs.lineTo(0.2,0.38);_ocrs.quadraticCurveTo(0.55,0.35,0.5,0);_ocrs.lineTo(-0.5,0);const oncRoofGeo=new THREE.ExtrudeGeometry(_ocrs,{depth:1.4,bevelEnabled:true,bevelThickness:0.05,bevelSize:0.04,bevelSegments:2});
 
   const oncColors=[0xe74c3c,0x3498db,0xf39c12,0x9b59b6,0x1abc9c,0xe67e22,0x2ecc71,0xecf0f1];
 
-  const oncBodyInst=new THREE.InstancedMesh(oncBodyGeo,new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0xffffff}),ONC_N);
+  const oncBodyInst=new THREE.InstancedMesh(oncBodyGeo,new THREE.MeshStandardMaterial({roughness:0.08,metalness:0.85,envMapIntensity:2.5,color:0xffffff}),ONC_N);
 
   oncBodyInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(ONC_N*3),3);
 
-  const oncRoofInst=new THREE.InstancedMesh(oncRoofGeo,new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x222222}),ONC_N);
+  const oncRoofInst=new THREE.InstancedMesh(oncRoofGeo,new THREE.MeshStandardMaterial({roughness:0.05,metalness:0.85,color:0x111820,envMapIntensity:2.0}),ONC_N);
 
   const oncLightInst=new THREE.InstancedMesh(new THREE.SphereGeometry(0.4,6,6),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0xffff44}),ONC_N*2);
 
