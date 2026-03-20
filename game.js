@@ -4774,7 +4774,10 @@ function updateHUD(){
 
   const _curSpd=Math.round(spd*500);if(_curSpd>topSpeed)topSpeed=_curSpd;
   if(window._drawSpeedo)window._drawSpeedo(_curSpd,210);
+  if(window._drawRPM)window._drawRPM();
 
+  // Camera mode indicator
+  var _camNames=["🎥 Chase","👀 Hood","🏎️ Bumper","🎬 Cinematic"];var _cmi=document.getElementById("camHint");if(_cmi&&gameActive){_cmi.style.display="block";_cmi.textContent=_camNames[window._camMode||0]+" | C=מצלמה | ESC=השהיה | SPACE=דריפט"}
   document.getElementById('speedVal').textContent=_curSpd+'km/h';var _spEl=document.getElementById('speedVal').parentElement;if(_spEl){_spEl.style.transition='border-color .3s,transform .3s';if(_curSpd>140){_spEl.style.borderColor='rgba(239,68,68,.6)';_spEl.style.transform='scale('+(1+Math.sin(fc*0.2)*0.03)+')'}else if(_curSpd>100)_spEl.style.borderColor='rgba(251,191,36,.5)';else _spEl.style.borderColor=''}
   // Gear + RPM HUD
   var _gv=document.getElementById("gearVal");if(_gv)_gv.textContent=GEAR_NAMES[gear]||gear;
@@ -5009,6 +5012,22 @@ ctx.save();ctx.translate(cx,cy);ctx.rotate(sa);ctx.beginPath();ctx.moveTo(0,-2);
 ctx.fillStyle="#fff";ctx.font="bold 28px Arial";ctx.textAlign="center";ctx.fillText(speed,cx,cy+25);
 ctx.fillStyle="rgba(180,180,200,0.7)";ctx.font="11px Arial";ctx.fillText("km/h",cx,cy+40);
 if(typeof isDrifting!=="undefined"&&isDrifting&&typeof driftIntensity!=="undefined"&&driftIntensity>0.15){var _da=0.5+driftIntensity*0.5;ctx.save();ctx.fillStyle="rgba(255,165,0,"+_da+")";ctx.font="bold "+(14+Math.floor(driftIntensity*10))+"px Arial";ctx.shadowColor="rgba(255,100,0,0.8)";ctx.shadowBlur=10+driftIntensity*15;ctx.fillText(handbrake?"HANDBRAKE!":"DRIFT!",cx,cy-25);if(driftIntensity>0.5){ctx.fillStyle="rgba(255,220,0,"+(driftIntensity*0.6)+")";ctx.font="bold "+(10+Math.floor(driftIntensity*6))+"px Arial";ctx.fillText("x"+Math.floor(driftIntensity*10)/10,cx,cy-8)}ctx.restore()}
+cv.style.opacity="1"};
+// ---- RPM GAUGE DRAW ----
+window._drawRPM=function(){
+var cv=document.getElementById("rpmCanvas");if(!cv)return;
+if(!window._rpmCtx)window._rpmCtx=cv.getContext("2d");
+var ctx=window._rpmCtx,w=cv.width,h=cv.height,cx=w/2,cy=h/2,r=w/2-8;
+ctx.clearRect(0,0,w,h);
+ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);var bg=ctx.createRadialGradient(cx,cy,r*0.3,cx,cy,r);bg.addColorStop(0,"rgba(25,15,15,0.85)");bg.addColorStop(1,"rgba(15,10,10,0.95)");ctx.fillStyle=bg;ctx.fill();
+ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle="rgba(255,80,80,0.25)";ctx.lineWidth=2;ctx.stroke();
+var sA=Math.PI*0.75,eA=Math.PI*2.25,sw=eA-sA,sr=Math.min(1,rpm/8000),sa=sA+sw*sr;
+ctx.beginPath();ctx.arc(cx,cy,r-6,sA,eA);ctx.strokeStyle="rgba(60,40,40,0.4)";ctx.lineWidth=6;ctx.stroke();
+if(rpm>900){ctx.beginPath();ctx.arc(cx,cy,r-6,sA,sa);ctx.strokeStyle=rpm>7000?"#ef4444":rpm>5000?"#eab308":"#22c55e";ctx.lineWidth=6;ctx.lineCap="round";ctx.stroke()}
+ctx.save();ctx.translate(cx,cy);ctx.rotate(sa);ctx.beginPath();ctx.moveTo(0,-1.5);ctx.lineTo(r-18,0);ctx.lineTo(0,1.5);ctx.fillStyle="#ef4444";ctx.fill();ctx.restore();
+ctx.fillStyle="#fff";ctx.font="bold 18px Arial";ctx.textAlign="center";ctx.fillText(Math.round(rpm/100)/10,cx,cy+15);
+ctx.fillStyle="rgba(180,150,150,0.6)";ctx.font="9px Arial";ctx.fillText("x1000",cx,cy+26);
+ctx.fillStyle=rpm>6500?"#ef4444":"#fbbf24";ctx.font="bold 22px Arial";ctx.fillText(GEAR_NAMES[gear]||gear,cx,cy-8);
 cv.style.opacity="1"};
 
 // ---- ANIMATE ----
