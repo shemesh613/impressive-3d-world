@@ -1101,7 +1101,7 @@ scene.add((() => {
 
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(16,SLEN+2.5),_roadMat,RSEGS);
 
-  const edgeMat=new THREE.MeshStandardMaterial({color:0x1a8844,emissive:0x064411,emissiveIntensity:0.25,roughness:0.2,metalness:0.15});window._edgeMat=edgeMat;
+  const edgeMat=new THREE.MeshStandardMaterial({color:0x115533,emissive:0x042208,emissiveIntensity:0.1,roughness:0.5,metalness:0.05});window._edgeMat=edgeMat;
 
   const edgeGeo=new THREE.PlaneGeometry(.5,SLEN+2);
 
