@@ -2456,6 +2456,37 @@ for(let z=-100;z<=7000;z+=10){
   inst.instanceMatrix.needsUpdate=true;inst.instanceColor.needsUpdate=true;
   inst.castShadow=true;inst.receiveShadow=true;
   scene.add(inst);
+  // Rooftops - varied shapes
+  var roofTypes=[0,1,2];// 0=flat antenna, 1=triangle, 2=sloped
+  var roofMat=new THREE.MeshStandardMaterial({color:0x2a3040,roughness:0.8,metalness:0.15});
+  var triRoofGeo=new THREE.ConeGeometry(1,0.6,4);
+  var flatRoofGeo=new THREE.BoxGeometry(0.8,0.08,0.8);
+  var antennaGeo=new THREE.CylinderGeometry(0.02,0.02,1.5,3);
+  var antennaMat=new THREE.MeshBasicMaterial({color:0x666666});
+  var roofInst=new THREE.InstancedMesh(triRoofGeo,roofMat,Math.min(300,bdata.length));
+  var antennaInst=new THREE.InstancedMesh(antennaGeo,antennaMat,Math.min(200,bdata.length));
+  var ri2=0,ai2=0;
+  bdata.forEach(function(b,i){
+    if(i>=300)return;
+    var bx=b[0],bz=b[1],bh=b[3],bw=b[2];
+    var topY=roadY(bz)+bh;
+    var rType=(i*7+Math.floor(bz))%3;
+    if(rType===1&&ri2<300){
+      dummy.position.set(bx,topY+0.3,bz);
+      dummy.scale.set(bw*0.35,bh*0.04+0.3,b[4]*0.35);
+      dummy.rotation.set(0,0,0);dummy.updateMatrix();
+      roofInst.setMatrixAt(ri2++,dummy.matrix);
+    }
+    if((rType===0||rType===2)&&ai2<200){
+      dummy.position.set(bx+(Math.random()-0.5)*bw*0.3,topY+0.75,bz);
+      dummy.scale.set(1,0.8+Math.random()*0.5,1);
+      dummy.rotation.set(0,0,0);dummy.updateMatrix();
+      antennaInst.setMatrixAt(ai2++,dummy.matrix);
+    }
+  });
+  roofInst.count=ri2;antennaInst.count=ai2;
+  roofInst.instanceMatrix.needsUpdate=true;antennaInst.instanceMatrix.needsUpdate=true;
+  scene.add(roofInst);scene.add(antennaInst);
 
   // Building windows (emissive glow)
 
@@ -2463,7 +2494,7 @@ for(let z=-100;z<=7000;z+=10){
 
   const winGeo=new THREE.PlaneGeometry(0.4,0.5);
 
-  const winMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd55,emissiveIntensity:3.5,roughness:0.05,side:THREE.DoubleSide});
+  const winMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd55,emissiveIntensity:0.4,roughness:0.05,side:THREE.DoubleSide});
 
   const winInst=new THREE.InstancedMesh(winGeo,winMat,WIN_N);
 
