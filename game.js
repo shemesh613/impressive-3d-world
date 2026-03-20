@@ -857,7 +857,7 @@ renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 
-renderer.toneMappingExposure=1.6;
+renderer.toneMappingExposure=1.2;
 
 document.body.prepend(renderer.domElement);
 
@@ -876,7 +876,7 @@ const renderPass=new THREE.RenderPass(scene,cam);
 composer.addPass(renderPass);
 // SSAO removed for performance
 
-const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.6,0.35,0.85);
+const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.35,0.4,0.92);
 composer.addPass(bloomPass);
 window._bloomPass=bloomPass;
 
@@ -1130,11 +1130,11 @@ scene.add((() => {
 
   const RSEGS=900,SLEN=9;
 
-  const _roadMat=new THREE.MeshStandardMaterial({roughness:0.38,metalness:0.25,color:0x2a2a38,envMapIntensity:1.2});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
+  const _roadMat=new THREE.MeshStandardMaterial({roughness:0.65,metalness:0.08,color:0x2a2a38,envMapIntensity:0.4});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
 
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(16,SLEN+2.5),_roadMat,RSEGS);
 
-  const edgeMat=new THREE.MeshStandardMaterial({color:0x1a8844,emissive:0x0eaa33,emissiveIntensity:1.5,roughness:0.2,metalness:0.15});window._edgeMat=edgeMat;
+  const edgeMat=new THREE.MeshStandardMaterial({color:0x1a8844,emissive:0x0a7722,emissiveIntensity:0.6,roughness:0.2,metalness:0.15});window._edgeMat=edgeMat;
 
   const edgeGeo=new THREE.PlaneGeometry(.5,SLEN+2);
 
@@ -1381,7 +1381,7 @@ scene.add((() => {
 
   const lampGlowGeo=new THREE.SphereGeometry(.2,6,6);
 
-  const lampGlowMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd66,emissiveIntensity:1.2,roughness:0.1});
+  const lampGlowMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd66,emissiveIntensity:0.5,roughness:0.3});
 
   const lampGlowInst=new THREE.InstancedMesh(lampGlowGeo,lampGlowMat,LAMP_N);
 
@@ -2980,10 +2980,10 @@ function buildPrimitiveCar(){
 buildPrimitiveCar();
 
 // Real SpotLight headlights
-var headlightL=new THREE.SpotLight(0xffffee,4,60,Math.PI/4.5,0.5,1.0);
+var headlightL=new THREE.SpotLight(0xffffee,1.8,45,Math.PI/4.5,0.5,1.0);
 headlightL.position.set(-0.6,0.42,2.4);headlightL.target.position.set(-0.6,0,20);
 car.add(headlightL);car.add(headlightL.target);
-var headlightR=new THREE.SpotLight(0xffffee,4,60,Math.PI/4.5,0.5,1.0);
+var headlightR=new THREE.SpotLight(0xffffee,1.8,45,Math.PI/4.5,0.5,1.0);
 headlightR.position.set(0.6,0.42,2.4);headlightR.target.position.set(0.6,0,20);
 car.add(headlightR);car.add(headlightR.target);
 
@@ -4749,7 +4749,8 @@ function updateHUD(){
   if(window._drawRPM)window._drawRPM();
 
   // Camera mode indicator
-  var _camNames=["🎥 Chase","👀 Hood","🏎️ Bumper","🎬 Cinematic"];var _cmi=document.getElementById("camHint");if(_cmi&&gameActive){_cmi.style.display="block";_cmi.textContent=_camNames[window._camMode||0]+" | C=מצלמה | ESC=השהיה | SPACE=דריפט"}
+  // Camera hint: only show on mode change, fade after 3s
+  var _camNames=["🎥 Chase","👀 Hood","🏎️ Bumper","🎬 Cinematic"];var _cmi=document.getElementById("camHint");if(_cmi&&gameActive){if(window._prevCamMode!==(window._camMode||0)){_cmi.style.display="block";_cmi.style.opacity="1";_cmi.textContent=_camNames[window._camMode||0];clearTimeout(window._camHintT);window._camHintT=setTimeout(function(){_cmi.style.opacity="0";setTimeout(function(){_cmi.style.display="none"},500)},3000);window._prevCamMode=window._camMode||0}}
   document.getElementById('speedVal').textContent=_curSpd+'km/h';var _spEl=document.getElementById('speedVal').parentElement;if(_spEl){_spEl.style.transition='border-color .3s,transform .3s';if(_curSpd>140){_spEl.style.borderColor='rgba(239,68,68,.6)';_spEl.style.transform='scale('+(1+Math.sin(fc*0.2)*0.03)+')'}else if(_curSpd>100)_spEl.style.borderColor='rgba(251,191,36,.5)';else _spEl.style.borderColor=''}
   // Gear + RPM HUD
   var _gv=document.getElementById("gearVal");if(_gv)_gv.textContent=GEAR_NAMES[gear]||gear;
@@ -4774,7 +4775,7 @@ function updateHUD(){
 
   scene.fog.density=0.0008-spd*0.0003;scene.fog.color.setHex(spd>0.1?0x1e1e30:0x1a1a2e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=0.25+spd*0.15;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.5+spd*0.2;var _tFov=68+spd*25;cam.fov+=(Math.min(88,_tFov)-cam.fov)*0.03;cam.updateProjectionMatrix();
     // Dynamic vignette at speed
-    if(typeof colorPass!=='undefined'&&colorPass.uniforms){colorPass.uniforms['vignetteAmount'].value=0.35+spd*0.3}// fog clears at speed
+    if(typeof colorPass!=='undefined'&&colorPass.uniforms){colorPass.uniforms['vignetteAmount'].value=0.3+spd*0.15}// fog clears at speed
 
   moon.position.z=car.position.z+500;moonGlow.position.z=moon.position.z;
 
@@ -4820,9 +4821,9 @@ function updateHUD(){
 
   const _lean=Math.abs(window._carLean||0);
 
-  if(_lean>0.04){const ca=Math.min(3,_lean*30);document.querySelector('canvas').style.filter='contrast(1.05) saturate(1.15) hue-rotate('+(_lean>0?(ca):(-ca))+'deg)'}
+  if(_lean>0.04){const ca=Math.min(3,_lean*30);document.querySelector('canvas').style.filter='hue-rotate('+(_lean>0?(ca):(-ca))+'deg)'}
 
-  else if(turboTimer>0){document.querySelector('canvas').style.filter='contrast(1.15) saturate(1.4) brightness(1.08)'}else{document.querySelector('canvas').style.filter='contrast(1.05) saturate(1.15)'}
+  else if(turboTimer>0){document.querySelector('canvas').style.filter='brightness(1.05)'}else{document.querySelector('canvas').style.filter=''}
 
   // Dust puff behind car at speed
 
@@ -5315,9 +5316,9 @@ if(window._underGlow){var ug=window._underGlow;if(shieldTimer>0){ug.color.setHex
 
         if(fc%15===0)emitParticles(car.position.x,car.position.y+0.5,car.position.z,0xffd700,2);
 
-        document.querySelector('canvas').style.filter='contrast(1.1) saturate(1.3) brightness(1.05)';
+        document.querySelector('canvas').style.filter='brightness(1.03)';
 
-      }else if(dz>=sz.len){window._speedZone=null;document.querySelector('canvas').style.filter='contrast(1.05) saturate(1.15)'}
+      }else if(dz>=sz.len){window._speedZone=null;document.querySelector('canvas').style.filter=''}
 
     }
 
@@ -5942,8 +5943,8 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   cam.updateProjectionMatrix();
   // Dynamic bloom + exposure
-  if(window._bloomPass){window._bloomPass.strength=0.5+spd*0.8+(isDrifting?0.3:0);window._bloomPass.threshold=0.85-spd*0.15}
-  renderer.toneMappingExposure=1.4+spd*0.5+(turboTimer>0?0.3:0);
+  if(window._bloomPass){window._bloomPass.strength=0.25+spd*0.3+(isDrifting?0.15:0);window._bloomPass.threshold=0.92-spd*0.05}
+  renderer.toneMappingExposure=1.3+spd*0.2+(turboTimer>0?0.15:0);
 
 
 

@@ -2,7 +2,7 @@
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
     body{background:#000;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;touch-action:none}
-    canvas{filter:contrast(1.05) saturate(1.15)}
+    canvas{display:block}
 
     canvas{display:block;filter:contrast(1.05) saturate(1.15)}
 

@@ -242,7 +242,7 @@
 <div id="friendNotify"></div>
 
 <div id="followers">🚗🚗🚗🚗🚗 חברים נוסעים אחריך!</div>
-<div id="camHint" style="position:fixed;top:45px;left:50%;transform:translateX(-50%);z-index:22;color:#666;font-size:11px;pointer-events:none;display:none">C=מצלמה | ESC=השהיה | SPACE=דריפט | H=צפירה</div>
+<div id="camHint" style="position:fixed;top:45px;left:50%;transform:translateX(-50%);z-index:22;color:#aaa;font-size:13px;pointer-events:none;display:none;transition:opacity .5s;background:rgba(0,0,0,.5);padding:4px 14px;border-radius:12px;backdrop-filter:blur(4px)">C=מצלמה | ESC=השהיה | SPACE=דריפט | H=צפירה</div>
 
 
 
@@ -428,7 +428,7 @@ setInterval(function(){const sh=document.createElement('div');sh.className='shoo
 <script src="./game.js"></script>
 
 <canvas id="speedoCanvas" width="200" height="200" style="position:fixed;bottom:15px;right:15px;z-index:25;pointer-events:none;opacity:0;transition:opacity .5s"></canvas>
-<canvas id="rpmCanvas" width="120" height="120" style="position:fixed;bottom:95px;right:165px;z-index:25;pointer-events:none;opacity:0;transition:opacity .5s"></canvas>
+<canvas id="rpmCanvas" width="150" height="150" style="position:fixed;bottom:110px;right:170px;z-index:25;pointer-events:none;opacity:0;transition:opacity .5s"></canvas>
 </body>
 
 </html>
