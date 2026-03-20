@@ -876,7 +876,7 @@ const renderPass=new THREE.RenderPass(scene,cam);
 composer.addPass(renderPass);
 // SSAO removed for performance
 
-const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.35,0.4,0.92);
+const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.25,0.4,0.95);
 composer.addPass(bloomPass);
 window._bloomPass=bloomPass;
 
@@ -914,7 +914,7 @@ scene.environment=_envRT.texture;
 const ambLight=new THREE.AmbientLight(0x111822,0.25);scene.add(ambLight);
 var hemiLight=new THREE.HemisphereLight(0x1a2244,0x050a05,0.2);scene.add(hemiLight);
 
-const dirLight=new THREE.DirectionalLight(0xffeedd,1.8);dirLight.position.set(30,50,40);
+const dirLight=new THREE.DirectionalLight(0xffeedd,1.2);dirLight.position.set(30,50,40);
 dirLight.castShadow=true;
 dirLight.shadow.mapSize.width=2048;dirLight.shadow.mapSize.height=2048;
 dirLight.shadow.camera.near=1;dirLight.shadow.camera.far=150;
@@ -1459,7 +1459,7 @@ scene.add((() => {
 
 // ---- TRAFFIC LIGHTS ----
 
-{  const TL_N=30;  const tlPoleGeo=new THREE.CylinderGeometry(.06,.06,4,6);  const tlPoleMat=new THREE.MeshPhongMaterial({color:0x444444,shininess:5});  const tlPoleInst=new THREE.InstancedMesh(tlPoleGeo,tlPoleMat,TL_N);  const tlBoxGeo=new THREE.BoxGeometry(.5,1.2,.3);  const tlBoxMat=new THREE.MeshPhongMaterial({color:0x222222,shininess:5});  const tlBoxInst=new THREE.InstancedMesh(tlBoxGeo,tlBoxMat,TL_N);  const tlLightGeo=new THREE.SphereGeometry(.15,8,8);  const tlRedMat=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0xff0000,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlYelMat=new THREE.MeshStandardMaterial({color:0xffcc00,emissive:0xffcc00,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlGrnMat=new THREE.MeshStandardMaterial({color:0x00ff00,emissive:0x00ff00,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlRedInst=new THREE.InstancedMesh(tlLightGeo,tlRedMat,TL_N);  const tlYelInst=new THREE.InstancedMesh(tlLightGeo,tlYelMat,TL_N);  const tlGrnInst=new THREE.InstancedMesh(tlLightGeo,tlGrnMat,TL_N);  const tlPositions=[];  for(let i=0;i<TL_N;i++){    const z=i*200+100;const _tlrx=roadX(z);const side=i%2===0?_tlrx-8:_tlrx+8;    tlPositions.push({x:side,z:z});    dummy.position.set(side,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    tlPoleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.2,z);dummy.updateMatrix();    tlBoxInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.55,z);dummy.updateMatrix();tlRedInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.2,z);dummy.updateMatrix();tlYelInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+3.85,z);dummy.updateMatrix();tlGrnInst.setMatrixAt(i,dummy.matrix);  }  tlPoleInst.instanceMatrix.needsUpdate=true;tlBoxInst.instanceMatrix.needsUpdate=true;  tlRedInst.instanceMatrix.needsUpdate=true;tlYelInst.instanceMatrix.needsUpdate=true;tlGrnInst.instanceMatrix.needsUpdate=true;  scene.add(tlPoleInst);scene.add(tlBoxInst);scene.add(tlRedInst);scene.add(tlYelInst);scene.add(tlGrnInst);  window._tlData={redInst:tlRedInst,yelInst:tlYelInst,grnInst:tlGrnInst,positions:tlPositions,n:TL_N};
+{  const TL_N=30;  const tlPoleGeo=new THREE.CylinderGeometry(.06,.06,4,6);  const tlPoleMat=new THREE.MeshPhongMaterial({color:0x444444,shininess:5});  const tlPoleInst=new THREE.InstancedMesh(tlPoleGeo,tlPoleMat,TL_N);  const tlBoxGeo=new THREE.BoxGeometry(.5,1.2,.3);  const tlBoxMat=new THREE.MeshPhongMaterial({color:0x222222,shininess:5});  const tlBoxInst=new THREE.InstancedMesh(tlBoxGeo,tlBoxMat,TL_N);  const tlLightGeo=new THREE.SphereGeometry(.15,8,8);  const tlRedMat=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0xff0000,emissiveIntensity:0.3,roughness:0.2,metalness:0.1});  const tlYelMat=new THREE.MeshStandardMaterial({color:0xffcc00,emissive:0xffcc00,emissiveIntensity:0.3,roughness:0.2,metalness:0.1});  const tlGrnMat=new THREE.MeshStandardMaterial({color:0x00ff00,emissive:0x00ff00,emissiveIntensity:0.3,roughness:0.2,metalness:0.1});  const tlRedInst=new THREE.InstancedMesh(tlLightGeo,tlRedMat,TL_N);  const tlYelInst=new THREE.InstancedMesh(tlLightGeo,tlYelMat,TL_N);  const tlGrnInst=new THREE.InstancedMesh(tlLightGeo,tlGrnMat,TL_N);  const tlPositions=[];  for(let i=0;i<TL_N;i++){    const z=i*200+100;const _tlrx=roadX(z);const side=i%2===0?_tlrx-8:_tlrx+8;    tlPositions.push({x:side,z:z});    dummy.position.set(side,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    tlPoleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.2,z);dummy.updateMatrix();    tlBoxInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.55,z);dummy.updateMatrix();tlRedInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.2,z);dummy.updateMatrix();tlYelInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+3.85,z);dummy.updateMatrix();tlGrnInst.setMatrixAt(i,dummy.matrix);  }  tlPoleInst.instanceMatrix.needsUpdate=true;tlBoxInst.instanceMatrix.needsUpdate=true;  tlRedInst.instanceMatrix.needsUpdate=true;tlYelInst.instanceMatrix.needsUpdate=true;tlGrnInst.instanceMatrix.needsUpdate=true;  scene.add(tlPoleInst);scene.add(tlBoxInst);scene.add(tlRedInst);scene.add(tlYelInst);scene.add(tlGrnInst);  window._tlData={redInst:tlRedInst,yelInst:tlYelInst,grnInst:tlGrnInst,positions:tlPositions,n:TL_N};
 
 }
 
@@ -1777,7 +1777,7 @@ scene.add((() => {
 
   const ctHlGeo=new THREE.BoxGeometry(0.15,0.08,0.04);
 
-  const ctHlMat=new THREE.MeshStandardMaterial({color:0xffffdd,emissive:0xffff88,emissiveIntensity:0.7,roughness:0.2,metalness:0.5});
+  const ctHlMat=new THREE.MeshStandardMaterial({color:0xffffdd,emissive:0xffff88,emissiveIntensity:0.3,roughness:0.2,metalness:0.5});
 
   const ctHlInst=new THREE.InstancedMesh(ctHlGeo,ctHlMat,CT_N*2);
 
@@ -1787,7 +1787,7 @@ scene.add((() => {
 
   const ctTlGeo=new THREE.BoxGeometry(0.12,0.06,0.04);
 
-  const ctTlMat=new THREE.MeshStandardMaterial({color:0xff4444,emissive:0xff2200,emissiveIntensity:0.8,roughness:0.3,metalness:0.2});
+  const ctTlMat=new THREE.MeshStandardMaterial({color:0xff4444,emissive:0xff2200,emissiveIntensity:0.35,roughness:0.3,metalness:0.2});
 
   const ctTlInst=new THREE.InstancedMesh(ctTlGeo,ctTlMat,CT_N*2);
 
@@ -2543,7 +2543,7 @@ for(let z=-100;z<=7000;z+=10){
 
   const neonGeo=new THREE.PlaneGeometry(1.8,0.6);
 
-  const neonInst=new THREE.InstancedMesh(neonGeo,new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:1.0,roughness:0.0,side:THREE.DoubleSide}),NEON_N);
+  const neonInst=new THREE.InstancedMesh(neonGeo,new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:0.4,roughness:0.0,side:THREE.DoubleSide}),NEON_N);
 
   neonInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(NEON_N*3),3);
 
@@ -2593,7 +2593,7 @@ for(let z=-100;z<=7000;z+=10){
 
   const antLGeo=new THREE.SphereGeometry(0.08,4,4);
 
-  const antLMat=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0xff0000,emissiveIntensity:1.0,roughness:0.1});
+  const antLMat=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0xff0000,emissiveIntensity:0.4,roughness:0.1});
 
   const antLInst=new THREE.InstancedMesh(antLGeo,antLMat,antN);
 
@@ -2950,10 +2950,10 @@ function buildPrimitiveCar(){
   var hlG=new THREE.BoxGeometry(.4,.08,.04);var hlM=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffee,emissiveIntensity:2.5,roughness:0.05,metalness:0.5});
   [-.6,.6].forEach(function(x){var hl=new THREE.Mesh(hlG,hlM);hl.position.set(x,.42,2.38);car.add(hl)});
   // DRL strip
-  var drlG=new THREE.BoxGeometry(.55,.03,.03);var drlM=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:2.0});
+  var drlG=new THREE.BoxGeometry(.55,.03,.03);var drlM=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:0.6});
   [-.55,.55].forEach(function(x){var d=new THREE.Mesh(drlG,drlM);d.position.set(x,.35,2.38);car.add(d)});
   // Taillights LED strip
-  var tlG=new THREE.BoxGeometry(.4,.06,.04);var tlM=new THREE.MeshStandardMaterial({color:0xff3333,emissive:0xff1100,emissiveIntensity:2.0,roughness:0.15,metalness:0.2});window._brakeMat=tlM;
+  var tlG=new THREE.BoxGeometry(.4,.06,.04);var tlM=new THREE.MeshStandardMaterial({color:0xff3333,emissive:0xff1100,emissiveIntensity:0.6,roughness:0.15,metalness:0.2});window._brakeMat=tlM;
   [-.65,.65].forEach(function(x){var tl=new THREE.Mesh(tlG,tlM);tl.position.set(x,.42,-2.38);car.add(tl)});
   var tlStrip=new THREE.Mesh(new THREE.BoxGeometry(1.1,.03,.03),new THREE.MeshStandardMaterial({color:0xff2222,emissive:0xff0000,emissiveIntensity:1.5}));
   tlStrip.position.set(0,.42,-2.38);car.add(tlStrip);
@@ -3206,7 +3206,7 @@ function spawnGreen(){
 
 // ---- POWER-UPS (golden diamonds) ----
 
-const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(.6,0),new THREE.MeshStandardMaterial({color:0x66bbff,emissive:0x3399ff,emissiveIntensity:1.0,roughness:0.05,metalness:0.7,transparent:true,opacity:0.85}),MAX_POWERUPS);powerupInst.frustumCulled=false;scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const z=car.position.z+(60+Math.random()*40);const rx=roadX(z);const x=rx+(Math.random()-.5)*7;  powerups.push({x,z,y:2.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
+const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(.6,0),new THREE.MeshStandardMaterial({color:0x66bbff,emissive:0x3399ff,emissiveIntensity:0.4,roughness:0.05,metalness:0.7,transparent:true,opacity:0.85}),MAX_POWERUPS);powerupInst.frustumCulled=false;scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const z=car.position.z+(60+Math.random()*40);const rx=roadX(z);const x=rx+(Math.random()-.5)*7;  powerups.push({x,z,y:2.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
 
 // ---- OBSTACLES (red) ----
 
@@ -3214,7 +3214,7 @@ const MAX_OBS=2;
 
 const obstacles=[];
 
-const obsInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.9,0),new THREE.MeshStandardMaterial({color:0xff1111,emissive:0xff0000,emissiveIntensity:2.0,roughness:0.02,metalness:0.8,transparent:true,opacity:0.9}),MAX_OBS);
+const obsInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.9,0),new THREE.MeshStandardMaterial({color:0xff1111,emissive:0xff0000,emissiveIntensity:0.6,roughness:0.02,metalness:0.8,transparent:true,opacity:0.9}),MAX_OBS);
 
 obsInst.frustumCulled=false;scene.add(obsInst);
 
