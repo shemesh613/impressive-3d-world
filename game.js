@@ -1233,32 +1233,7 @@ scene.add((() => {
 }// ---- GUARDRAILS (road barriers) ----{  var grGeo=new THREE.BoxGeometry(0.15,0.6,SLEN+2);  var grMat=new THREE.MeshStandardMaterial({color:0x888899,roughness:0.4,metalness:0.6,envMapIntensity:1.5});  var grPostGeo=new THREE.BoxGeometry(0.12,0.7,0.12);  var grL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  var grR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  for(var gi2=0;gi2<RSEGS;gi2++){    var gz2=-50+gi2*SLEN,gzc2=gz2+SLEN/2,gx2=roadX(gzc2),gy2=roadY(gzc2);    var ga2=Math.atan2(roadX(gzc2+2)-roadX(gzc2-2),4);    dummy.position.set(gx2-7.5*Math.cos(ga2),gy2+0.35,gzc2+7.5*Math.sin(ga2));    dummy.rotation.set(0,ga2,0);dummy.scale.setScalar(1);dummy.updateMatrix();    grL.setMatrixAt(gi2,dummy.matrix);    dummy.position.set(gx2+7.5*Math.cos(ga2),gy2+0.35,gzc2-7.5*Math.sin(ga2));    dummy.updateMatrix();    grR.setMatrixAt(gi2,dummy.matrix);  }  grL.instanceMatrix.needsUpdate=true;grR.instanceMatrix.needsUpdate=true;  grL.castShadow=true;grR.castShadow=true;  scene.add(grL);scene.add(grR);
 
 
-// Grass strips alongside road
-
-{
-
-  const _gMat=new THREE.MeshStandardMaterial({color:0x1a4a2e,roughness:0.9,metalness:0});
-
-  const _gGeo=new THREE.PlaneGeometry(8,6.5);
-
-  const _gL=new THREE.InstancedMesh(_gGeo,_gMat,600);
-
-  const _gR=new THREE.InstancedMesh(_gGeo,_gMat,600);
-
-  for(let i=0;i<600;i++){
-
-    const z=-50+i*6+3;const x=roadX(z);const y=roadY(z);
-
-    dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);
-
-    dummy.position.set(x-9.5,y-0.3,z);dummy.updateMatrix();_gL.setMatrixAt(i,dummy.matrix);
-
-    dummy.position.set(x+9.5,y-0.3,z);dummy.updateMatrix();_gR.setMatrixAt(i,dummy.matrix);
-
-  }
-
-  _gL.instanceMatrix.needsUpdate=true;_gR.instanceMatrix.needsUpdate=true;
-
+// Duplicate grass strips removed (already in GRASS STRIPS section above)
   scene.add(_gL);scene.add(_gR);
 
 }
@@ -4852,7 +4827,7 @@ function updateHUD(){
 
   if(_lean>0.04){const ca=Math.min(3,_lean*30);document.querySelector('canvas').style.filter='contrast(1.05) saturate(1.15) hue-rotate('+(_lean>0?(ca):(-ca))+'deg)'}
 
-  else{document.querySelector('canvas').style.filter='contrast(1.05) saturate(1.15)'}
+  else if(turboTimer>0){document.querySelector('canvas').style.filter='contrast(1.15) saturate(1.4) brightness(1.08)'}else{document.querySelector('canvas').style.filter='contrast(1.05) saturate(1.15)'}
 
   // Dust puff behind car at speed
 
@@ -5721,7 +5696,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
     ea.gain.gain.value=Math.min(0.06,(0.01+spd*0.15))*_masterVol;
     // Gear shift sound
     if(!window._lastGear)window._lastGear=1;
-    if(gear!==window._lastGear&&spd>0.05){playTone(200+gear*80,.08,"square",.06);playTone(100+gear*40,.12,"sawtooth",.04);window._lastGear=gear}
+    if(gear!==window._lastGear&&spd>0.05){if(gear<window._lastGear){playTone(80,.15,"sawtooth",.08);playTone(120,.12,"square",.05);if(fc%2===0&&particles.length<PART_MAX)particles.push({x:car.position.x-0.4,y:car.position.y+0.2,z:car.position.z-2.2,vx:0,vy:0.02,vz:-0.08,life:0.3,color:0xff6600})}else{playTone(200+gear*80,.08,"triangle",.06);playTone(300+gear*60,.06,"sine",.04)}window._lastGear=gear}
 
   }
 
