@@ -1492,7 +1492,7 @@ scene.add((() => {
 
 // ---- TRAFFIC LIGHTS ----
 
-{  const TL_N=30;  const tlPoleGeo=new THREE.CylinderGeometry(.06,.06,4,6);  const tlPoleMat=new THREE.MeshPhongMaterial({color:0x444444,shininess:5});  const tlPoleInst=new THREE.InstancedMesh(tlPoleGeo,tlPoleMat,TL_N);  const tlBoxGeo=new THREE.BoxGeometry(.5,1.2,.3);  const tlBoxMat=new THREE.MeshPhongMaterial({color:0x222222,shininess:5});  const tlBoxInst=new THREE.InstancedMesh(tlBoxGeo,tlBoxMat,TL_N);  const tlLightGeo=new THREE.SphereGeometry(.15,8,8);  const tlRedMat=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0xff0000,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlYelMat=new THREE.MeshStandardMaterial({color:0xffcc00,emissive:0xffcc00,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlGrnMat=new THREE.MeshStandardMaterial({color:0x00ff00,emissive:0x00ff00,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlRedInst=new THREE.InstancedMesh(tlLightGeo,tlRedMat,TL_N);  const tlYelInst=new THREE.InstancedMesh(tlLightGeo,tlYelMat,TL_N);  const tlGrnInst=new THREE.InstancedMesh(tlLightGeo,tlGrnMat,TL_N);  const tlPositions=[];  for(let i=0;i<TL_N;i++){    const side=i%2===0?-4.5:4.5;    const z=i*200+100;    tlPositions.push({x:side,z:z});    dummy.position.set(side,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    tlPoleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,4.2,z);dummy.updateMatrix();    tlBoxInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.55,z);dummy.updateMatrix();tlRedInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,4.2,z);dummy.updateMatrix();tlYelInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+3.85,z);dummy.updateMatrix();tlGrnInst.setMatrixAt(i,dummy.matrix);  }  tlPoleInst.instanceMatrix.needsUpdate=true;tlBoxInst.instanceMatrix.needsUpdate=true;  tlRedInst.instanceMatrix.needsUpdate=true;tlYelInst.instanceMatrix.needsUpdate=true;tlGrnInst.instanceMatrix.needsUpdate=true;  scene.add(tlPoleInst);scene.add(tlBoxInst);scene.add(tlRedInst);scene.add(tlYelInst);scene.add(tlGrnInst);  window._tlData={redInst:tlRedInst,yelInst:tlYelInst,grnInst:tlGrnInst,positions:tlPositions,n:TL_N};
+{  const TL_N=30;  const tlPoleGeo=new THREE.CylinderGeometry(.06,.06,4,6);  const tlPoleMat=new THREE.MeshPhongMaterial({color:0x444444,shininess:5});  const tlPoleInst=new THREE.InstancedMesh(tlPoleGeo,tlPoleMat,TL_N);  const tlBoxGeo=new THREE.BoxGeometry(.5,1.2,.3);  const tlBoxMat=new THREE.MeshPhongMaterial({color:0x222222,shininess:5});  const tlBoxInst=new THREE.InstancedMesh(tlBoxGeo,tlBoxMat,TL_N);  const tlLightGeo=new THREE.SphereGeometry(.15,8,8);  const tlRedMat=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0xff0000,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlYelMat=new THREE.MeshStandardMaterial({color:0xffcc00,emissive:0xffcc00,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlGrnMat=new THREE.MeshStandardMaterial({color:0x00ff00,emissive:0x00ff00,emissiveIntensity:0.7,roughness:0.2,metalness:0.1});  const tlRedInst=new THREE.InstancedMesh(tlLightGeo,tlRedMat,TL_N);  const tlYelInst=new THREE.InstancedMesh(tlLightGeo,tlYelMat,TL_N);  const tlGrnInst=new THREE.InstancedMesh(tlLightGeo,tlGrnMat,TL_N);  const tlPositions=[];  for(let i=0;i<TL_N;i++){    const z=i*200+100;const _tlrx=roadX(z);const side=i%2===0?_tlrx-8:_tlrx+8;    tlPositions.push({x:side,z:z});    dummy.position.set(side,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    tlPoleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.2,z);dummy.updateMatrix();    tlBoxInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.55,z);dummy.updateMatrix();tlRedInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+4.2,z);dummy.updateMatrix();tlYelInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(side,roadY(z)+3.85,z);dummy.updateMatrix();tlGrnInst.setMatrixAt(i,dummy.matrix);  }  tlPoleInst.instanceMatrix.needsUpdate=true;tlBoxInst.instanceMatrix.needsUpdate=true;  tlRedInst.instanceMatrix.needsUpdate=true;tlYelInst.instanceMatrix.needsUpdate=true;tlGrnInst.instanceMatrix.needsUpdate=true;  scene.add(tlPoleInst);scene.add(tlBoxInst);scene.add(tlRedInst);scene.add(tlYelInst);scene.add(tlGrnInst);  window._tlData={redInst:tlRedInst,yelInst:tlYelInst,grnInst:tlGrnInst,positions:tlPositions,n:TL_N};
 
 }
 
@@ -2398,7 +2398,7 @@ scene.add((() => {
 
   const tunnelLightInst=new THREE.InstancedMesh(tunnelLightGeo,tunnelLightMat,TUNNEL_N*LIGHTS_PER_TUNNEL);
 
-  const tunnelPositions=[];
+  const tunnelPositions=[];window._tunnelPositions=tunnelPositions;
 
   for(let i=0;i<TUNNEL_N;i++){
 
@@ -2466,7 +2466,7 @@ scene.add((() => {
 
 // ---- BUILDINGS (varied zones) ----
 
-const bdata=[];
+const bdata=[];window._bdata=bdata;
 
 for(let z=-100;z<=7000;z+=10){
 
@@ -5069,7 +5069,56 @@ function animate(){
     car.position.x+=curvePull;
 
     const _offRoad=Math.abs(car.position.x-curX);
-    if(_offRoad>12)car.position.x+=(curX-car.position.x)*0.1;// hard pull back if too far
+    // Hard road boundary - can't leave road area
+    if(_offRoad>7){
+      // Slow down when off road
+      spd*=0.97;
+      // Strong pull back
+      car.position.x+=(curX-car.position.x)*0.08;
+      // Visual feedback
+      if(fc%20===0)emitParticles(car.position.x,0.3,car.position.z,0x886644,2);
+    }
+    if(_offRoad>10){
+      // Hard wall - can't go further
+      car.position.x=curX+Math.sign(car.position.x-curX)*10;
+      lateralVel*=-0.3;
+      spd*=0.8;
+    }
+    // Building collision
+    if(window._bdata){
+      var _cz2=car.position.z;
+      for(var _bi=0;_bi<window._bdata.length;_bi++){
+        var _b=window._bdata[_bi];
+        var _bx=_b[0],_bz=_b[1],_bw=_b[2]/2+0.5,_bd=_b[4]/2+0.5;
+        if(Math.abs(_cz2-_bz)<_bd&&Math.abs(car.position.x-_bx)<_bw){
+          // Push car out of building
+          var _pushX=car.position.x>_bx?_bx+_bw:_bx-_bw;
+          car.position.x=_pushX;
+          lateralVel*=-0.2;
+          spd*=0.85;
+          if(!window._lastBldgHit||fc-window._lastBldgHit>30){
+            emitParticles(car.position.x,1,car.position.z,0xff8844,4);
+            window._lastBldgHit=fc;
+          }
+          break;
+        }
+      }
+    }
+    // Tunnel wall collision
+    if(window._tunnelPositions){
+      for(var _ti=0;_ti<window._tunnelPositions.length;_ti++){
+        var _tz=window._tunnelPositions[_ti];
+        if(Math.abs(car.position.z-_tz)<10){
+          var _trx2=roadX(_tz);
+          if(Math.abs(car.position.x-_trx2)>5.5){
+            car.position.x=_trx2+Math.sign(car.position.x-_trx2)*5.5;
+            lateralVel*=-0.3;
+            spd*=0.9;
+          }
+          break;
+        }
+      }
+    }
 
     const _dv=document.getElementById('dangerVignette');if(_dv)_dv.style.opacity=_offRoad>3?String(Math.min(1,(_offRoad-3)*0.15)):'0';
 
