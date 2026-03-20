@@ -1064,7 +1064,7 @@ var _groundTex=(function(){
   var cv=document.createElement('canvas');cv.width=256;cv.height=256;
   var ctx=cv.getContext('2d');
   // Dark urban ground - asphalt everywhere (no grass!)
-  ctx.fillStyle='#1a1a24';ctx.fillRect(0,0,256,256);
+  ctx.fillStyle='#101812';ctx.fillRect(0,0,256,256);
   // Asphalt grain noise
   for(var i=0;i<3000;i++){var x=Math.random()*256,y=Math.random()*256;var v=20+Math.random()*16|0;ctx.fillStyle='rgb('+v+','+(v+1)+','+(v+4)+')';ctx.fillRect(x,y,1+Math.random()*2,1+Math.random()*2)}
   // Dark crack patches
@@ -1080,7 +1080,7 @@ var _groundTex=(function(){
 
 scene.add((() => {
 
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshBasicMaterial({color:0x121218,map:_groundTex}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),new THREE.MeshBasicMaterial({color:0x0e1410,map:_groundTex}));
 
   m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;m.receiveShadow=false;return m;
 
@@ -1140,7 +1140,7 @@ scene.add((() => {
   }
 
   roadInst.receiveShadow=true;
-  [roadInst,edgeL,edgeR,glowL,glowR].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});
+  [roadInst,edgeL,edgeR].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});// glowL/R removed
 // ---- SIDEWALKS ----
 {
   var swGeo=new THREE.PlaneGeometry(10,SLEN+2.5);
@@ -1175,7 +1175,7 @@ scene.add((() => {
 
 }
   curbL.instanceMatrix.needsUpdate=true;curbR.instanceMatrix.needsUpdate=true;
-  scene.add(curbL);scene.add(curbR);
+  // curbs removed (visual noise)
 }
 
 // ---- GRASS STRIPS ----
@@ -1198,7 +1198,7 @@ scene.add((() => {
   swInstL.instanceMatrix.needsUpdate=true;swInstR.instanceMatrix.needsUpdate=true;
   swInstL.receiveShadow=true;swInstR.receiveShadow=true;
   scene.add(swInstL);scene.add(swInstR);
-}// ---- GUARDRAILS (road barriers) ----{  var grGeo=new THREE.BoxGeometry(0.15,0.6,SLEN+2);  var grMat=new THREE.MeshStandardMaterial({color:0x888899,roughness:0.4,metalness:0.6,envMapIntensity:1.5});  var grPostGeo=new THREE.BoxGeometry(0.12,0.7,0.12);  var grL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  var grR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  for(var gi2=0;gi2<RSEGS;gi2++){    var gz2=-50+gi2*SLEN,gzc2=gz2+SLEN/2,gx2=roadX(gzc2),gy2=roadY(gzc2);    var ga2=Math.atan2(roadX(gzc2+2)-roadX(gzc2-2),4);    dummy.position.set(gx2-7.5*Math.cos(ga2),gy2+0.35,gzc2+7.5*Math.sin(ga2));    dummy.rotation.set(0,ga2,0);dummy.scale.setScalar(1);dummy.updateMatrix();    grL.setMatrixAt(gi2,dummy.matrix);    dummy.position.set(gx2+7.5*Math.cos(ga2),gy2+0.35,gzc2-7.5*Math.sin(ga2));    dummy.updateMatrix();    grR.setMatrixAt(gi2,dummy.matrix);  }  grL.instanceMatrix.needsUpdate=true;grR.instanceMatrix.needsUpdate=true;  grL.castShadow=true;grR.castShadow=true;  scene.add(grL);scene.add(grR);
+}// ---- GUARDRAILS (road barriers) ----{  var grGeo=new THREE.BoxGeometry(0.08,0.35,SLEN+2);  var grMat=new THREE.MeshStandardMaterial({color:0x444455,roughness:0.6,metalness:0.3,envMapIntensity:0.5});  var grPostGeo=new THREE.BoxGeometry(0.12,0.7,0.12);  var grL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  var grR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  for(var gi2=0;gi2<RSEGS;gi2++){    var gz2=-50+gi2*SLEN,gzc2=gz2+SLEN/2,gx2=roadX(gzc2),gy2=roadY(gzc2);    var ga2=Math.atan2(roadX(gzc2+2)-roadX(gzc2-2),4);    dummy.position.set(gx2-7.5*Math.cos(ga2),gy2+0.35,gzc2+7.5*Math.sin(ga2));    dummy.rotation.set(0,ga2,0);dummy.scale.setScalar(1);dummy.updateMatrix();    grL.setMatrixAt(gi2,dummy.matrix);    dummy.position.set(gx2+7.5*Math.cos(ga2),gy2+0.35,gzc2-7.5*Math.sin(ga2));    dummy.updateMatrix();    grR.setMatrixAt(gi2,dummy.matrix);  }  grL.instanceMatrix.needsUpdate=true;grR.instanceMatrix.needsUpdate=true;  grL.castShadow=true;grR.castShadow=true;  scene.add(grL);scene.add(grR);
 
 
 
@@ -1274,7 +1274,7 @@ scene.add((() => {
 
   }
 
-  parkInst.instanceMatrix.needsUpdate=true;scene.add(parkInst);
+  parkInst.instanceMatrix.needsUpdate=true;// parkInst removed
 
 }
 
@@ -1302,7 +1302,7 @@ scene.add((() => {
 
   }
 
-  benchInst.instanceMatrix.needsUpdate=true;scene.add(benchInst);
+  benchInst.instanceMatrix.needsUpdate=true;// benchInst removed
 
 }
 
@@ -1328,7 +1328,7 @@ scene.add((() => {
 
   }
 
-  swL.instanceMatrix.needsUpdate=true;swR.instanceMatrix.needsUpdate=true;scene.add(swL);scene.add(swR);
+  swL.instanceMatrix.needsUpdate=true;swR.instanceMatrix.needsUpdate=true;// sidewalk boxes removed (too bright)
 
 }
 
@@ -1669,7 +1669,7 @@ scene.add((() => {
 
   sideRoadL.instanceMatrix.needsUpdate=true;sideRoadR.instanceMatrix.needsUpdate=true;
 
-  scene.add(crossInst);scene.add(zebraInst);scene.add(sideRoadL);scene.add(sideRoadR);
+  // cross streets removed (floating platforms)
 
 }
 
@@ -2095,11 +2095,11 @@ scene.add((() => {
 
   shopLightInst.instanceColor.needsUpdate=true;
 
-  scene.add(awningInst);
+  // awningInst removed
 
-  scene.add(shopFrontInst);
+  // shopFrontInst removed
 
-  scene.add(shopLightInst);
+  // shopLightInst removed
 
   window._shopData={lightInst:shopLightInst,n:SHOP_N};
 
@@ -5753,7 +5753,7 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
   // Shop lights pulse
 
-  if(window._shopData){
+  if(false&&window._shopData){
 
     const shd=window._shopData;
 
