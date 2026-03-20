@@ -5487,7 +5487,6 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
       for(var oi3=0;oi3<od2.n;oi3++){if(!od2.data[oi3].active){od2.data[oi3].active=true;od2.data[oi3].z=car.position.z+60+Math.random()*30;od2.data[oi3].x=roadX(od2.data[oi3].z)-3.5+Math.random()*1.5;od2.data[oi3].spd=0.08+Math.random()*0.1;break}}
     }
   }
-    ct.roofInst.instanceMatrix.needsUpdate=true;
 
   }
 
