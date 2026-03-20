@@ -1420,7 +1420,7 @@ scene.add((() => {
 
   poleInst.instanceMatrix.needsUpdate=true;signInst.instanceMatrix.needsUpdate=true;
 
-  scene.add(poleInst);scene.add(signInst);
+  // signInst removed
 
 }
 
@@ -1432,7 +1432,8 @@ scene.add((() => {
 
 // ---- FLOATING BALLOONS ----
 
-{  const BLN_N=12;const blnColors=[0xff6b9d,0x4ecdc4,0xffe66d,0xa855f7,0x06b6d4,0xf97316];  const blnGeo=new THREE.SphereGeometry(.6,8,8);  const blnMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0xffffff});  const blnInst=new THREE.InstancedMesh(blnGeo,blnMat,BLN_N);  blnInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(BLN_N*3),3);  const blnData=[];  const _bc=new THREE.Color();  for(let i=0;i<BLN_N;i++){    const x=-20+Math.random()*40;    const z=Math.random()*2500;    const baseY=10+Math.random()*8;    blnData.push({x,z,baseY,phase:Math.random()*Math.PI*2,spd:.01+Math.random()*.02});    _bc.setHex(blnColors[i%blnColors.length]);    blnInst.instanceColor.setXYZ(i,_bc.r,_bc.g,_bc.b);    dummy.position.set(x,baseY,z);dummy.scale.setScalar(.8+Math.random()*.5);dummy.rotation.set(0,0,0);dummy.updateMatrix();    blnInst.setMatrixAt(i,dummy.matrix);  }  blnInst.instanceMatrix.needsUpdate=true;blnInst.instanceColor.needsUpdate=true;  scene.add(blnInst);  window._blnData={inst:blnInst,data:blnData,n:BLN_N};}
+{  const BLN_N=12;const blnColors=[0xff6b9d,0x4ecdc4,0xffe66d,0xa855f7,0x06b6d4,0xf97316];  const blnGeo=new THREE.SphereGeometry(.6,8,8);  const blnMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0xffffff});  const blnInst=new THREE.InstancedMesh(blnGeo,blnMat,BLN_N);  blnInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(BLN_N*3),3);  const blnData=[];  const _bc=new THREE.Color();  for(let i=0;i<BLN_N;i++){    const x=-20+Math.random()*40;    const z=Math.random()*2500;    const baseY=10+Math.random()*8;    blnData.push({x,z,baseY,phase:Math.random()*Math.PI*2,spd:.01+Math.random()*.02});    _bc.setHex(blnColors[i%blnColors.length]);    blnInst.instanceColor.setXYZ(i,_bc.r,_bc.g,_bc.b);    dummy.position.set(x,baseY,z);dummy.scale.setScalar(.8+Math.random()*.5);dummy.rotation.set(0,0,0);dummy.updateMatrix();    blnInst.setMatrixAt(i,dummy.matrix);  }  blnInst.instanceMatrix.needsUpdate=true;blnInst.instanceColor.needsUpdate=true;  // blnInst removed
+  window._blnData={inst:blnInst,data:blnData,n:BLN_N};}
 
 
 
@@ -1466,7 +1467,7 @@ scene.add((() => {
 
   }
 
-  cwInst.count=ci;cwInst.instanceMatrix.needsUpdate=true;scene.add(cwInst);
+  cwInst.count=ci;cwInst.instanceMatrix.needsUpdate=true;// cwInst removed
 
 }
 
@@ -3143,7 +3144,7 @@ window._beamInst=beamInst;
 
 const ringGeo=new THREE.RingGeometry(1.5,2,16);
 
-const ringMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x55ff77,transparent:true,opacity:0.5,side:THREE.DoubleSide});
+const ringMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x55ff77,transparent:true,opacity:0.2,side:THREE.DoubleSide});
 
 const ringInst=new THREE.InstancedMesh(ringGeo,ringMat,MAX_GREENS);
 
@@ -3181,7 +3182,7 @@ const MAX_OBS=2;
 
 const obstacles=[];
 
-const obsInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.9,0),new THREE.MeshStandardMaterial({color:0xff1111,emissive:0xff0000,emissiveIntensity:0.6,roughness:0.02,metalness:0.8,transparent:true,opacity:0.9}),MAX_OBS);
+const obsInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.9,0),new THREE.MeshStandardMaterial({color:0xcc2222,emissive:0x881111,emissiveIntensity:0.15,roughness:0.3,metalness:0.5,transparent:true,opacity:0.7}),MAX_OBS);
 
 obsInst.frustumCulled=false;scene.add(obsInst);
 
@@ -5469,7 +5470,7 @@ if(window._beamInst){for(let i=0;i<MAX_GREENS;i++){if(i<greens.length&&greens[i]
 
   if(window._tlData){const tld=window._tlData;const cycle=Math.floor(fc/120)%3;for(let i=0;i<tld.n;i++){const ph=(cycle+(i%3))%3;dummy.scale.setScalar(ph===0?1:.3);dummy.position.set(tld.positions[i].x,roadY(tld.positions[i].z)+4.55,tld.positions[i].z);dummy.rotation.set(0,0,0);dummy.updateMatrix();tld.redInst.setMatrixAt(i,dummy.matrix);dummy.scale.setScalar(ph===1?1:.3);dummy.position.set(tld.positions[i].x,roadY(tld.positions[i].z)+4.2,tld.positions[i].z);dummy.updateMatrix();tld.yelInst.setMatrixAt(i,dummy.matrix);dummy.scale.setScalar(ph===2?1:.3);dummy.position.set(tld.positions[i].x,roadY(tld.positions[i].z)+3.85,tld.positions[i].z);dummy.updateMatrix();tld.grnInst.setMatrixAt(i,dummy.matrix)}tld.redInst.instanceMatrix.needsUpdate=true;tld.yelInst.instanceMatrix.needsUpdate=true;tld.grnInst.instanceMatrix.needsUpdate=true}
 
-if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.data[i];dummy.position.set(b.x+Math.sin(fc*.008+b.phase)*2,b.baseY+Math.sin(fc*b.spd+b.phase)*3,b.z);dummy.scale.setScalar(.8+Math.sin(fc*.01+b.phase)*.2);dummy.rotation.set(0,fc*.005,0);dummy.updateMatrix();bd.inst.setMatrixAt(i,dummy.matrix)}bd.inst.instanceMatrix.needsUpdate=true}
+if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.data[i];dummy.position.set(b.x+Math.sin(fc*.008+b.phase)*2,b.baseY+Math.sin(fc*b.spd+b.phase)*3,b.z);dummy.scale.setScalar(.8+Math.sin(fc*.01+b.phase)*.2);dummy.rotation.set(0,fc*.005,0);dummy.updateMatrix();bd.inst.setMatrixAt(i,dummy.matrix)}bd.inst.instanceMatrix.needsUpdate=true}
 
 
 
