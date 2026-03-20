@@ -1144,7 +1144,7 @@ scene.add((() => {
 // ---- SIDEWALKS ----
 {
   var swGeo=new THREE.PlaneGeometry(10,SLEN+2.5);
-  var swMat=new THREE.MeshStandardMaterial({color:0x333340,roughness:0.85,metalness:0.05});
+  var swMat=new THREE.MeshStandardMaterial({color:0x1a1e24,roughness:0.92,metalness:0.02});
   var swInstL=new THREE.InstancedMesh(swGeo,swMat,RSEGS);
   var swInstR=new THREE.InstancedMesh(swGeo,swMat,RSEGS);
   for(var si=0;si<RSEGS;si++){
@@ -1310,7 +1310,7 @@ scene.add((() => {
 
 {
 
-  const swMat=new THREE.MeshStandardMaterial({roughness:0.8,metalness:0.05,color:0x4a5a6a});
+  const swMat=new THREE.MeshStandardMaterial({roughness:0.9,metalness:0.02,color:0x1e2228});
 
   const SW_SEGS=400,SW_LEN=7.5;
 
@@ -3120,7 +3120,7 @@ const MAX_GREENS=3;
 
 const greens=[];
 
-const greenInst=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.9,1),new THREE.MeshStandardMaterial({color:0x22ff66,emissive:0x11ff44,emissiveIntensity:1.5,roughness:0.05,metalness:0.7,transparent:true,opacity:0.95}),MAX_GREENS);
+const greenInst=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.5,1),new THREE.MeshStandardMaterial({color:0x22dd55,emissive:0x11aa33,emissiveIntensity:0.3,roughness:0.15,metalness:0.5,transparent:true,opacity:0.8}),MAX_GREENS);
 
 greenInst.frustumCulled=false;scene.add(greenInst);
 
@@ -3134,7 +3134,7 @@ const beamMat=new THREE.MeshStandardMaterial({color:0x44ff66,emissive:0x22ff44,e
 
 const beamInst=new THREE.InstancedMesh(beamGeo,beamMat,MAX_GREENS);
 
-beamInst.frustumCulled=false;scene.add(beamInst);
+beamInst.frustumCulled=false;// beamInst removed (visual noise)
 
 window._beamInst=beamInst;
 
@@ -3148,7 +3148,7 @@ const ringMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,colo
 
 const ringInst=new THREE.InstancedMesh(ringGeo,ringMat,MAX_GREENS);
 
-ringInst.frustumCulled=false;scene.add(ringInst);
+ringInst.frustumCulled=false;// ringInst removed (redundant)
 
 window._ringInst=ringInst;
 
@@ -3174,7 +3174,7 @@ function spawnGreen(){
 
 // ---- POWER-UPS (golden diamonds) ----
 
-const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(.6,0),new THREE.MeshStandardMaterial({color:0x66bbff,emissive:0x3399ff,emissiveIntensity:0.4,roughness:0.05,metalness:0.7,transparent:true,opacity:0.85}),MAX_POWERUPS);powerupInst.frustumCulled=false;scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const z=car.position.z+(60+Math.random()*40);const rx=roadX(z);const x=rx+(Math.random()-.5)*7;  powerups.push({x,z,y:2.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
+const MAX_POWERUPS=3;const powerups=[];const powerupInst=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(.6,0),new THREE.MeshStandardMaterial({color:0x4499dd,emissive:0x2266aa,emissiveIntensity:0.2,roughness:0.2,metalness:0.5,transparent:true,opacity:0.7}),MAX_POWERUPS);powerupInst.frustumCulled=false;scene.add(powerupInst);function spawnPowerup(){  if(powerups.length>=MAX_POWERUPS)return;  const z=car.position.z+(60+Math.random()*40);const rx=roadX(z);const x=rx+(Math.random()-.5)*7;  powerups.push({x,z,y:2.5,active:true,type:Math.random()>.5?"shield":"turbo"});}
 
 // ---- OBSTACLES (red) ----
 
