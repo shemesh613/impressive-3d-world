@@ -20,13 +20,13 @@
 
     @keyframes roadDash{0%{left:-10px}100%{left:130px}}
 
-    #startScreen h1{font-size:clamp(28px,6vw,48px);color:#4ade80;letter-spacing:6px;
+    #startScreen h1{font-size:clamp(24px,5vw,40px);color:#4ade80;letter-spacing:6px;
 
       text-shadow:0 0 30px rgba(74,222,128,.5),0 0 60px rgba(74,222,128,.2),0 4px 12px rgba(0,0,0,.9);
 
       animation:pulse 3s ease-in-out infinite,startFade .8s ease forwards;margin-bottom:6px;text-align:center;font-weight:900}
 
-    #startScreen .subtitle{color:#86efac;font-size:clamp(14px,3vw,20px);margin-bottom:8px;text-align:center;
+    #startScreen .subtitle{color:#86efac;font-size:clamp(14px,3vw,20px);margin-bottom:4px;text-align:center;
 
       text-shadow:0 0 12px rgba(74,222,128,.25);letter-spacing:2px;font-weight:300;
 
@@ -34,13 +34,13 @@
 
     #startScreen .instructions{background:linear-gradient(135deg,rgba(10,30,20,.7),rgba(5,20,12,.8));border:1px solid rgba(74,222,128,.12);border-radius:22px;backdrop-filter:blur(12px);
 
-      padding:12px 18px;margin:6px;max-width:400px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05);
+      padding:8px 14px;margin:4px;max-width:380px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05);
 
       opacity:0;animation:startFade .8s ease .5s forwards}
 
     @keyframes startFade{0%{opacity:0;transform:translateY(15px)}100%{opacity:1;transform:translateY(0)}}
 
-    #startScreen .instructions p{color:#d1fae5;font-size:clamp(12px,2.5vw,16px);margin:4px 0;direction:rtl;line-height:1.4;
+    #startScreen .instructions p{color:#d1fae5;font-size:clamp(11px,2vw,14px);margin:2px 0;direction:rtl;line-height:1.4;
 
       text-shadow:0 1px 2px rgba(0,0,0,.4)}
 
