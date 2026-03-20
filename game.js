@@ -2714,7 +2714,7 @@ for(let z=-100;z<=7000;z+=10){
   scene.add(sfInst);
 }
 
-// ---- TREES removed ----// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=7000;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshPhongMaterial({color:0x888888,shininess:20});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.4,6,6);  const glowMat2=new THREE.MeshStandardMaterial({color:0xffffcc,emissive:0xffdd66,emissiveIntensity:2.5,roughness:0.1,metalness:0.3});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
+// ---- TREES removed ----// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=7000;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshPhongMaterial({color:0x888888,shininess:20});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.25,6,6);  const glowMat2=new THREE.MeshStandardMaterial({color:0xffffcc,emissive:0xffdd66,emissiveIntensity:0.4,roughness:0.3,metalness:0.1});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
 
 // ---- ELECTRIC POLES WITH WIRES ----
 
@@ -2915,7 +2915,7 @@ function buildPrimitiveCar(){
   // Racing stripe
   car.add(new THREE.Mesh(new THREE.BoxGeometry(.18,.01,4.8),new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.15,metalness:0.6}))).position.set(0,.78,0);
   // LED Headlights
-  var hlG=new THREE.BoxGeometry(.4,.08,.04);var hlM=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffee,emissiveIntensity:2.5,roughness:0.05,metalness:0.5});
+  var hlG=new THREE.BoxGeometry(.4,.08,.04);var hlM=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffee,emissiveIntensity:0.5,roughness:0.1,metalness:0.5});
   [-.6,.6].forEach(function(x){var hl=new THREE.Mesh(hlG,hlM);hl.position.set(x,.42,2.38);car.add(hl)});
   // DRL strip
   var drlG=new THREE.BoxGeometry(.55,.03,.03);var drlM=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:0.6});
@@ -3272,8 +3272,8 @@ function updateParticles(){
   var trunkMat=new THREE.MeshStandardMaterial({color:0x4a2a15,roughness:0.9,metalness:0.05});
   var trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,TREE_N);
   trunkInst.castShadow=true;
-  var leafGeo=new THREE.IcosahedronGeometry(1.2,1);
-  var leafMat=new THREE.MeshStandardMaterial({color:0x1a4a1a,roughness:0.85,metalness:0.08});
+  var leafGeo=new THREE.ConeGeometry(1.0,2.2,6);
+  var leafMat=new THREE.MeshStandardMaterial({color:0x143a14,roughness:0.9,metalness:0.03});
   var leafInst=new THREE.InstancedMesh(leafGeo,leafMat,TREE_N);
   leafInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(TREE_N*3),3);
   leafInst.castShadow=true;
@@ -3299,7 +3299,7 @@ function updateParticles(){
       dummy.updateMatrix();
       trunkInst.setMatrixAt(_ti2,dummy.matrix);
       // Leaves
-      dummy.position.set(tx,ty+tScale*2.0,tz);
+      dummy.position.set(tx,ty+tScale*1.8,tz);
       dummy.scale.set(tScale*(0.8+Math.random()*0.4),tScale*(0.8+Math.random()*0.5),tScale*(0.8+Math.random()*0.4));
       dummy.updateMatrix();
       leafInst.setMatrixAt(_ti2,dummy.matrix);
