@@ -5299,7 +5299,7 @@ if(window._underGlow){var ug=window._underGlow;if(shieldTimer>0){ug.color.setHex
 
     const _rainEl=document.getElementById('rainOverlay');
 
-    if(_rainEl){const rz=Math.floor(car.position.z/600)%3;_rainEl.style.opacity=rz===1?'0.7':'0'}
+    var rz=0;if(_rainEl){rz=Math.floor(car.position.z/600)%3;_rainEl.style.opacity=rz===1?"0.7":"0"}
     // Rain sound
     if(rz===1&&!window._rainSound&&audioCtx){try{var rb=audioCtx.createBuffer(1,audioCtx.sampleRate*3,audioCtx.sampleRate);var rd=rb.getChannelData(0);for(var ri=0;ri<rd.length;ri++)rd[ri]=(Math.random()*2-1);var rs=audioCtx.createBufferSource();rs.buffer=rb;rs.loop=true;var rf=audioCtx.createBiquadFilter();rf.type="lowpass";rf.frequency.value=1200;var rg=audioCtx.createGain();rg.gain.value=0;rs.connect(rf);rf.connect(rg);rg.connect(audioCtx.destination);rs.start();window._rainSound={src:rs,gain:rg}}catch(e){}}
     if(window._rainSound){window._rainSound.gain.gain.value=rz===1?(0.025*_masterVol):0}
