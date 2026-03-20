@@ -5485,79 +5485,6 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
       for(var oi3=0;oi3<od2.n;oi3++){if(!od2.data[oi3].active){od2.data[oi3].active=true;od2.data[oi3].z=car.position.z+60+Math.random()*30;od2.data[oi3].x=roadX(od2.data[oi3].z)-3.5+Math.random()*1.5;od2.data[oi3].spd=0.08+Math.random()*0.1;break}}
     }
   }
-
-        dummy.position.set(c.x,0.4,c.crossZ);
-
-        dummy.scale.setScalar(1);
-
-        dummy.rotation.set(0,Math.PI/2,0);
-
-        dummy.updateMatrix();
-
-        ct.bodyInst.setMatrixAt(i,dummy.matrix);
-
-        dummy.position.set(c.x,0.75,c.crossZ);
-
-        dummy.updateMatrix();
-
-        ct.roofInst.setMatrixAt(i,dummy.matrix);
-
-        if(Math.abs(car.position.x-c.x)<1.8&&Math.abs(car.position.z-c.crossZ)<1.5){
-
-          if(shieldTimer>0){shieldTimer=0;emitParticles(c.x,1,c.crossZ,0x60a5fa,8);c.active=false;}
-
-          else{lives=Math.max(0,lives-1);flow=Math.max(0,flow-8);spd*=0.2;sfxRed();screenFlash("flash-red");emitParticles(c.x,1,c.crossZ,0xff4444,12);c.active=false;}
-
-        }
-
-      } else {
-
-        dummy.position.set(0,-100,0);
-
-        dummy.scale.setScalar(0);
-
-        dummy.updateMatrix();
-
-        ct.bodyInst.setMatrixAt(i,dummy.matrix);
-
-        ct.roofInst.setMatrixAt(i,dummy.matrix);
-
-      }
-
-    }
-
-    if(fc%200===0&&activeCount<2&&spd>0.08){
-
-      const nextCrossZ=Math.ceil(car.position.z/80)*80+50;
-
-      if(Math.abs(car.position.z-nextCrossZ)<60){
-
-        for(let i=0;i<ct.n;i++){
-
-          if(!ct.data[i].active){
-
-            ct.data[i].active=true;
-
-            ct.data[i].crossZ=nextCrossZ;
-
-            ct.data[i].dir=Math.random()>0.5?1:-1;
-
-            ct.data[i].x=-20*ct.data[i].dir;
-
-            ct.data[i].spd=0.15+Math.random()*0.1;
-
-            break;
-
-          }
-
-        }
-
-      }
-
-    }
-
-    ct.bodyInst.instanceMatrix.needsUpdate=true;
-
     ct.roofInst.instanceMatrix.needsUpdate=true;
 
   }
@@ -5994,7 +5921,6 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
   composer.render();
 
-}
 
 animate();
 
