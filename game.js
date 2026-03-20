@@ -999,6 +999,7 @@ var dummy=new THREE.Object3D();
     starPositions[si*3+1]=r*Math.cos(phi)+50;
     starPositions[si*3+2]=r*Math.sin(phi)*Math.sin(theta);
   }
+}// end STARS block
 
 
 let _skyLoaded=0;
@@ -1233,12 +1234,6 @@ scene.add((() => {
 }// ---- GUARDRAILS (road barriers) ----{  var grGeo=new THREE.BoxGeometry(0.15,0.6,SLEN+2);  var grMat=new THREE.MeshStandardMaterial({color:0x888899,roughness:0.4,metalness:0.6,envMapIntensity:1.5});  var grPostGeo=new THREE.BoxGeometry(0.12,0.7,0.12);  var grL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  var grR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  for(var gi2=0;gi2<RSEGS;gi2++){    var gz2=-50+gi2*SLEN,gzc2=gz2+SLEN/2,gx2=roadX(gzc2),gy2=roadY(gzc2);    var ga2=Math.atan2(roadX(gzc2+2)-roadX(gzc2-2),4);    dummy.position.set(gx2-7.5*Math.cos(ga2),gy2+0.35,gzc2+7.5*Math.sin(ga2));    dummy.rotation.set(0,ga2,0);dummy.scale.setScalar(1);dummy.updateMatrix();    grL.setMatrixAt(gi2,dummy.matrix);    dummy.position.set(gx2+7.5*Math.cos(ga2),gy2+0.35,gzc2-7.5*Math.sin(ga2));    dummy.updateMatrix();    grR.setMatrixAt(gi2,dummy.matrix);  }  grL.instanceMatrix.needsUpdate=true;grR.instanceMatrix.needsUpdate=true;  grL.castShadow=true;grR.castShadow=true;  scene.add(grL);scene.add(grR);
 
 
-// Duplicate grass strips removed (already in GRASS STRIPS section above)
-  scene.add(_gL);scene.add(_gR);
-
-}
-
-}
 
 
 
