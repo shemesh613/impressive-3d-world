@@ -310,9 +310,7 @@
 
     @keyframes twinkle{0%{opacity:.2;transform:scale(.8)}100%{opacity:1;transform:scale(1.2)}}
 
-    #headlightGlow{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:60vw;height:35vh;z-index:12;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(255,245,200,.04) 0%,rgba(255,240,180,.02) 40%,transparent 70%);opacity:0;transition:opacity .5s}
 
-    #boostTrail{position:fixed;bottom:15%;left:50%;transform:translateX(-50%);width:8px;height:0;z-index:11;pointer-events:none;background:linear-gradient(to top,rgba(74,222,128,.5),rgba(74,222,128,0));border-radius:4px;transition:height .3s,opacity .3s;opacity:0;filter:blur(3px)}
 
     /* Screen flash */    #speedGlow{position:fixed;top:0;left:0;right:0;height:30%;z-index:12;pointer-events:none;opacity:0;transition:opacity .3s;background:linear-gradient(to bottom,rgba(74,222,128,.08) 0%,transparent 100%)}
     #speedLines{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;transition:opacity .3s;background:repeating-linear-gradient(90deg,transparent 0%,transparent 48%,rgba(255,255,255,0.1) 49%,transparent 50%,transparent 98%,rgba(255,255,255,0.1) 99%,transparent 100%);background-size:20px 100%}

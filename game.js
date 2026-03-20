@@ -6,7 +6,7 @@ if('caches' in window){caches.keys().then(function(names){names.forEach(function
 
 window.addEventListener('DOMContentLoaded',()=>{if(typeof _loadSettings==='function')_loadSettings()});
 
-if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
+// SW disabled — using direct loading
 
 
 
@@ -3468,6 +3468,20 @@ let gameActive=false,spd=0,dir=0,fc=0,boostTimer=0,lastMilestone=0;
 let scenarioActive=false,scenarioTimer=0,scenarioTimeout=null,usedScenarios=[];
 
 let nextScenarioAt=0,scenariosAnswered=0;
+// ---- CLOCK + GEAR SYSTEM ----
+const _clock=new THREE.Clock();
+let dt=1/60,gear=1,rpm=0,_paused=false;
+const GEARS=[0,0.15,0.28,0.42,0.58,0.75];// speed thresholds per gear
+const GEAR_NAMES=["N","1","2","3","4","5"];
+function updateGearRPM(){
+  var absSpd=Math.abs(spd);
+  for(var g=GEARS.length-1;g>=1;g--){if(absSpd>=GEARS[g]){gear=g;break}}
+  if(absSpd<GEARS[1])gear=1;
+  var lo=GEARS[gear]||0,hi=GEARS[gear+1]||1;
+  rpm=((absSpd-lo)/(hi-lo))*7000+1000;
+  rpm=Math.max(800,Math.min(8000,rpm));
+  if(absSpd<0.01)rpm=800;
+}
 let lateralVel=0,driftAngle=0,isDrifting=false,driftIntensity=0,handbrake=false,driftChain=0,driftChainTimer=0;
 
 
@@ -3482,6 +3496,8 @@ addEventListener('keydown',e=>{if(document.activeElement&&document.activeElement
 
   if(e.code==='KeyH'&&gameActive)sfxHonk();
 
+  if(e.code==='Escape'&&gameActive)togglePause();
+  if(e.code==='KeyC'&&gameActive){window._camMode=((window._camMode||0)+1)%4}
   if(e.code==='KeyM')_toggleMute();
 
   if(e.code==='KeyP'&&gameActive){_paused=!_paused;const pe=document.getElementById('pauseOverlay');if(pe)pe.style.display=_paused?'flex':'none'}
@@ -4626,6 +4642,7 @@ function _realStartGame(){
   document.getElementById('followers').style.display='block';
 
   gameActive=true;startBgMusic();
+  var _ch=document.getElementById("camHint");if(_ch){_ch.style.display="block";setTimeout(function(){_ch.style.display="none"},8000)}
 
   score=0;lives=5;level=1;flow=85;greenCount=0;redCount=0;streak=0;bestStreak=0;topSpeed=0;
 
@@ -4673,6 +4690,7 @@ function _realStartGame(){
 
 
 
+function togglePause(){  _paused=!_paused;  var pm=document.getElementById("pauseMenu");  if(pm)pm.style.display=_paused?"flex":"none";  if(!_paused)_clock.getDelta();/*reset dt after unpause*/}
 function restartGame(){
 
   document.getElementById('gameOver').style.display='none';
@@ -4759,6 +4777,10 @@ function updateHUD(){
   if(window._drawSpeedo)window._drawSpeedo(_curSpd,210);
 
   document.getElementById('speedVal').textContent=_curSpd+'km/h';var _spEl=document.getElementById('speedVal').parentElement;if(_spEl){_spEl.style.transition='border-color .3s,transform .3s';if(_curSpd>140){_spEl.style.borderColor='rgba(239,68,68,.6)';_spEl.style.transform='scale('+(1+Math.sin(fc*0.2)*0.03)+')'}else if(_curSpd>100)_spEl.style.borderColor='rgba(251,191,36,.5)';else _spEl.style.borderColor=''}
+  // Gear + RPM HUD
+  var _gv=document.getElementById("gearVal");if(_gv)_gv.textContent=GEAR_NAMES[gear]||gear;
+  var _rv=document.getElementById("rpmVal");if(_rv){_rv.textContent=Math.round(rpm);_rv.style.color=rpm>6500?"#ef4444":rpm>4500?"#fbbf24":"#4ade80"}
+  var _sv2=document.getElementById("spdVal");if(_sv2)_sv2.textContent=_curSpd;
 
   const _sn=document.getElementById('speedNeedle');if(_sn)_sn.style.transform='rotate('+(-90+spd*500)+'deg)';
 
@@ -4997,6 +5019,8 @@ function animate(){
   requestAnimationFrame(animate);
 
   if(_paused){renderer.toneMappingExposure=1.2+spd*0.3;composer.render();return}
+  dt=Math.min(_clock.getDelta(),1/30)*60;// normalize to 60fps
+  updateGearRPM();
 
   fc++;
 
@@ -5013,6 +5037,8 @@ function animate(){
     if(keys.ArrowUp||keys.KeyW)spd=Math.min(maxSpd,spd+(_mob?.008:.018));
 
     else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.12,spd-.012);
+    // Brake screech at high speed
+    if((keys.ArrowDown||keys.KeyS)&&spd>0.25&&fc%30===0){if(!audioCtx)return;var bn=audioCtx.createBufferSource();var bsr=audioCtx.sampleRate;var bbuf=audioCtx.createBuffer(1,bsr*.15,bsr);var bd=bbuf.getChannelData(0);for(var bi=0;bi<bd.length;bi++){var bt=bi/bsr;bd[bi]=(Math.random()*2-1)*Math.max(0,1-bt*8)*.08*_masterVol}bn.buffer=bbuf;var bf=audioCtx.createBiquadFilter();bf.type="bandpass";bf.frequency.value=2000+spd*3000;bf.Q.value=2;bn.connect(bf);bf.connect(audioCtx.destination);bn.start()}
 
     else{spd*=_mob?.96:.975;if(Math.abs(spd)<.005)spd=0;else if(!_mob&&spd>0&&spd<.04)spd=.04}
 
@@ -5539,7 +5565,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
     }
 
-    if(false&&fc%90===0&&activeCount<4){
+    if(fc%120===0&&activeCount<3&&spd>0.1){
 
       for(let i=0;i<od.n;i++){if(!od.data[i].active){od.data[i].active=true;od.data[i].z=car.position.z+60+Math.random()*30;od.data[i].x=roadX(od.data[i].z)-3.5+Math.random()*1.5;od.data[i].spd=0.08+Math.random()*0.1;break;}}
 
@@ -5621,7 +5647,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
     }
 
-    if(false&&fc%150===0&&activeCount<3){
+    if(fc%200===0&&activeCount<2&&spd>0.08){
 
       const nextCrossZ=Math.ceil(car.position.z/80)*80+50;
 
@@ -5667,9 +5693,12 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
     const ea=window._engineAudio;
 
-    const _rpm=65+spd*500;ea.osc.frequency.value=_rpm;if(ea.osc2){ea.osc2.frequency.value=_rpm*2;ea.gain2.gain.value=Math.min(0.03,spd*0.1)*_masterVol}
+    const _rpmF=40+rpm*0.04;ea.osc.frequency.value=_rpmF;if(ea.osc2){ea.osc2.frequency.value=_rpmF*2.02;ea.gain2.gain.value=Math.min(0.035,spd*0.12)*_masterVol}
 
-    ea.gain.gain.value=Math.min(0.055,spd*0.18)*_masterVol;
+    ea.gain.gain.value=Math.min(0.06,(0.01+spd*0.15))*_masterVol;
+    // Gear shift sound
+    if(!window._lastGear)window._lastGear=1;
+    if(gear!==window._lastGear&&spd>0.05){playTone(200+gear*80,.08,"square",.06);playTone(100+gear*40,.12,"sawtooth",.04);window._lastGear=gear}
 
   }
 
@@ -5877,7 +5906,8 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
 
 
-  // Camera - stays behind car on road, never swings into buildings
+  // Camera modes: 0=chase, 1=hood, 2=bumper, 3=cinematic
+  var _cm=window._camMode||0;
 
   const _cz=car.position.z;
 
@@ -5905,10 +5935,10 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   const _shakeY=_shakeAmt*(Math.sin(fc*9.7)*.2+Math.sin(fc*11.3)*.15);
 
-  _cv.set(_camX+_shakeX,_hillCamY+_camHeight+cPh*4+_shakeY,_behindZ);
+  if(_cm===1){_cv.set(car.position.x,car.position.y+1.8,_cz+0.3);_ct.set(roadX(_cz+30),roadY(_cz+30)+1,_cz+30)}else if(_cm===2){_cv.set(car.position.x,car.position.y+0.7,_cz+1.5);_ct.set(roadX(_cz+40),roadY(_cz+40)+0.5,_cz+40)}else if(_cm===3){var _cinA=fc*0.003;_cv.set(car.position.x+Math.sin(_cinA)*12,car.position.y+6+Math.sin(fc*0.005)*2,_cz-5+Math.cos(_cinA)*8);_ct.set(car.position.x,car.position.y+1,_cz)}else{_cv.set(_camX+_shakeX,_hillCamY+_camHeight+cPh*4+_shakeY,_behindZ);_ct.set(roadX(_lookAheadZ),roadY(_lookAheadZ)+0.5,_lookAheadZ)}
 
-  cam.position.lerp(_cv,.08);
-
+  cam.position.lerp(_cv,_cm===0?.08:_cm===3?.03:.15);
+  cam.lookAt(_ct);
   _ct.set(roadX(_lookAheadZ),roadY(_lookAheadZ)+0.5,_lookAheadZ);cam.lookAt(_ct);
 
   // Dynamic FOV - widens at high speed
@@ -6079,7 +6109,7 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
 
 
-  renderer.render(scene,cam);
+  composer.render();
 
 }
 
