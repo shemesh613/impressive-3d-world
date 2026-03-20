@@ -724,79 +724,48 @@ function sfxHonk(){
 let _bgMusic=null;
 
 function startBgMusic(){
-
   if(_bgMusic||!audioCtx)return;
-
-  const ctx=audioCtx;
-
-  // C major happy melody loop - kid-friendly
-
-  const notes=[262,294,330,349,392,349,330,294,262,330,392,523,392,330,294,262];
-
-  const bass=[131,131,165,165,175,175,196,196,131,131,165,165,175,175,196,131];
-
-  const tempo=0.25;// seconds per note
-
-  let noteIdx=0;
-
-  const melGain=ctx.createGain();melGain.gain.value=0;melGain.connect(ctx.destination);
-
-  const bassGain=ctx.createGain();bassGain.gain.value=0;bassGain.connect(ctx.destination);
-
-  const padGain=ctx.createGain();padGain.gain.value=0;padGain.connect(ctx.destination);
-
-  // Pad (sustained chord)
-
-  const pad1=ctx.createOscillator();pad1.type='sine';pad1.frequency.value=262;pad1.connect(padGain);pad1.start();
-
-  const pad2=ctx.createOscillator();pad2.type='sine';pad2.frequency.value=330;pad2.connect(padGain);pad2.start();
-
-  const pad3=ctx.createOscillator();pad3.type='sine';pad3.frequency.value=392;pad3.connect(padGain);pad3.start();
-
-  function playNote(){
-
-    if(!_bgMusic)return;
-
-    const now=ctx.currentTime;
-
-    // Melody
-
-    const mOsc=ctx.createOscillator();const mG=ctx.createGain();
-
-    mOsc.type='triangle';mOsc.frequency.value=notes[noteIdx%notes.length];
-
-    mG.gain.setValueAtTime(0.06*_masterVol,now);mG.gain.exponentialRampToValueAtTime(0.001,now+tempo*0.9);
-
-    mOsc.connect(mG);mG.connect(melGain);mOsc.start(now);mOsc.stop(now+tempo);
-
-    // Bass
-
-    const bOsc=ctx.createOscillator();const bG=ctx.createGain();
-
-    bOsc.type='sine';bOsc.frequency.value=bass[noteIdx%bass.length];
-
-    bG.gain.setValueAtTime(0.04*_masterVol,now);bG.gain.exponentialRampToValueAtTime(0.001,now+tempo*0.9);
-
-    bOsc.connect(bG);bG.connect(bassGain);bOsc.start(now);bOsc.stop(now+tempo);
-
-    noteIdx++;
-
-    _bgMusic.timer=setTimeout(playNote,tempo*1000);
-
+  var ctx=audioCtx;
+  // === PROFESSIONAL PROCEDURAL SOUNDTRACK ===
+  // Multi-track: drums + bass + melody + arpeggio + pad
+  // NOTE: This music is procedurally generated (Web Audio API).
+  // For COMMERCIAL USE, replace with licensed music (Suno/ElevenLabs paid plan).
+  var bpm=125,beat=60/bpm,noteIdx=0;
+  var melodyNotes=[523,587,622,698,784,622,698,523,784,698,622,587,523,622,784,1047];
+  var bassNotes=[131,131,156,156,175,175,156,131,131,131,175,175,196,196,175,131];
+  var arpNotes=[523,622,784,1047,784,622,523,622,784,1047,1175,1047,784,622,523,784];
+  var masterGain=ctx.createGain();masterGain.gain.value=0;masterGain.connect(ctx.destination);
+  var compressor=ctx.createDynamicsCompressor();compressor.threshold.value=-20;compressor.ratio.value=4;compressor.connect(masterGain);
+  var drumGain=ctx.createGain();drumGain.gain.value=0.5;drumGain.connect(compressor);
+  var melGain=ctx.createGain();melGain.gain.value=0.4;
+  var melDelay=ctx.createDelay(0.5);melDelay.delayTime.value=beat*0.75;
+  var melDelayGain=ctx.createGain();melDelayGain.gain.value=0.2;
+  melGain.connect(compressor);melGain.connect(melDelay);melDelay.connect(melDelayGain);melDelayGain.connect(compressor);
+  var bassGain=ctx.createGain();bassGain.gain.value=0.35;bassGain.connect(compressor);
+  var arpGain=ctx.createGain();arpGain.gain.value=0.15;
+  var arpFilter=ctx.createBiquadFilter();arpFilter.type='lowpass';arpFilter.frequency.value=2000;arpFilter.Q.value=2;
+  arpGain.connect(arpFilter);arpFilter.connect(compressor);
+  var padGain=ctx.createGain();padGain.gain.value=0.06;padGain.connect(compressor);
+  var pad1=ctx.createOscillator();pad1.type='sine';pad1.frequency.value=131;pad1.connect(padGain);pad1.start();
+  var pad2=ctx.createOscillator();pad2.type='sine';pad2.frequency.value=156;pad2.connect(padGain);pad2.start();
+  var pad3=ctx.createOscillator();pad3.type='sine';pad3.frequency.value=196;pad3.connect(padGain);pad3.start();
+  function kick(t){var o=ctx.createOscillator();var g=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(30,t+0.1);g.gain.setValueAtTime(0.8*_masterVol,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.15);o.connect(g);g.connect(drumGain);o.start(t);o.stop(t+0.2)}
+  function snare(t){var b=ctx.createBuffer(1,ctx.sampleRate*0.1,ctx.sampleRate);var d=b.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,3);var s=ctx.createBufferSource();s.buffer=b;var g=ctx.createGain();g.gain.setValueAtTime(0.4*_masterVol,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.08);var f=ctx.createBiquadFilter();f.type='highpass';f.frequency.value=1500;s.connect(f);f.connect(g);g.connect(drumGain);s.start(t)}
+  function hihat(t,open){var b=ctx.createBuffer(1,ctx.sampleRate*(open?0.12:0.04),ctx.sampleRate);var d=b.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);var s=ctx.createBufferSource();s.buffer=b;var g=ctx.createGain();g.gain.setValueAtTime(0.2*_masterVol,t);g.gain.exponentialRampToValueAtTime(0.001,t+(open?0.12:0.04));var f=ctx.createBiquadFilter();f.type='highpass';f.frequency.value=5000;s.connect(f);f.connect(g);g.connect(drumGain);s.start(t)}
+  function playBeat(){
+    if(!_bgMusic)return;var now=ctx.currentTime;var step=noteIdx%16;
+    if(step%4===0)kick(now);
+    if(step===4||step===12)snare(now);
+    hihat(now,step%4===2);
+    if(step===7||step===14){var o=ctx.createOscillator();var g=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(100,now);o.frequency.exponentialRampToValueAtTime(40,now+0.06);g.gain.setValueAtTime(0.3*_masterVol,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.08);o.connect(g);g.connect(drumGain);o.start(now);o.stop(now+0.1)}
+    if(step%4===0){var mO=ctx.createOscillator();var mG2=ctx.createGain();mO.type='triangle';mO.frequency.value=melodyNotes[(noteIdx/4|0)%melodyNotes.length];mG2.gain.setValueAtTime(0.08*_masterVol,now);mG2.gain.exponentialRampToValueAtTime(0.001,now+beat*3.5);mO.connect(mG2);mG2.connect(melGain);mO.start(now);mO.stop(now+beat*4)}
+    if(step%4===0){var bO=ctx.createOscillator();var bG2=ctx.createGain();bO.type='sawtooth';bO.frequency.value=bassNotes[(noteIdx/4|0)%bassNotes.length];bG2.gain.setValueAtTime(0.07*_masterVol,now);bG2.gain.exponentialRampToValueAtTime(0.001,now+beat*3.8);var bf=ctx.createBiquadFilter();bf.type='lowpass';bf.frequency.value=300;bO.connect(bf);bf.connect(bG2);bG2.connect(bassGain);bO.start(now);bO.stop(now+beat*4)}
+    var aO=ctx.createOscillator();var aG=ctx.createGain();aO.type='square';aO.frequency.value=arpNotes[step%arpNotes.length]*(noteIdx>32?1:0.5);aG.gain.setValueAtTime(0.03*_masterVol,now);aG.gain.exponentialRampToValueAtTime(0.001,now+beat*0.4);aO.connect(aG);aG.connect(arpGain);aO.start(now);aO.stop(now+beat*0.5);
+    noteIdx++;_bgMusic.timer=setTimeout(playBeat,(beat/4)*1000);
   }
-
-  // Fade in
-
-  melGain.gain.setValueAtTime(0,ctx.currentTime);melGain.gain.linearRampToValueAtTime(1,ctx.currentTime+2);
-
-  bassGain.gain.setValueAtTime(0,ctx.currentTime);bassGain.gain.linearRampToValueAtTime(1,ctx.currentTime+2);
-
-  padGain.gain.setValueAtTime(0,ctx.currentTime);padGain.gain.linearRampToValueAtTime(0.02*_masterVol,ctx.currentTime+2);
-
-  _bgMusic={timer:null,melGain,bassGain,padGain,pad1,pad2,pad3};
-
-  playNote();
-
+  masterGain.gain.setValueAtTime(0,ctx.currentTime);masterGain.gain.linearRampToValueAtTime(0.7,ctx.currentTime+3);
+  _bgMusic={timer:null,masterGain:masterGain,melGain:melGain,bassGain:bassGain,padGain:padGain,drumGain:drumGain,arpGain:arpGain,arpFilter:arpFilter,pad1:pad1,pad2:pad2,pad3:pad3};
+  playBeat();
 }
 
 function _shareResult(){
@@ -832,13 +801,10 @@ function stopBgMusic(){
 }
 
 function updateBgMusicVol(){
-
-  if(!_bgMusic)return;
-
-  _bgMusic.padGain.gain.value=0.02*_masterVol;
-
+  if(!_bgMusic||!_bgMusic.masterGain)return;
+  _bgMusic.masterGain.gain.value=0.7*_masterVol;
+  _bgMusic.padGain.gain.value=0.06*_masterVol;
 }
-
 
 
 // ---- RENDERER ----
