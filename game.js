@@ -5033,7 +5033,7 @@ function animate(){
 
     const maxSpd=_gateActive?(_mob?.18:.33):turboTimer>0?(_mob?.4:.75):boostTimer>0?(_mob?.35:.6):(_mob?.25:.42);
 
-    if(keys.ArrowUp||keys.KeyW)spd=Math.min(maxSpd,spd+(_mob?.008:.018));
+    if(keys.ArrowUp||keys.KeyW){var _accel=_mob?.008:.018;var _gearBoost=gear<=2?1.3:gear<=3?1.0:0.8;spd=Math.min(maxSpd,spd+_accel*_gearBoost);spd-=spd*spd*0.08}/*aerodynamic drag*/
 
     else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.12,spd-.012);
     // Brake screech at high speed
@@ -5098,7 +5098,8 @@ function animate(){
       // Strong pull back
       car.position.x+=(curX-car.position.x)*0.08;
       // Visual feedback
-      if(fc%20===0)emitParticles(car.position.x,0.3,car.position.z,0x886644,2);
+      if(fc%4===0){for(var _si2=0;_si2<3&&particles.length<PART_MAX;_si2++){particles.push({x:car.position.x+Math.sign(car.position.x-curX)*1.5,y:car.position.y+0.3+Math.random()*0.5,z:car.position.z-Math.random()*2,vx:Math.sign(car.position.x-curX)*0.1+Math.random()*0.05,vy:0.05+Math.random()*0.08,vz:-Math.random()*0.05,life:0.4+Math.random()*0.3,color:Math.random()>0.5?0xffaa00:0xff6600})}}
+      if(fc%15===0&&spd>0.1){playTone(1500+Math.random()*2000,.06,"sawtooth",.04)}
     }
     if(_offRoad>10){
       // Hard wall - can't go further
@@ -5188,6 +5189,8 @@ function animate(){
     if(window._wheels){const wSpd=spd*8;window._wheels.forEach(w=>{w.children.forEach(c=>{c.rotation.x+=wSpd})})}if(window._glbWheels&&window._glbWheels.length){const _gws=spd*8;window._glbWheels.forEach(function(w){w.rotation.x+=_gws})}
     // Drift sound
     if(isDrifting&&driftIntensity>0.2){if(!window._driftOsc)window._startDriftSound();window._updateDriftSound(driftIntensity);driftChain+=driftIntensity*(handbrake?2:1);driftChainTimer=0}else{if(window._driftOsc)window._stopDriftSound();if(driftChain>30){score+=Math.floor(driftChain);var _dsc=document.createElement('div');_dsc.textContent='DRIFT +'+Math.floor(driftChain);_dsc.style.cssText='position:fixed;top:35%;left:50%;transform:translateX(-50%);z-index:55;font-size:clamp(20px,4vw,32px);font-weight:900;color:#fbbf24;text-shadow:0 0 20px rgba(251,191,36,.7);pointer-events:none;transition:all 1.5s;opacity:1';document.body.appendChild(_dsc);setTimeout(function(){_dsc.style.opacity='0';_dsc.style.top='25%'},50);setTimeout(function(){_dsc.remove()},1600);var _sv2=document.getElementById('scoreVal');if(_sv2)_sv2.textContent=score}driftChain=0}
+    // Exhaust flame at high RPM
+    if(rpm>6000&&(keys.ArrowUp||keys.KeyW)&&fc%3===0&&particles.length<PART_MAX){particles.push({x:car.position.x-0.4+(Math.random()-.5)*.2,y:car.position.y+0.2,z:car.position.z-2,vx:(Math.random()-.5)*0.02,vy:0.01+Math.random()*0.02,vz:-0.05-Math.random()*0.05,life:0.5,color:rpm>7000?0xff4400:0xff8800});}
     // Drift smoke
     if(isDrifting&&driftIntensity>0.15&&fc%2===0){var _dSx=car.position.x,_dSz=car.position.z-1.5,_dSy=car.position.y+0.05;var _sn=Math.ceil(driftIntensity*(handbrake?5:3));for(var _si=0;_si<_sn&&particles.length<PART_MAX;_si++){var _sv=0.08+driftIntensity*0.15;particles.push({x:_dSx-1.15+(Math.random()-.5)*.3,y:_dSy,z:_dSz+(Math.random()-.5)*.5,vx:(Math.random()-.5)*_sv,vy:0.02+Math.random()*0.04,vz:-Math.random()*_sv*0.5,life:1,color:0xdddddd,isSmoke:true});particles.push({x:_dSx+1.15+(Math.random()-.5)*.3,y:_dSy,z:_dSz+(Math.random()-.5)*.5,vx:(Math.random()-.5)*_sv,vy:0.02+Math.random()*0.04,vz:-Math.random()*_sv*0.5,life:1,color:0xdddddd,isSmoke:true})}}
     // Tire marks
@@ -5942,11 +5945,14 @@ if(window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){const b=bd.
 
   // Dynamic FOV - widens at high speed
 
-  let _targetFov=68+spd*25;if(_gateActive){const gd=_gateZ-car.position.z;if(gd>0&&gd<40)_targetFov=Math.max(55,_targetFov-((40-gd)/40)*15)}
+  let _targetFov=68+spd*30+(isDrifting?5:0);if(_gateActive){const gd=_gateZ-car.position.z;if(gd>0&&gd<40)_targetFov=Math.max(55,_targetFov-((40-gd)/40)*15)}if(_cm===2)_targetFov+=8;/*bumper cam wider*/if(turboTimer>0)_targetFov+=5;
 
   cam.fov+=((_targetFov-cam.fov)*.06);
 
   cam.updateProjectionMatrix();
+  // Dynamic bloom + exposure
+  if(window._bloomPass){window._bloomPass.strength=0.5+spd*0.8+(isDrifting?0.3:0);window._bloomPass.threshold=0.85-spd*0.15}
+  renderer.toneMappingExposure=1.4+spd*0.5+(turboTimer>0?0.3:0);
 
 
 
