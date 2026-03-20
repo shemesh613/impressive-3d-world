@@ -33,6 +33,7 @@ class Pass {
 	dispose() {}
 
 }
+// === MaskPass + ClearMaskPass stubs ===class MaskPass extends Pass{  constructor(s,c){super();this.scene=s;this.camera=c;this.needsSwap=false}  render(){}}class ClearMaskPass extends Pass{  constructor(){super();this.needsSwap=false}  render(renderer){if(renderer.state&&renderer.state.buffers&&renderer.state.buffers.stencil){renderer.state.buffers.stencil.setLocked(false);renderer.state.buffers.stencil.setTest(false)}}}
 
 // Helper for passes that need to fill the viewport with a single quad.
 
