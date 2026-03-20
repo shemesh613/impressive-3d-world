@@ -3490,7 +3490,6 @@ let lateralVel=0,driftAngle=0,isDrifting=false,driftIntensity=0,handbrake=false,
 
 const keys={};
 
-let _paused=false;
 
 addEventListener('keydown',e=>{if(document.activeElement&&document.activeElement.tagName==='INPUT')return;keys[e.code]=true;
 
@@ -3500,7 +3499,7 @@ addEventListener('keydown',e=>{if(document.activeElement&&document.activeElement
   if(e.code==='KeyC'&&gameActive){window._camMode=((window._camMode||0)+1)%4}
   if(e.code==='KeyM')_toggleMute();
 
-  if(e.code==='KeyP'&&gameActive){_paused=!_paused;const pe=document.getElementById('pauseOverlay');if(pe)pe.style.display=_paused?'flex':'none'}
+  if(e.code==='KeyP'&&gameActive)togglePause()
 
   e.preventDefault()});
 
