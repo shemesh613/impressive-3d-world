@@ -10,6 +10,62 @@ window.addEventListener('DOMContentLoaded',()=>{if(typeof _loadSettings==='funct
 
 
 
+// ---- CAR FACTORY (shared by player + NPC + multiplayer) ----
+function createCarModel(color, scale) {
+  scale = scale || 1;
+  var g = new THREE.Group();
+  var _p = new THREE.MeshStandardMaterial({color: color, roughness: 0.08, metalness: 0.88, envMapIntensity: 3.0});
+  var _d = new THREE.MeshStandardMaterial({color: 0x111111, roughness: 0.4, metalness: 0.3});
+  var _gl = new THREE.MeshStandardMaterial({color: 0x8899bb, roughness: 0.02, metalness: 0.1, transparent: true, opacity: 0.55, side: THREE.DoubleSide, envMapIntensity: 1.8});
+  var _ch = new THREE.MeshStandardMaterial({color: 0xdddddd, roughness: 0.03, metalness: 0.95, envMapIntensity: 3});
+  var _hl = new THREE.MeshStandardMaterial({color: 0xffffee, emissive: 0xffffaa, emissiveIntensity: 0.35, roughness: 0.1});
+  var _tl = new THREE.MeshStandardMaterial({color: 0xff2222, emissive: 0xff1100, emissiveIntensity: 0.25, roughness: 0.2});
+  var _tire = new THREE.MeshStandardMaterial({color: 0x0a0a0a, roughness: 0.9, metalness: 0.1});
+  // Body
+  var bs = new THREE.Shape();
+  bs.moveTo(-1.0, 0.08); bs.lineTo(-1.05, 0.35); bs.quadraticCurveTo(-1.05, 0.62, -0.8, 0.65);
+  bs.lineTo(0.8, 0.65); bs.quadraticCurveTo(1.05, 0.62, 1.05, 0.35); bs.lineTo(1.0, 0.08); bs.lineTo(-1.0, 0.08);
+  var body = new THREE.Mesh(new THREE.ExtrudeGeometry(bs, {depth:4.0, bevelEnabled:true, bevelThickness:0.09, bevelSize:0.07, bevelSegments:3}), _p);
+  body.position.set(0, 0, -2.0); body.castShadow = true; g.add(body);
+  // Cabin
+  var cs = new THREE.Shape();
+  cs.moveTo(-0.58, 0); cs.quadraticCurveTo(-0.62, 0.32, -0.22, 0.35);
+  cs.lineTo(0.22, 0.35); cs.quadraticCurveTo(0.62, 0.32, 0.58, 0); cs.lineTo(-0.58, 0);
+  var cab = new THREE.Mesh(new THREE.ExtrudeGeometry(cs, {depth:1.4, bevelEnabled:true, bevelThickness:0.04, bevelSize:0.03, bevelSegments:2}),
+    new THREE.MeshStandardMaterial({color: 0x151520, roughness: 0.04, metalness: 0.88}));
+  cab.position.set(0, 0.65, -0.7); cab.castShadow = true; g.add(cab);
+  // Glass
+  var ws = new THREE.Mesh(new THREE.PlaneGeometry(1.05, 0.32), _gl); ws.position.set(0, 0.85, 0.62); ws.rotation.x = -0.35; g.add(ws);
+  var rw = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 0.26), _gl); rw.position.set(0, 0.85, -0.8); rw.rotation.x = 0.3; g.add(rw);
+  [-0.64, 0.64].forEach(function(x) { var sw = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.22), _gl); sw.position.set(x, 0.8, -0.05); sw.rotation.set(0, x<0?-Math.PI/2:Math.PI/2, 0); g.add(sw); });
+  // Headlights
+  [-.5, .5].forEach(function(x) { var hl = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.06, 0.03), _hl); hl.position.set(x, 0.36, 1.98); g.add(hl); });
+  // Taillights
+  [-.5, .5].forEach(function(x) { var tl = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.05, 0.03), _tl); tl.position.set(x, 0.36, -1.98); g.add(tl); });
+  // Chrome trim
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.04, 0.05), _ch)).position.set(0, 0.2, 1.98);
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.04, 0.05), _ch)).position.set(0, 0.2, -1.98);
+  // Splitter + diffuser
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.04, 0.1), _d)).position.set(0, 0.1, 1.95);
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.05, 0.12), _d)).position.set(0, 0.1, -1.95);
+  // Side skirts
+  [-1.06, 1.06].forEach(function(x) { g.add(new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.09, 3.2), _d)).position.set(x, 0.13, 0); });
+  // Mirrors
+  [-1.06, 1.06].forEach(function(x) { g.add(new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.06, 0.09), _p)).position.set(x, 0.76, 0.25); });
+  // Wheels
+  var wG = new THREE.CylinderGeometry(0.33, 0.33, 0.2, 14);
+  var rG = new THREE.CylinderGeometry(0.18, 0.18, 0.22, 8);
+  [[-0.95, 0.33, 1.2], [0.95, 0.33, 1.2], [-0.95, 0.33, -1.2], [0.95, 0.33, -1.2]].forEach(function(p) {
+    var wGr = new THREE.Group(); wGr.position.set(p[0], p[1], p[2]);
+    var t = new THREE.Mesh(wG, _tire); t.rotation.set(0, 0, Math.PI/2); wGr.add(t);
+    var rim = new THREE.Mesh(rG, _ch); rim.rotation.set(0, 0, Math.PI/2); wGr.add(rim);
+    g.add(wGr);
+  });
+  g.scale.setScalar(scale);
+  return g;
+}
+
+
 // ---- SCENARIOS DATABASE ----
 
 const SCENARIOS = [
@@ -2801,60 +2857,6 @@ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAtt
 
 
 
-// ---- CAR FACTORY (shared by player + NPC + multiplayer) ----
-function createCarModel(color, scale) {
-  scale = scale || 1;
-  var g = new THREE.Group();
-  var _p = new THREE.MeshStandardMaterial({color: color, roughness: 0.08, metalness: 0.88, envMapIntensity: 3.0});
-  var _d = new THREE.MeshStandardMaterial({color: 0x111111, roughness: 0.4, metalness: 0.3});
-  var _gl = new THREE.MeshStandardMaterial({color: 0x8899bb, roughness: 0.02, metalness: 0.1, transparent: true, opacity: 0.55, side: THREE.DoubleSide, envMapIntensity: 1.8});
-  var _ch = new THREE.MeshStandardMaterial({color: 0xdddddd, roughness: 0.03, metalness: 0.95, envMapIntensity: 3});
-  var _hl = new THREE.MeshStandardMaterial({color: 0xffffee, emissive: 0xffffaa, emissiveIntensity: 0.35, roughness: 0.1});
-  var _tl = new THREE.MeshStandardMaterial({color: 0xff2222, emissive: 0xff1100, emissiveIntensity: 0.25, roughness: 0.2});
-  var _tire = new THREE.MeshStandardMaterial({color: 0x0a0a0a, roughness: 0.9, metalness: 0.1});
-  // Body
-  var bs = new THREE.Shape();
-  bs.moveTo(-1.0, 0.08); bs.lineTo(-1.05, 0.35); bs.quadraticCurveTo(-1.05, 0.62, -0.8, 0.65);
-  bs.lineTo(0.8, 0.65); bs.quadraticCurveTo(1.05, 0.62, 1.05, 0.35); bs.lineTo(1.0, 0.08); bs.lineTo(-1.0, 0.08);
-  var body = new THREE.Mesh(new THREE.ExtrudeGeometry(bs, {depth:4.0, bevelEnabled:true, bevelThickness:0.09, bevelSize:0.07, bevelSegments:3}), _p);
-  body.position.set(0, 0, -2.0); body.castShadow = true; g.add(body);
-  // Cabin
-  var cs = new THREE.Shape();
-  cs.moveTo(-0.58, 0); cs.quadraticCurveTo(-0.62, 0.32, -0.22, 0.35);
-  cs.lineTo(0.22, 0.35); cs.quadraticCurveTo(0.62, 0.32, 0.58, 0); cs.lineTo(-0.58, 0);
-  var cab = new THREE.Mesh(new THREE.ExtrudeGeometry(cs, {depth:1.4, bevelEnabled:true, bevelThickness:0.04, bevelSize:0.03, bevelSegments:2}),
-    new THREE.MeshStandardMaterial({color: 0x151520, roughness: 0.04, metalness: 0.88}));
-  cab.position.set(0, 0.65, -0.7); cab.castShadow = true; g.add(cab);
-  // Glass
-  var ws = new THREE.Mesh(new THREE.PlaneGeometry(1.05, 0.32), _gl); ws.position.set(0, 0.85, 0.62); ws.rotation.x = -0.35; g.add(ws);
-  var rw = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 0.26), _gl); rw.position.set(0, 0.85, -0.8); rw.rotation.x = 0.3; g.add(rw);
-  [-0.64, 0.64].forEach(function(x) { var sw = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.22), _gl); sw.position.set(x, 0.8, -0.05); sw.rotation.set(0, x<0?-Math.PI/2:Math.PI/2, 0); g.add(sw); });
-  // Headlights
-  [-.5, .5].forEach(function(x) { var hl = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.06, 0.03), _hl); hl.position.set(x, 0.36, 1.98); g.add(hl); });
-  // Taillights
-  [-.5, .5].forEach(function(x) { var tl = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.05, 0.03), _tl); tl.position.set(x, 0.36, -1.98); g.add(tl); });
-  // Chrome trim
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.04, 0.05), _ch)).position.set(0, 0.2, 1.98);
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.04, 0.05), _ch)).position.set(0, 0.2, -1.98);
-  // Splitter + diffuser
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.04, 0.1), _d)).position.set(0, 0.1, 1.95);
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.05, 0.12), _d)).position.set(0, 0.1, -1.95);
-  // Side skirts
-  [-1.06, 1.06].forEach(function(x) { g.add(new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.09, 3.2), _d)).position.set(x, 0.13, 0); });
-  // Mirrors
-  [-1.06, 1.06].forEach(function(x) { g.add(new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.06, 0.09), _p)).position.set(x, 0.76, 0.25); });
-  // Wheels
-  var wG = new THREE.CylinderGeometry(0.33, 0.33, 0.2, 14);
-  var rG = new THREE.CylinderGeometry(0.18, 0.18, 0.22, 8);
-  [[-0.95, 0.33, 1.2], [0.95, 0.33, 1.2], [-0.95, 0.33, -1.2], [0.95, 0.33, -1.2]].forEach(function(p) {
-    var wGr = new THREE.Group(); wGr.position.set(p[0], p[1], p[2]);
-    var t = new THREE.Mesh(wG, _tire); t.rotation.set(0, 0, Math.PI/2); wGr.add(t);
-    var rim = new THREE.Mesh(rG, _ch); rim.rotation.set(0, 0, Math.PI/2); wGr.add(rim);
-    g.add(wGr);
-  });
-  g.scale.setScalar(scale);
-  return g;
-}
 
 // ---- CAR (player) ----
 const car=new THREE.Group();
