@@ -1045,7 +1045,7 @@ _trailInst.instanceMatrix.needsUpdate=true;scene.add(_trailInst);window._trailIn
 
 // ---- ROAD CURVE FUNCTION ----
 
-function roadY(z){return Math.sin(z*.006)*3.5+Math.sin(z*.017)*1.8+Math.sin(z*.003)*2.0+Math.sin(z*.04)*0.6}
+function roadY(z){return Math.sin(z*.006)*1.5+Math.sin(z*.017)*0.8+Math.sin(z*.003)*1.0+Math.sin(z*.04)*0.3}
 
 function roadX(z){
 
