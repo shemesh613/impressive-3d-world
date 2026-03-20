@@ -1953,7 +1953,7 @@ scene.add((() => {
 
     pCarBodyInst.instanceColor.setXYZ(i,_pc.r,_pc.g,_pc.b);
 
-    dummy.position.set(side,0.0,z-1.6);
+    dummy.position.set(side,roadY(z)+0.06,z-1.6);
 
     dummy.scale.setScalar(1);
 
@@ -1963,7 +1963,7 @@ scene.add((() => {
 
     pCarBodyInst.setMatrixAt(i,dummy.matrix);
 
-    dummy.position.set(side,0.58,z-1.0);
+    dummy.position.set(side,roadY(z)+0.58,z-1.0);
 
     dummy.updateMatrix();
 
