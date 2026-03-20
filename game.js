@@ -1157,9 +1157,9 @@ scene.add((() => {
 
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(16,SLEN+2.5),_roadMat,RSEGS);
 
-  const edgeMat=new THREE.MeshStandardMaterial({color:0x115533,emissive:0x042208,emissiveIntensity:0.1,roughness:0.5,metalness:0.05});window._edgeMat=edgeMat;
+  const edgeMat=new THREE.MeshStandardMaterial({color:0x0a2a18,emissive:0x020a04,emissiveIntensity:0.03,roughness:0.8,metalness:0.02});window._edgeMat=edgeMat;
 
-  const edgeGeo=new THREE.PlaneGeometry(.5,SLEN+2);
+  const edgeGeo=new THREE.PlaneGeometry(.25,SLEN+2);
 
   const edgeL=new THREE.InstancedMesh(edgeGeo,edgeMat,RSEGS);
 
@@ -5718,9 +5718,9 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
   const _cz=car.position.z;
 
-  const _camDist=8+spd*5;// pull back at speed (closer)
+  const _camDist=14+spd*6;// pull back at speed (closer)
 
-  const _camHeight=3.5+spd*2.5;// rise at speed (lower)
+  const _camHeight=6+spd*3;// rise at speed (lower)
 
   const _behindZ=_cz-_camDist;
 
