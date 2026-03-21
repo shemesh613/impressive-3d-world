@@ -1140,7 +1140,7 @@ scene.add((() => {
   }
 
   roadInst.receiveShadow=true;
-  [roadInst,edgeL,edgeR].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});// glowL/R removed
+  [roadInst].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});// glowL/R removed
 // ---- SIDEWALKS ----
 {
   var swGeo=new THREE.PlaneGeometry(10,SLEN+2.5);
@@ -1197,7 +1197,7 @@ scene.add((() => {
 }
   swInstL.instanceMatrix.needsUpdate=true;swInstR.instanceMatrix.needsUpdate=true;
   swInstL.receiveShadow=true;swInstR.receiveShadow=true;
-  scene.add(swInstL);scene.add(swInstR);
+  //scene.add(swInstL);scene.add(swInstR);
 }// ---- GUARDRAILS (road barriers) ----{  var grGeo=new THREE.BoxGeometry(0.06,0.18,SLEN+2);  var grMat=new THREE.MeshStandardMaterial({color:0x444455,roughness:0.6,metalness:0.3,envMapIntensity:0.5});  var grPostGeo=new THREE.BoxGeometry(0.12,0.7,0.12);  var grL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  var grR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  for(var gi2=0;gi2<RSEGS;gi2++){    var gz2=-50+gi2*SLEN,gzc2=gz2+SLEN/2,gx2=roadX(gzc2),gy2=roadY(gzc2);    var ga2=Math.atan2(roadX(gzc2+2)-roadX(gzc2-2),4);    dummy.position.set(gx2-7.5*Math.cos(ga2),gy2+0.35,gzc2+7.5*Math.sin(ga2));    dummy.rotation.set(0,ga2,0);dummy.scale.setScalar(1);dummy.updateMatrix();    grL.setMatrixAt(gi2,dummy.matrix);    dummy.position.set(gx2+7.5*Math.cos(ga2),gy2+0.35,gzc2-7.5*Math.sin(ga2));    dummy.updateMatrix();    grR.setMatrixAt(gi2,dummy.matrix);  }  grL.instanceMatrix.needsUpdate=true;grR.instanceMatrix.needsUpdate=true;  grL.castShadow=true;grR.castShadow=true;  scene.add(grL);scene.add(grR);
 
 
@@ -2107,7 +2107,6 @@ scene.add((() => {
 
 
 
-// ---- TREES (stylized low-poly) ----{  var TREE_N=50;  var trunkGeo=new THREE.CylinderGeometry(0.08,0.15,1.8,5);  var trunkMat=new THREE.MeshStandardMaterial({color:0x3a2a1a,roughness:0.9,metalness:0.0});  var trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,TREE_N);  var leafGeo1=new THREE.ConeGeometry(1.2,2.0,6);  var leafGeo2=new THREE.ConeGeometry(0.9,1.6,6);  var leafGeo3=new THREE.ConeGeometry(0.6,1.2,6);  var leafMat=new THREE.MeshStandardMaterial({color:0x0d3a12,roughness:0.85,metalness:0.0});  var leafInst1=new THREE.InstancedMesh(leafGeo1,leafMat,TREE_N);  var leafInst2=new THREE.InstancedMesh(leafGeo2,leafMat,TREE_N);  var leafInst3=new THREE.InstancedMesh(leafGeo3,leafMat,TREE_N);  for(var ti=0;ti<TREE_N;ti++){    var tz=40+ti*55+Math.random()*20;    var tside=(ti%2===0?-1:1)*(9+Math.random()*6);    var tx=roadX(tz)+tside;    var ty=roadY(tz);    var tscale=0.7+Math.random()*0.6;    dummy.position.set(tx,ty+0.9*tscale,tz);    dummy.scale.set(tscale,tscale,tscale);    dummy.rotation.set(0,Math.random()*Math.PI*2,0);    dummy.updateMatrix();    trunkInst.setMatrixAt(ti,dummy.matrix);    dummy.position.set(tx,ty+2.2*tscale,tz);    dummy.updateMatrix();    leafInst1.setMatrixAt(ti,dummy.matrix);    dummy.position.set(tx,ty+3.0*tscale,tz);    dummy.updateMatrix();    leafInst2.setMatrixAt(ti,dummy.matrix);    dummy.position.set(tx,ty+3.6*tscale,tz);    dummy.updateMatrix();    leafInst3.setMatrixAt(ti,dummy.matrix);  }  trunkInst.instanceMatrix.needsUpdate=true;  leafInst1.instanceMatrix.needsUpdate=true;  leafInst2.instanceMatrix.needsUpdate=true;  leafInst3.instanceMatrix.needsUpdate=true;  scene.add(trunkInst);scene.add(leafInst1);scene.add(leafInst2);scene.add(leafInst3);}
 // ---- TWINKLING STARS ----
 
 {
@@ -3274,11 +3273,11 @@ function updateParticles(){
   var trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,TREE_N);
   trunkInst.castShadow=true;
   var leafGeo=new THREE.IcosahedronGeometry(1.2,1);
-  var leafMat=new THREE.MeshStandardMaterial({color:0x1a4a1a,roughness:0.85,metalness:0.08});
+  var leafMat=new THREE.MeshStandardMaterial({color:0x1a5a22,roughness:0.85,metalness:0.08});
   var leafInst=new THREE.InstancedMesh(leafGeo,leafMat,TREE_N);
   leafInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(TREE_N*3),3);
   leafInst.castShadow=true;
-  var _treeColors=[0x0f3f0f,0x153a28,0x003200,0x1a4a1a,0x1a4028,0x2a3a1a,0x354a1a,0x004000];
+  var _treeColors=[0x1a5a22,0x205030,0x0a4a10,0x2a5a2a,0x2a5030,0x3a5a2a,0x456a2a,0x1a5a18];
   var _ti2=0;
   for(var tz=-50;tz<=7000;tz+=5){
     if(_ti2>=TREE_N)break;
