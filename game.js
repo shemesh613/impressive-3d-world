@@ -864,7 +864,7 @@ composer.addPass(colorPass);
 
 // Film Grain removed — cleaner image
 
-scene.fog=new THREE.FogExp2(0x0e0e1a,.0009);
+scene.fog=new THREE.FogExp2(0x0a0e14,.0012);
 
 // Environment map for reflections
 var _pmremGen=new THREE.PMREMGenerator(renderer);
@@ -893,7 +893,7 @@ scene.add(dirLight);scene.add(dirLight.target);
 
 // Moon
 
-const moonGeo=new THREE.SphereGeometry(8,12,12);
+const moonGeo=new THREE.SphereGeometry(14,16,16);
 
 const moonMat=new THREE.MeshBasicMaterial({color:0xeeeeff});
 
@@ -903,9 +903,9 @@ moon.position.set(-80,120,500);scene.add(moon);
 
 // Moon glow
 
-const moonGlowGeo=new THREE.SphereGeometry(14,12,12);
+const moonGlowGeo=new THREE.SphereGeometry(22,12,12);
 
-const moonGlowMat=new THREE.MeshBasicMaterial({color:0xaabbdd,transparent:true,opacity:0.08});
+const moonGlowMat=new THREE.MeshBasicMaterial({color:0xaabbdd,transparent:true,opacity:0.15});
 
 const moonGlow=new THREE.Mesh(moonGlowGeo,moonGlowMat);
 
@@ -967,6 +967,7 @@ var dummy=new THREE.Object3D();
     starPositions[si*3+2]=r*Math.sin(phi)*Math.sin(theta);
   }
 }// end STARS block
+// ---- CLOUDS ----{  var CLOUD_N=8;  var cloudGeo=new THREE.SphereGeometry(1,6,4);  var cloudMat=new THREE.MeshBasicMaterial({color:0x2a3040,transparent:true,opacity:0.12,fog:false});  var cloudGroup=[];  for(var ci=0;ci<CLOUD_N;ci++){    var cg=new THREE.Group();    var parts=3+Math.floor(Math.random()*3);    for(var cp=0;cp<parts;cp++){      var cm=new THREE.Mesh(cloudGeo,cloudMat);      cm.position.set(cp*3-parts*1.5,Math.random()*1.5,Math.random()*2-1);      cm.scale.set(3+Math.random()*4,1+Math.random()*1.5,2+Math.random()*2);      cg.add(cm);    }    cg.position.set(-100+Math.random()*200,40+Math.random()*30,Math.random()*3000);    scene.add(cg);    cloudGroup.push({group:cg,spd:0.02+Math.random()*0.03,baseX:cg.position.x});  }  window._clouds=cloudGroup;}function updateClouds(){  if(!window._clouds)return;  window._clouds.forEach(function(c){    c.group.position.x=c.baseX+Math.sin(performance.now()*0.0001*c.spd)*40;  });}
 
 
 let _skyLoaded=0;
@@ -1693,13 +1694,14 @@ scene.add((() => {
 
 
 
+// ---- CAR SHAPE HELPER ----function _makeCarGeo(w,h,l){  var g=new THREE.BoxGeometry(w,h,l,1,1,1);  var p=g.attributes.position;  for(var i=0;i<p.count;i++){    var x=p.getX(i),y=p.getY(i),z=p.getZ(i);    if(y>0){p.setX(i,x*0.82);p.setZ(i,z*0.88)}    if(y<0){if(z>l*0.4)p.setY(i,y+h*0.15);if(z<-l*0.4)p.setY(i,y+h*0.1)}  }  p.needsUpdate=true;g.computeVertexNormals();return g;}
 // ---- CROSS TRAFFIC ----
 
 {
 
   const CT_N=6;
 
-  const ctGeo=new THREE.BoxGeometry(2,0.6,1.1);
+  const ctGeo=_makeCarGeo(2,0.6,1.1);
 
   const ctRoofGeo=new THREE.BoxGeometry(1.4,0.35,0.85);
 
@@ -1927,7 +1929,7 @@ scene.add((() => {
 
   const PARKED_N=25;
 
-  const pCarBodyGeo=new THREE.BoxGeometry(1.1,0.55,2);
+  const pCarBodyGeo=_makeCarGeo(1.1,0.55,2);
 
   const pCarRoofGeo=new THREE.BoxGeometry(0.85,0.35,1.1);
 
@@ -2111,9 +2113,9 @@ scene.add((() => {
 
 {
 
-  const STAR_N=50;
+  const STAR_N=80;
 
-  const starGeo=new THREE.SphereGeometry(0.12,4,4);
+  const starGeo=new THREE.SphereGeometry(0.2,4,4);
 
   const starMat=new THREE.MeshBasicMaterial({color:0xffffff});
 
@@ -2267,17 +2269,17 @@ scene.add((() => {
 
   const ONC_N=8;
 
-  const oncBodyGeo=new THREE.BoxGeometry(1.8,0.9,3);
+  const oncBodyGeo=_makeCarGeo(1.8,0.9,3);
 
   const oncRoofGeo=new THREE.BoxGeometry(1.3,0.5,1.6);
 
   const oncColors=[0xe74c3c,0x3498db,0xf39c12,0x9b59b6,0x1abc9c,0xe67e22,0x2ecc71,0xecf0f1];
 
-  const oncBodyInst=new THREE.InstancedMesh(oncBodyGeo,new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0xffffff}),ONC_N);
+  const oncBodyInst=new THREE.InstancedMesh(oncBodyGeo,new THREE.MeshStandardMaterial({roughness:0.25,metalness:0.6,envMapIntensity:1.5,color:0xffffff}),ONC_N);
 
   oncBodyInst.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(ONC_N*3),3);
 
-  const oncRoofInst=new THREE.InstancedMesh(oncRoofGeo,new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x222222}),ONC_N);
+  const oncRoofInst=new THREE.InstancedMesh(oncRoofGeo,new THREE.MeshStandardMaterial({roughness:0.1,metalness:0.8,envMapIntensity:2.0,color:0x111822}),ONC_N);
 
   const oncLightInst=new THREE.InstancedMesh(new THREE.SphereGeometry(0.4,6,6),new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0xffff44}),ONC_N*2);
 
