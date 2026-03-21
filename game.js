@@ -2168,19 +2168,19 @@ var _makeCarGeo=function(w,h,l){  var g=new THREE.BoxGeometry(w,h,l,1,1,1);  var
 
   const bridgeDeckGeo=new THREE.BoxGeometry(14,0.4,4);
 
-  const bridgeDeckMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x556677});
+  const bridgeDeckMat=new THREE.MeshStandardMaterial({roughness:0.7,metalness:0.15,color:0x2a3040});
 
   const bridgeDeckInst=new THREE.InstancedMesh(bridgeDeckGeo,bridgeDeckMat,BRIDGE_N);
 
   const pillarGeo=new THREE.CylinderGeometry(0.3,0.4,7,6);
 
-  const pillarMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x667788});
+  const pillarMat=new THREE.MeshStandardMaterial({roughness:0.7,metalness:0.2,color:0x2a3545});
 
   const pillarInst=new THREE.InstancedMesh(pillarGeo,pillarMat,BRIDGE_N*4);
 
   const railGeo=new THREE.BoxGeometry(14,0.8,0.15);
 
-  const railMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x88aacc});
+  const railMat=new THREE.MeshStandardMaterial({roughness:0.5,metalness:0.4,color:0x3a4a5a});
 
   const railInst=new THREE.InstancedMesh(railGeo,railMat,BRIDGE_N*2);
 
@@ -2316,11 +2316,11 @@ var _makeCarGeo=function(w,h,l){  var g=new THREE.BoxGeometry(w,h,l,1,1,1);  var
 
   const tunnelWallGeo=new THREE.BoxGeometry(1,5,20);
 
-  const tunnelWallMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x333344});
+  const tunnelWallMat=new THREE.MeshStandardMaterial({roughness:0.8,metalness:0.1,color:0x1a1e28});
 
   const tunnelRoofGeo=new THREE.BoxGeometry(12,0.5,20);
 
-  const tunnelRoofMat=new THREE.MeshStandardMaterial({roughness:0.75,metalness:0.05,color:0x222233});
+  const tunnelRoofMat=new THREE.MeshStandardMaterial({roughness:0.8,metalness:0.1,color:0x151822});
 
   const tunnelLWall=new THREE.InstancedMesh(tunnelWallGeo,tunnelWallMat,TUNNEL_N);
 
