@@ -1196,7 +1196,7 @@ scene.add((() => {
   }
 
   roadInst.receiveShadow=true;
-  [roadInst,edgeL,edgeR].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});// glowL/R removed
+  [roadInst].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});// glowL/R removed
 // ---- SIDEWALKS ----
 {
   var swGeo=new THREE.PlaneGeometry(10,SLEN+2.5);
@@ -5718,9 +5718,9 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
   const _cz=car.position.z;
 
-  const _camDist=18+spd*8;// pull back at speed (closer)
+  const _camDist=12+spd*6;// pull back at speed (closer)
 
-  const _camHeight=10+spd*4;// rise at speed (lower)
+  const _camHeight=5+spd*3;// rise at speed (lower)
 
   const _behindZ=_cz-_camDist;
 
@@ -5746,7 +5746,7 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
   cam.position.lerp(_cv,_cm===0?.25:_cm===3?.03:.15);
   cam.lookAt(_ct);
-  _ct.set(roadX(_lookAheadZ),roadY(_lookAheadZ)+0.5,_lookAheadZ);cam.lookAt(_ct);
+  _ct.set(car.position.x,car.position.y+1,_cz+6+spd*5);cam.lookAt(_ct);
 
   // Dynamic FOV - widens at high speed
 
