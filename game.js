@@ -1694,7 +1694,8 @@ scene.add((() => {
 
 
 
-// ---- CAR SHAPE HELPER ----function _makeCarGeo(w,h,l){  var g=new THREE.BoxGeometry(w,h,l,1,1,1);  var p=g.attributes.position;  for(var i=0;i<p.count;i++){    var x=p.getX(i),y=p.getY(i),z=p.getZ(i);    if(y>0){p.setX(i,x*0.82);p.setZ(i,z*0.88)}    if(y<0){if(z>l*0.4)p.setY(i,y+h*0.15);if(z<-l*0.4)p.setY(i,y+h*0.1)}  }  p.needsUpdate=true;g.computeVertexNormals();return g;}
+// ---- CAR SHAPE HELPER ----
+var _makeCarGeo=function(w,h,l){  var g=new THREE.BoxGeometry(w,h,l,1,1,1);  var p=g.attributes.position;  for(var i=0;i<p.count;i++){    var x=p.getX(i),y=p.getY(i),z=p.getZ(i);    if(y>0){p.setX(i,x*0.82);p.setZ(i,z*0.88)}    if(y<0){if(z>l*0.4)p.setY(i,y+h*0.15);if(z<-l*0.4)p.setY(i,y+h*0.1)}  }  p.needsUpdate=true;g.computeVertexNormals();return g;}
 // ---- CROSS TRAFFIC ----
 
 {
