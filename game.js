@@ -6115,6 +6115,34 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
 
 
+  // ---- SPEED LINES ----
+  if(!window._speedLines){
+    var slGeo=new THREE.BufferGeometry();
+    var slPos=new Float32Array(60*3);
+    var slVel=new Float32Array(60);
+    for(var sli=0;sli<60;sli++){slPos[sli*3]=0;slPos[sli*3+1]=-100;slPos[sli*3+2]=0;slVel[sli]=0}
+    slGeo.setAttribute("position",new THREE.BufferAttribute(slPos,3));
+    var slMat=new THREE.PointsMaterial({color:0xffffff,size:0.15,transparent:true,opacity:0.4,sizeAttenuation:true});
+    var slPts=new THREE.Points(slGeo,slMat);
+    scene.add(slPts);
+    window._speedLines={geo:slGeo,pts:slPts,vel:slVel,n:60};
+  }
+  if(window._speedLines&&spd>0.2){
+    var sl=window._speedLines;var slp=sl.geo.attributes.position;
+    for(var sli2=0;sli2<sl.n;sli2++){
+      var sy=slp.getY(sli2);
+      if(sy<-50||sl.vel[sli2]<=0){
+        slp.setXYZ(sli2,car.position.x+(Math.random()-0.5)*8,car.position.y+1+Math.random()*3,car.position.z+15+Math.random()*20);
+        sl.vel[sli2]=0.5+Math.random()*1.5;
+      }else{
+        slp.setZ(sli2,slp.getZ(sli2)-sl.vel[sli2]*(spd*3));
+        sl.vel[sli2]*=0.98;
+        if(slp.getZ(sli2)<car.position.z-10)sl.vel[sli2]=0;
+      }
+    }
+    slp.needsUpdate=true;
+    sl.pts.material.opacity=Math.min(0.5,(spd-0.2)*2);
+  }else if(window._speedLines){window._speedLines.pts.material.opacity=0}
   composer.render();
 
 }
