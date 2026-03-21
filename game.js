@@ -1101,7 +1101,7 @@ scene.add((() => {
 
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(16,SLEN+2.5),_roadMat,RSEGS);
 
-  const edgeMat=new THREE.MeshStandardMaterial({color:0x115533,emissive:0x042208,emissiveIntensity:0.1,roughness:0.5,metalness:0.05});window._edgeMat=edgeMat;
+  const edgeMat=new THREE.MeshStandardMaterial({color:0x0a1a0e,emissive:0x000000,emissiveIntensity:0.0,roughness:0.5,metalness:0.05});window._edgeMat=edgeMat;
 
   const edgeGeo=new THREE.PlaneGeometry(.5,SLEN+2);
 
@@ -1181,7 +1181,7 @@ scene.add((() => {
 // ---- GRASS STRIPS ----
 {
   var grGeo=new THREE.PlaneGeometry(8,SLEN+1);
-  var grMat=new THREE.MeshStandardMaterial({color:0x1e4412,roughness:0.95,metalness:0.0});
+  var grMat=new THREE.MeshStandardMaterial({color:0x0a1508,roughness:0.95,metalness:0.0});
   var grInstL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);
   var grInstR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);
   for(var gi=0;gi<RSEGS;gi++){
@@ -1198,7 +1198,7 @@ scene.add((() => {
   swInstL.instanceMatrix.needsUpdate=true;swInstR.instanceMatrix.needsUpdate=true;
   swInstL.receiveShadow=true;swInstR.receiveShadow=true;
   scene.add(swInstL);scene.add(swInstR);
-}// ---- GUARDRAILS (road barriers) ----{  var grGeo=new THREE.BoxGeometry(0.08,0.35,SLEN+2);  var grMat=new THREE.MeshStandardMaterial({color:0x444455,roughness:0.6,metalness:0.3,envMapIntensity:0.5});  var grPostGeo=new THREE.BoxGeometry(0.12,0.7,0.12);  var grL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  var grR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  for(var gi2=0;gi2<RSEGS;gi2++){    var gz2=-50+gi2*SLEN,gzc2=gz2+SLEN/2,gx2=roadX(gzc2),gy2=roadY(gzc2);    var ga2=Math.atan2(roadX(gzc2+2)-roadX(gzc2-2),4);    dummy.position.set(gx2-7.5*Math.cos(ga2),gy2+0.35,gzc2+7.5*Math.sin(ga2));    dummy.rotation.set(0,ga2,0);dummy.scale.setScalar(1);dummy.updateMatrix();    grL.setMatrixAt(gi2,dummy.matrix);    dummy.position.set(gx2+7.5*Math.cos(ga2),gy2+0.35,gzc2-7.5*Math.sin(ga2));    dummy.updateMatrix();    grR.setMatrixAt(gi2,dummy.matrix);  }  grL.instanceMatrix.needsUpdate=true;grR.instanceMatrix.needsUpdate=true;  grL.castShadow=true;grR.castShadow=true;  scene.add(grL);scene.add(grR);
+}// ---- GUARDRAILS (road barriers) ----{  var grGeo=new THREE.BoxGeometry(0.06,0.18,SLEN+2);  var grMat=new THREE.MeshStandardMaterial({color:0x444455,roughness:0.6,metalness:0.3,envMapIntensity:0.5});  var grPostGeo=new THREE.BoxGeometry(0.12,0.7,0.12);  var grL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  var grR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  for(var gi2=0;gi2<RSEGS;gi2++){    var gz2=-50+gi2*SLEN,gzc2=gz2+SLEN/2,gx2=roadX(gzc2),gy2=roadY(gzc2);    var ga2=Math.atan2(roadX(gzc2+2)-roadX(gzc2-2),4);    dummy.position.set(gx2-7.5*Math.cos(ga2),gy2+0.35,gzc2+7.5*Math.sin(ga2));    dummy.rotation.set(0,ga2,0);dummy.scale.setScalar(1);dummy.updateMatrix();    grL.setMatrixAt(gi2,dummy.matrix);    dummy.position.set(gx2+7.5*Math.cos(ga2),gy2+0.35,gzc2-7.5*Math.sin(ga2));    dummy.updateMatrix();    grR.setMatrixAt(gi2,dummy.matrix);  }  grL.instanceMatrix.needsUpdate=true;grR.instanceMatrix.needsUpdate=true;  grL.castShadow=true;grR.castShadow=true;  scene.add(grL);scene.add(grR);
 
 
 
@@ -1885,9 +1885,9 @@ scene.add((() => {
 
   pedHeadInst.instanceColor.needsUpdate=true;
 
-  scene.add(pedBodyInst);
+  //scene.add(pedBodyInst);
 
-  scene.add(pedHeadInst);
+  //scene.add(pedHeadInst);
 
   // Pedestrian legs
 
@@ -1913,7 +1913,7 @@ scene.add((() => {
 
   pedLegLI.instanceMatrix.needsUpdate=true;pedLegRI.instanceMatrix.needsUpdate=true;
 
-  scene.add(pedLegLI);scene.add(pedLegRI);
+  //scene.add(pedLegLI);scene.add(pedLegRI);
 
   window._pedData={bodyInst:pedBodyInst,headInst:pedHeadInst,legL:pedLegLI,legR:pedLegRI,data:pedData,n:PED_N};
 
@@ -2107,6 +2107,7 @@ scene.add((() => {
 
 
 
+// ---- TREES (stylized low-poly) ----{  var TREE_N=50;  var trunkGeo=new THREE.CylinderGeometry(0.08,0.15,1.8,5);  var trunkMat=new THREE.MeshStandardMaterial({color:0x3a2a1a,roughness:0.9,metalness:0.0});  var trunkInst=new THREE.InstancedMesh(trunkGeo,trunkMat,TREE_N);  var leafGeo1=new THREE.ConeGeometry(1.2,2.0,6);  var leafGeo2=new THREE.ConeGeometry(0.9,1.6,6);  var leafGeo3=new THREE.ConeGeometry(0.6,1.2,6);  var leafMat=new THREE.MeshStandardMaterial({color:0x0d3a12,roughness:0.85,metalness:0.0});  var leafInst1=new THREE.InstancedMesh(leafGeo1,leafMat,TREE_N);  var leafInst2=new THREE.InstancedMesh(leafGeo2,leafMat,TREE_N);  var leafInst3=new THREE.InstancedMesh(leafGeo3,leafMat,TREE_N);  for(var ti=0;ti<TREE_N;ti++){    var tz=40+ti*55+Math.random()*20;    var tside=(ti%2===0?-1:1)*(9+Math.random()*6);    var tx=roadX(tz)+tside;    var ty=roadY(tz);    var tscale=0.7+Math.random()*0.6;    dummy.position.set(tx,ty+0.9*tscale,tz);    dummy.scale.set(tscale,tscale,tscale);    dummy.rotation.set(0,Math.random()*Math.PI*2,0);    dummy.updateMatrix();    trunkInst.setMatrixAt(ti,dummy.matrix);    dummy.position.set(tx,ty+2.2*tscale,tz);    dummy.updateMatrix();    leafInst1.setMatrixAt(ti,dummy.matrix);    dummy.position.set(tx,ty+3.0*tscale,tz);    dummy.updateMatrix();    leafInst2.setMatrixAt(ti,dummy.matrix);    dummy.position.set(tx,ty+3.6*tscale,tz);    dummy.updateMatrix();    leafInst3.setMatrixAt(ti,dummy.matrix);  }  trunkInst.instanceMatrix.needsUpdate=true;  leafInst1.instanceMatrix.needsUpdate=true;  leafInst2.instanceMatrix.needsUpdate=true;  leafInst3.instanceMatrix.needsUpdate=true;  scene.add(trunkInst);scene.add(leafInst1);scene.add(leafInst2);scene.add(leafInst3);}
 // ---- TWINKLING STARS ----
 
 {
@@ -3120,7 +3121,7 @@ const MAX_GREENS=3;
 
 const greens=[];
 
-const greenInst=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.5,1),new THREE.MeshStandardMaterial({color:0x22dd55,emissive:0x11aa33,emissiveIntensity:0.3,roughness:0.15,metalness:0.5,transparent:true,opacity:0.8}),MAX_GREENS);
+const greenInst=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.3,1),new THREE.MeshStandardMaterial({color:0x22dd55,emissive:0x11aa33,emissiveIntensity:0.15,roughness:0.15,metalness:0.5,transparent:true,opacity:0.8}),MAX_GREENS);
 
 greenInst.frustumCulled=false;scene.add(greenInst);
 
@@ -3182,7 +3183,7 @@ const MAX_OBS=2;
 
 const obstacles=[];
 
-const obsInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.9,0),new THREE.MeshStandardMaterial({color:0xcc2222,emissive:0x881111,emissiveIntensity:0.15,roughness:0.3,metalness:0.5,transparent:true,opacity:0.7}),MAX_OBS);
+const obsInst=new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.5,0),new THREE.MeshStandardMaterial({color:0xcc2222,emissive:0x881111,emissiveIntensity:0.15,roughness:0.3,metalness:0.5,transparent:true,opacity:0.7}),MAX_OBS);
 
 obsInst.frustumCulled=false;scene.add(obsInst);
 
@@ -5869,7 +5870,7 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
     else{pi.style.display='none';pi.style.boxShadow='';const si=document.getElementById('shieldInd');if(si)si.style.display='none';const ti=document.getElementById('turboInd');if(ti)ti.style.display='none'}
 
-    if(window._edgeMat){const fc2=flow/100;window._edgeMat.color.setRGB(1-fc2,fc2,.2)}}
+    }
 
 
 
@@ -5906,7 +5907,7 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
   cam.position.lerp(_cv,_cm===0?.2:_cm===3?.03:.15);
   cam.lookAt(_ct);
-  _ct.set(car.position.x,car.position.y+0.5,_cz+3+spd*3);cam.lookAt(_ct);
+
 
   // Dynamic FOV - widens at high speed
 
