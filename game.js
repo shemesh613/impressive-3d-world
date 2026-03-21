@@ -1181,8 +1181,8 @@ scene.add((() => {
 
 // ---- GRASS STRIPS ----
 {
-  var grGeo=new THREE.PlaneGeometry(8,SLEN+1);
-  var grMat=new THREE.MeshStandardMaterial({color:0x0c1a0a,roughness:0.95,metalness:0.0});
+  var grGeo=new THREE.PlaneGeometry(5,SLEN+1);
+  var grMat=new THREE.MeshStandardMaterial({color:0x081408,roughness:0.95,metalness:0.0});
   var grInstL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);
   var grInstR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);
   for(var gi=0;gi<RSEGS;gi++){
@@ -2548,6 +2548,38 @@ for(let z=-100;z<=7000;z+=10){
 
 
 
+// ---- BUILDING ROOFS (varied shapes) ----
+{
+  var roofTypes=3;
+  var triRoofGeo=new THREE.ConeGeometry(1,1,4);
+  var triRoofMat=new THREE.MeshStandardMaterial({color:0x2a1a1a,roughness:0.8,metalness:0.1});
+  var triRoofInst=new THREE.InstancedMesh(triRoofGeo,triRoofMat,200);
+  var flatRailGeo=new THREE.BoxGeometry(1,0.15,1);
+  var flatRailMat=new THREE.MeshStandardMaterial({color:0x3a3a44,roughness:0.6,metalness:0.3});
+  var flatRailInst=new THREE.InstancedMesh(flatRailGeo,flatRailMat,200);
+  var ri=0,fi=0;
+  for(var bi2=0;bi2<bdata.length&&(ri<200||fi<200);bi2++){
+    var bd=bdata[bi2];
+    if(bd[3]<4)continue;
+    var roofType=bi2%roofTypes;
+    var bry=roadY(bd[1])+bd[3];
+    if(roofType===0&&ri<200){
+      dummy.position.set(bd[0],bry+bd[2]*0.35,bd[1]);
+      dummy.scale.set(bd[2]*0.7,bd[2]*0.7,bd[4]*0.7);
+      dummy.rotation.set(0,0,0);dummy.updateMatrix();
+      triRoofInst.setMatrixAt(ri,dummy.matrix);ri++;
+    }else if(roofType===1&&fi<200){
+      dummy.position.set(bd[0],bry+0.08,bd[1]);
+      dummy.scale.set(bd[2]+0.3,1,bd[4]+0.3);
+      dummy.rotation.set(0,0,0);dummy.updateMatrix();
+      flatRailInst.setMatrixAt(fi,dummy.matrix);fi++;
+    }
+  }
+  triRoofInst.count=ri;flatRailInst.count=fi;
+  triRoofInst.instanceMatrix.needsUpdate=true;
+  flatRailInst.instanceMatrix.needsUpdate=true;
+  scene.add(triRoofInst);scene.add(flatRailInst);
+}
 // Building roof accents + antennas
 
 {
