@@ -3589,6 +3589,21 @@ addEventListener('mousemove',e=>{if(!drag)return;cTh+=(e.clientX-mx)*.005;cPh=Ma
 
 
 
+
+// ---- HEBREW TTS NARRATION ----
+function narrateHebrew(text){
+  if(!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang='he-IL';u.rate=0.9;u.pitch=1.0;u.volume=0.8;
+  // Try to find Hebrew voice
+  var voices=window.speechSynthesis.getVoices();
+  for(var i=0;i<voices.length;i++){if(voices[i].lang&&voices[i].lang.indexOf('he')>=0){u.voice=voices[i];break}}
+  window.speechSynthesis.speak(u);
+}
+// Preload voices
+if(window.speechSynthesis){window.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices()}}
+
 // ---- GATE SYSTEM (replaces popup scenarios) ----
 
 // 3D gates: two arches on the road, player drives through one
@@ -3632,6 +3647,55 @@ _gateR.visible=false;scene.add(_gateR);
 let _gateActive=false,_gateZ=0,_gateIsGreenLeft=true,_gateScenarioIdx=0;
 
 
+
+
+// ---- FORK ROAD VISUAL ----
+var _forkGroup=null;
+function _createForkRoad(z){
+  if(_forkGroup){scene.remove(_forkGroup)}
+  _forkGroup=new THREE.Group();
+  var rx=roadX(z);var ry=roadY(z);
+  // Left fork road
+  var forkGeo=new THREE.BoxGeometry(6,0.12,25);
+  var forkMatL=new THREE.MeshStandardMaterial({color:0x2a3a2a,roughness:0.5,metalness:0.15});
+  var forkL=new THREE.Mesh(forkGeo,forkMatL);
+  forkL.position.set(rx-5,ry-0.02,z+15);
+  forkL.rotation.y=0.15;
+  _forkGroup.add(forkL);
+  // Right fork road
+  var forkMatR=new THREE.MeshStandardMaterial({color:0x3a2a2a,roughness:0.5,metalness:0.15});
+  var forkR=new THREE.Mesh(forkGeo,forkMatR);
+  forkR.position.set(rx+5,ry-0.02,z+15);
+  forkR.rotation.y=-0.15;
+  _forkGroup.add(forkR);
+  // Divider (triangle island between forks)
+  var divGeo=new THREE.BoxGeometry(1.5,0.2,20);
+  var divMat=new THREE.MeshStandardMaterial({color:0x1a3a1a,roughness:0.8});
+  var div=new THREE.Mesh(divGeo,divMat);
+  div.position.set(rx,ry+0.05,z+12);
+  _forkGroup.add(div);
+  // Choice signs (3D text boards)
+  var signGeo=new THREE.BoxGeometry(3.5,1.5,0.15);
+  var signMatGreen=new THREE.MeshStandardMaterial({color:0x1a3a2a,emissive:0x0a2a1a,emissiveIntensity:0.3,roughness:0.4});
+  var signMatRed=new THREE.MeshStandardMaterial({color:0x3a1a1a,emissive:0x2a0a0a,emissiveIntensity:0.3,roughness:0.4});
+  // Post for left sign
+  var postGeo=new THREE.BoxGeometry(0.15,3,0.15);
+  var postMat=new THREE.MeshStandardMaterial({color:0x666666,roughness:0.5,metalness:0.3});
+  var postL=new THREE.Mesh(postGeo,postMat);postL.position.set(rx-5,ry+1.5,z+5);_forkGroup.add(postL);
+  var postR=new THREE.Mesh(postGeo,postMat);postR.position.set(rx+5,ry+1.5,z+5);_forkGroup.add(postR);
+  // Signs
+  var sL=new THREE.Mesh(signGeo,_gateIsGreenLeft?signMatGreen:signMatRed);
+  sL.position.set(rx-5,ry+3.5,z+5);_forkGroup.add(sL);
+  var sR=new THREE.Mesh(signGeo,_gateIsGreenLeft?signMatRed:signMatGreen);
+  sR.position.set(rx+5,ry+3.5,z+5);_forkGroup.add(sR);
+  scene.add(_forkGroup);
+}
+function _removeForkRoad(){
+  if(_forkGroup){
+    _forkGroup.traverse(function(c){if(c.geometry)c.geometry.dispose();if(c.material)c.material.dispose()});
+    scene.remove(_forkGroup);_forkGroup=null;
+  }
+}
 
 function triggerScenario(){
 
@@ -3718,6 +3782,13 @@ function triggerScenario(){
   _gateActive=true;
 
   scenarioActive=true;
+  // Switch to first-person driver view
+  window._prevCamMode=window._camMode||0;
+  window._camMode=2; // bumper cam = driver view
+  // Narrate the question
+  narrateHebrew(SCENARIOS[_gateScenarioIdx].situation);
+  // Create fork road visual
+  _createForkRoad(_gateZ);
   // Speed brake disabled
 
   // Don't stop car for gates - player drives through!
@@ -3900,6 +3971,8 @@ function _updateGateLabels(){
 
   if(car.position.z-_gateZ>30){
 
+    
+    window._camMode=window._prevCamMode||0;_removeForkRoad();if(window.speechSynthesis)window.speechSynthesis.cancel();
     _gateL.visible=false;_gateR.visible=false;
 
     document.getElementById('gateLabel1').style.display='none';
@@ -3915,6 +3988,10 @@ function _updateGateLabels(){
 
 
 function _processGateChoice(isGreen){
+  // Restore chase camera
+  window._camMode=window._prevCamMode||0;
+  _removeForkRoad();
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
 
   scenariosAnswered++;
 
