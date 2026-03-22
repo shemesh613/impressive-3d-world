@@ -1092,57 +1092,29 @@ scene.add((() => {
 
 
 
-// ---- CURVED ROAD ----
-
+// ---- CURVED ROAD (Box - no z-fighting) ----
 {
-
   const RSEGS=900,SLEN=9;
-
-  const _roadMat=new THREE.MeshStandardMaterial({roughness:0.55,metalness:0.15,color:0x2a2a38,envMapIntensity:0.6});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
-
-  const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(16,SLEN+2.5),_roadMat,RSEGS);
-
-  const edgeMat=new THREE.MeshStandardMaterial({color:0x0a1a0e,emissive:0x000000,emissiveIntensity:0.0,roughness:0.5,metalness:0.05});window._edgeMat=edgeMat;
-
-  const edgeGeo=new THREE.PlaneGeometry(.5,SLEN+2);
-
-  const edgeL=new THREE.InstancedMesh(edgeGeo,edgeMat,RSEGS);
-
-  const edgeR=new THREE.InstancedMesh(edgeGeo,edgeMat,RSEGS);
-
-  const glowMat=new THREE.MeshStandardMaterial({color:0x0a3318,emissive:0x052210,emissiveIntensity:0.2,roughness:0.7,metalness:0.05});
-
-  const glowGeo=new THREE.PlaneGeometry(3,SLEN+2);
-
-  const glowL=new THREE.InstancedMesh(glowGeo,glowMat,RSEGS);
-
-  const glowR=new THREE.InstancedMesh(glowGeo,glowMat,RSEGS);
-
+  const _roadMat=new THREE.MeshStandardMaterial({roughness:0.5,metalness:0.2,color:0x2a2a38,envMapIntensity:0.6});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
+  const roadInst=new THREE.InstancedMesh(new THREE.BoxGeometry(16,0.15,SLEN+2.5),_roadMat,RSEGS);
+  const edgeMat=new THREE.MeshStandardMaterial({color:0x334455,roughness:0.5,metalness:0.1,emissive:0x112233,emissiveIntensity:0.1});window._edgeMat=edgeMat;
+  const _newCurbGeo=new THREE.BoxGeometry(0.35,0.2,SLEN+2);
+  const _newCurbMat=new THREE.MeshStandardMaterial({color:0x3a3a4a,roughness:0.6,metalness:0.15});
+  const _curbL=new THREE.InstancedMesh(_newCurbGeo,_newCurbMat,RSEGS);
+  const _curbR=new THREE.InstancedMesh(_newCurbGeo,_newCurbMat,RSEGS);
   for(let i=0;i<RSEGS;i++){
-
     const z=-50+i*SLEN,zc=z+SLEN/2,x=roadX(zc),hy=roadY(zc);
-
     const ca=Math.atan2(roadX(zc+2)-roadX(zc-2),4);const hillA=Math.atan2(roadY(zc+SLEN/2)-roadY(zc-SLEN/2),SLEN);
-
-    const cosA=Math.cos(ca),sinA=Math.sin(ca);
-
-    dummy.rotation.order='YXZ';dummy.rotation.set(-Math.PI/2+hillA,ca,0);dummy.scale.setScalar(1);
-
-    dummy.position.set(x,hy+.01,zc);dummy.updateMatrix();roadInst.setMatrixAt(i,dummy.matrix);
-
-    dummy.position.set(x-5.2*cosA,hy+.02,zc+5.2*sinA);dummy.updateMatrix();edgeL.setMatrixAt(i,dummy.matrix);
-
-    dummy.position.set(x+5.2*cosA,hy+.02,zc-5.2*sinA);dummy.updateMatrix();edgeR.setMatrixAt(i,dummy.matrix);
-
-    dummy.position.set(x-6.8*cosA,hy+.005,zc+6.8*sinA);dummy.updateMatrix();glowL.setMatrixAt(i,dummy.matrix);
-
-    dummy.position.set(x+6.8*cosA,hy+.005,zc-6.8*sinA);dummy.updateMatrix();glowR.setMatrixAt(i,dummy.matrix);
-
+    dummy.rotation.order='YXZ';dummy.rotation.set(hillA,ca,0);dummy.scale.setScalar(1);
+    dummy.position.set(x,hy-0.05,zc);dummy.updateMatrix();roadInst.setMatrixAt(i,dummy.matrix);
+    dummy.rotation.set(0,ca,0);
+    dummy.position.set(x-8*Math.cos(ca),hy+0.08,zc+8*Math.sin(ca));dummy.updateMatrix();_curbL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x+8*Math.cos(ca),hy+0.08,zc-8*Math.sin(ca));dummy.updateMatrix();_curbR.setMatrixAt(i,dummy.matrix);
   }
-
   roadInst.receiveShadow=true;
-  [roadInst].forEach(m=>{m.instanceMatrix.needsUpdate=true;scene.add(m)});// glowL/R removed
-// ---- SIDEWALKS ----
+  roadInst.instanceMatrix.needsUpdate=true;_curbL.instanceMatrix.needsUpdate=true;_curbR.instanceMatrix.needsUpdate=true;
+  scene.add(roadInst);scene.add(_curbL);scene.add(_curbR);
+
 {
   var swGeo=new THREE.PlaneGeometry(10,SLEN+2.5);
   var swMat=new THREE.MeshStandardMaterial({color:0x1a1e24,roughness:0.92,metalness:0.02});
@@ -1168,14 +1140,14 @@ scene.add((() => {
     var cca=Math.atan2(roadX(czc+2)-roadX(czc-2),4);
     dummy.position.set(cx-7.2*Math.cos(cca),cy+0.12,czc+7.2*Math.sin(cca));
     dummy.rotation.set(0,cca,0);dummy.scale.setScalar(1);dummy.updateMatrix();
-    curbL.setMatrixAt(ci,dummy.matrix);
+    _curbL.setMatrixAt(ci,dummy.matrix);
     dummy.position.set(cx+7.2*Math.cos(cca),cy+0.12,czc-7.2*Math.sin(cca));
     dummy.updateMatrix();
-    curbR.setMatrixAt(ci,dummy.matrix);
+    _curbR.setMatrixAt(ci,dummy.matrix);
   }
 
 }
-  curbL.instanceMatrix.needsUpdate=true;curbR.instanceMatrix.needsUpdate=true;
+  _curbL.instanceMatrix.needsUpdate=true;_curbR.instanceMatrix.needsUpdate=true;
   // curbs removed (visual noise)
 }
 
@@ -2438,24 +2410,15 @@ for(let z=-100;z<=7000;z+=10){
 
 {
 
-  const geo=new THREE.BoxGeometry(1,1,1);const mat=new THREE.MeshStandardMaterial({roughness:0.55,metalness:0.25,envMapIntensity:1.8});
-
+  const geo=new THREE.BoxGeometry(1,1,1);
+  const mat=new THREE.MeshStandardMaterial({roughness:0.45,metalness:0.3,envMapIntensity:1.5});
   const inst=new THREE.InstancedMesh(geo,mat,bdata.length);
-
-  const biomes=[[0x2a3548,0x1e2e42,0x344050,0x1a2838],[0x3d2a1e,0x4a3325,0x2e1f14,0x553a28],[0x252540,0x1e1e38,0x30304a,0x1a1a32],[0x1e3028,0x253a30,0x182a20,0x2a4038],[0x3a1828,0x4a2030,0x2e1018,0x552840],[0x1a3040,0x20384a,0x142830,0x1e3848],[0x3a3520,0x44402a,0x2e2a14,0x4a4030]];
-
-  function biomeColor(z,i){const idx=((Math.floor(z/180)%biomes.length)+biomes.length)%biomes.length;const b=biomes[idx];return b[i%b.length]}
-
-  const colors=[0x22c55e,0x10b981,0x059669,0x34d399,0x6ee7b7,0x14b8a6,0x0d9488,0x2dd4bf];
-
-  bdata.forEach((b,i)=>{
-
+  const palettes=[[0x1e2d3d,0x253545,0x1a2535,0x2d3d4d],[0x352520,0x3e2e28,0x2a1e18,0x453528],[0x202040,0x1a1a35,0x282848,0x151530],[0x1a2e25,0x203828,0x15281e,0x284035],[0x351a25,0x3e2030,0x2a1018,0x452838],[0x1a2e3d,0x203545,0x142530,0x1e3545],[0x353220,0x3e3a28,0x2a2618,0x453e28]];
+  function getPalette(z,i){var pi=((Math.floor(z/250)%palettes.length)+palettes.length)%palettes.length;return palettes[pi][i%palettes[pi].length]}
+  bdata.forEach(function(b,i){
     dummy.position.set(b[0],roadY(b[1])+b[3]/2,b[1]);dummy.scale.set(b[2],b[3],b[4]);dummy.rotation.set(0,0,0);dummy.updateMatrix();
-
-    inst.setMatrixAt(i,dummy.matrix);inst.setColorAt(i,_col.setHex(biomeColor(b[1],i)));
-
+    inst.setMatrixAt(i,dummy.matrix);inst.setColorAt(i,_col.setHex(getPalette(b[1],i)));
   });
-
   inst.instanceMatrix.needsUpdate=true;inst.instanceColor.needsUpdate=true;
   inst.castShadow=true;inst.receiveShadow=true;
   scene.add(inst);
