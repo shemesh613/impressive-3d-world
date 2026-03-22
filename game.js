@@ -1040,7 +1040,7 @@ var _roadTex=(function(){
   var cv=document.createElement('canvas');cv.width=512;cv.height=512;
   var ctx=cv.getContext('2d');
   // Dark asphalt base with warm tint
-  ctx.fillStyle='#22222e';ctx.fillRect(0,0,512,512);
+  ctx.fillStyle='#1a1a26';ctx.fillRect(0,0,512,512);
   // Multi-layer asphalt noise (fine + coarse grain)
   for(var i=0;i<12000;i++){var x=Math.random()*512,y=Math.random()*512,v=22+Math.random()*28;ctx.fillStyle='rgb('+v+','+(v+1)+','+(v+5)+')';ctx.fillRect(x,y,1+Math.random()*1.5,1+Math.random()*1.5)}
   for(var i=0;i<3000;i++){var x=Math.random()*512,y=Math.random()*512,v=35+Math.random()*20;ctx.globalAlpha=0.3;ctx.fillStyle='rgb('+v+','+(v+2)+','+(v+6)+')';ctx.fillRect(x,y,2+Math.random()*4,2+Math.random()*4)}
@@ -1051,10 +1051,10 @@ var _roadTex=(function(){
   ctx.globalAlpha=1;
   // Center dashed line (softer white with glow)
   ctx.shadowColor='rgba(255,255,255,0.4)';ctx.shadowBlur=6;
-  ctx.strokeStyle='#e8e8e8';ctx.lineWidth=4;ctx.setLineDash([45,30]);ctx.beginPath();ctx.moveTo(256,0);ctx.lineTo(256,512);ctx.stroke();
+  ctx.strokeStyle='#ffcc44';ctx.lineWidth=5;ctx.setLineDash([45,30]);ctx.beginPath();ctx.moveTo(256,0);ctx.lineTo(256,512);ctx.stroke();
   ctx.shadowBlur=0;
   // Edge lines (solid)
-  ctx.setLineDash([]);ctx.lineWidth=2.5;ctx.strokeStyle='#dddddd';ctx.beginPath();ctx.moveTo(22,0);ctx.lineTo(22,512);ctx.moveTo(490,0);ctx.lineTo(490,512);ctx.stroke();
+  ctx.setLineDash([]);ctx.lineWidth=2.5;ctx.strokeStyle='#ffffff';ctx.beginPath();ctx.moveTo(22,0);ctx.lineTo(22,512);ctx.moveTo(490,0);ctx.lineTo(490,512);ctx.stroke();
   var t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1,35);
   if(renderer.capabilities&&renderer.capabilities.getMaxAnisotropy)t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
   return t;
@@ -1098,7 +1098,7 @@ scene.add((() => {
 
   const RSEGS=900,SLEN=9;
 
-  const _roadMat=new THREE.MeshStandardMaterial({roughness:0.65,metalness:0.08,color:0x2a2a38,envMapIntensity:0.4});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
+  const _roadMat=new THREE.MeshStandardMaterial({roughness:0.55,metalness:0.15,color:0x2a2a38,envMapIntensity:0.6});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
 
   const roadInst=new THREE.InstancedMesh(new THREE.PlaneGeometry(16,SLEN+2.5),_roadMat,RSEGS);
 
@@ -1209,7 +1209,7 @@ scene.add((() => {
 
 {
 
-  const g=new THREE.BoxGeometry(.2,0.06,3);const m=new THREE.MeshStandardMaterial({color:0xfbbf24,emissive:0xfbbf24,emissiveIntensity:0.15,roughness:0.5,metalness:0.0});
+  const g=new THREE.BoxGeometry(.25,0.06,3);const m=new THREE.MeshStandardMaterial({color:0xff9922,emissive:0xff8811,emissiveIntensity:0.25,roughness:0.5,metalness:0.0});
 
   const inst=new THREE.InstancedMesh(g,m,600);
 
@@ -1630,7 +1630,7 @@ scene.add((() => {
 
   const zebraGeo=new THREE.BoxGeometry(1.4,0.08,.6);
 
-  const zebraMat=new THREE.MeshStandardMaterial({roughness:0.7,metalness:0.05,color:0xaaaaaa});
+  const zebraMat=new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.1,color:0xdddddd});
 
   const zebraInst=new THREE.InstancedMesh(zebraGeo,zebraMat,crossN*5);
 
@@ -2442,7 +2442,7 @@ for(let z=-100;z<=7000;z+=10){
 
   const inst=new THREE.InstancedMesh(geo,mat,bdata.length);
 
-  const biomes=[[0x1a2a3a,0x223344,0x182838,0x2a3a4a],[0x3a2218,0x44332a,0x331a10,0x4a3322],[0x1a1a3a,0x222244,0x151530,0x2a2a44],[0x152a22,0x1a3a2a,0x10281a,0x224433],[0x3a1522,0x442233,0x30101a,0x553344],[0x102a3a,0x1a3a44,0x0e2830,0x1a3a44],[0x3a3018,0x443622,0x332810,0x443a2a]];
+  const biomes=[[0x2a3548,0x1e2e42,0x344050,0x1a2838],[0x3d2a1e,0x4a3325,0x2e1f14,0x553a28],[0x252540,0x1e1e38,0x30304a,0x1a1a32],[0x1e3028,0x253a30,0x182a20,0x2a4038],[0x3a1828,0x4a2030,0x2e1018,0x552840],[0x1a3040,0x20384a,0x142830,0x1e3848],[0x3a3520,0x44402a,0x2e2a14,0x4a4030]];
 
   function biomeColor(z,i){const idx=((Math.floor(z/180)%biomes.length)+biomes.length)%biomes.length;const b=biomes[idx];return b[i%b.length]}
 
