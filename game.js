@@ -1014,7 +1014,7 @@ _trailInst.instanceMatrix.needsUpdate=true;scene.add(_trailInst);window._trailIn
 
 // ---- ROAD CURVE FUNCTION ----
 
-function roadY(z){return Math.sin(z*.006)*1.5+Math.sin(z*.017)*0.8+Math.sin(z*.003)*1.0+Math.sin(z*.04)*0.3}
+function roadY(z){return Math.sin(z*.006)*0.8+Math.sin(z*.017)*0.4+Math.sin(z*.003)*0.5+Math.sin(z*.04)*0.15}
 
 function roadX(z){
 
@@ -1105,7 +1105,7 @@ scene.add((() => {
   for(let i=0;i<RSEGS;i++){
     const z=-50+i*SLEN,zc=z+SLEN/2,x=roadX(zc),hy=roadY(zc);
     const ca=Math.atan2(roadX(zc+2)-roadX(zc-2),4);const hillA=Math.atan2(roadY(zc+SLEN/2)-roadY(zc-SLEN/2),SLEN);
-    dummy.rotation.order='YXZ';dummy.rotation.set(hillA,ca,0);dummy.scale.setScalar(1);
+    dummy.rotation.order='YXZ';dummy.rotation.set(hillA,ca,0);dummy.scale.set(1,1,1);
     dummy.position.set(x,hy-0.05,zc);dummy.updateMatrix();roadInst.setMatrixAt(i,dummy.matrix);
     dummy.rotation.set(0,ca,0);
     dummy.position.set(x-8*Math.cos(ca),hy+0.08,zc+8*Math.sin(ca));dummy.updateMatrix();_curbL.setMatrixAt(i,dummy.matrix);
@@ -4820,7 +4820,7 @@ function updateHUD(){
   // Camera mode indicator
   // Camera hint: only show on mode change, fade after 3s
   var _camNames=["🎥 Chase","👀 Hood","🏎️ Bumper","🎬 Cinematic"];var _cmi=document.getElementById("camHint");if(_cmi&&gameActive){if(window._prevCamMode!==(window._camMode||0)){_cmi.style.display="block";_cmi.style.opacity="1";_cmi.textContent=_camNames[window._camMode||0];clearTimeout(window._camHintT);window._camHintT=setTimeout(function(){_cmi.style.opacity="0";setTimeout(function(){_cmi.style.display="none"},500)},3000);window._prevCamMode=window._camMode||0}}
-  document.getElementById('speedVal').textContent=_curSpd+'km/h';var _spEl=document.getElementById('speedVal').parentElement;if(_spEl){_spEl.style.transition='border-color .3s,transform .3s';if(_curSpd>140){_spEl.style.borderColor='rgba(239,68,68,.6)';_spEl.style.transform='scale('+(1+Math.sin(fc*0.2)*0.03)+')'}else if(_curSpd>100)_spEl.style.borderColor='rgba(251,191,36,.5)';else _spEl.style.borderColor=''}
+  document.getElementById('speedVal').textContent=_curSpd+'km/h';document.getElementById('speedVal').style.color=_curSpd>200?'#ef4444':_curSpd>150?'#fbbf24':'#4ade80';var _spEl=document.getElementById('speedVal').parentElement;if(_spEl){_spEl.style.transition='border-color .3s,transform .3s';if(_curSpd>140){_spEl.style.borderColor='rgba(239,68,68,.6)';_spEl.style.transform='scale('+(1+Math.sin(fc*0.2)*0.03)+')'}else if(_curSpd>100)_spEl.style.borderColor='rgba(251,191,36,.5)';else _spEl.style.borderColor=''}
   // Gear + RPM HUD
   var _gv=document.getElementById("gearVal");if(_gv)_gv.textContent=GEAR_NAMES[gear]||gear;
   var _rv=document.getElementById("rpmVal");if(_rv){_rv.textContent=Math.round(rpm);_rv.style.color=rpm>6500?"#ef4444":rpm>4500?"#fbbf24":"#4ade80"}
@@ -5092,15 +5092,15 @@ function animate(){
 
     const _mob=!!window._isMobileDevice;
 
-    const maxSpd=_gateActive?(_mob?.18:.33):turboTimer>0?(_mob?.4:.75):boostTimer>0?(_mob?.35:.6):(_mob?.25:.42);
+    const maxSpd=_gateActive?(_mob?.22:.40):turboTimer>0?(_mob?.55:.95):boostTimer>0?(_mob?.45:.78):(_mob?.35:.60);
 
-    if(keys.ArrowUp||keys.KeyW){var _accel=_mob?.008:.018;var _gearBoost=gear<=2?1.3:gear<=3?1.0:0.8;spd=Math.min(maxSpd,spd+_accel*_gearBoost);spd-=spd*spd*0.08}/*aerodynamic drag*/
+    if(keys.ArrowUp||keys.KeyW){var _accel=_mob?.014:.028;var _gearBoost=gear<=2?1.4:gear<=3?1.1:0.85;spd=Math.min(maxSpd,spd+_accel*_gearBoost);spd-=spd*spd*0.05}/*aerodynamic drag*/
 
-    else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.12,spd-.012);
+    else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.15,spd-.02);
     // Brake screech at high speed
     if((keys.ArrowDown||keys.KeyS)&&spd>0.25&&fc%30===0){if(!audioCtx)return;var bn=audioCtx.createBufferSource();var bsr=audioCtx.sampleRate;var bbuf=audioCtx.createBuffer(1,bsr*.15,bsr);var bd=bbuf.getChannelData(0);for(var bi=0;bi<bd.length;bi++){var bt=bi/bsr;bd[bi]=(Math.random()*2-1)*Math.max(0,1-bt*8)*.08*_masterVol}bn.buffer=bbuf;var bf=audioCtx.createBiquadFilter();bf.type="bandpass";bf.frequency.value=2000+spd*3000;bf.Q.value=2;bn.connect(bf);bf.connect(audioCtx.destination);bn.start()}
 
-    else{spd*=_mob?.96:.975;if(Math.abs(spd)<.005)spd=0;else if(!_mob&&spd>0&&spd<.04)spd=.04}
+    else{spd*=_mob?.97:.985;if(Math.abs(spd)<.003)spd=0}
 
 
 
@@ -5118,13 +5118,13 @@ function animate(){
 
       }
 
-      window._steerSmooth+=(steerTarget-window._steerSmooth)*0.18;// smooth easing
+      window._steerSmooth+=(steerTarget-window._steerSmooth)*0.25;// snappier steering
 
       dir+=window._steerSmooth*Math.sign(spd)*(1+spd*0.3);// balanced steer-at-speed
 
     }
 
-    dir*=.94;
+    dir*=.96;
     var _prevBrake=handbrake;handbrake=!!(keys.Space);
     if(handbrake&&spd>0.1){if(!_prevBrake){lateralVel+=(window._steerSmooth||0)*spd*6;spd*=0.97}else{lateralVel+=(window._steerSmooth||0)*spd*4.5}isDrifting=true;spd*=0.985}
     else if(Math.abs(spd)>0.12&&Math.abs(window._steerSmooth||0)>0.012){lateralVel+=(window._steerSmooth||0)*spd*3.2;isDrifting=true}
@@ -5147,7 +5147,7 @@ function animate(){
 
     const _isMob=!!window._isMobileDevice;
 
-    const curvePull=(curX-car.position.x)*(_isMob?.08:.008);
+    const curvePull=(curX-car.position.x)*(_isMob?.1:.015);
 
     car.position.x+=curvePull;
 
@@ -6007,21 +6007,21 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
   if(_cm===1){_cv.set(car.position.x,car.position.y+1.8,_cz+0.3);_ct.set(roadX(_cz+30),roadY(_cz+30)+1,_cz+30)}else if(_cm===2){_cv.set(car.position.x,car.position.y+0.7,_cz+1.5);_ct.set(roadX(_cz+40),roadY(_cz+40)+0.5,_cz+40)}else if(_cm===3){var _cinA=fc*0.003;_cv.set(car.position.x+Math.sin(_cinA)*12,car.position.y+6+Math.sin(fc*0.005)*2,_cz-5+Math.cos(_cinA)*8);_ct.set(car.position.x,car.position.y+1,_cz)}else{_cv.set(_camX+_shakeX,_hillCamY+_camHeight+cPh*4+_shakeY,_behindZ);_ct.set(roadX(_lookAheadZ),roadY(_lookAheadZ)+0.5,_lookAheadZ)}
 
-  cam.position.lerp(_cv,_cm===0?.2:_cm===3?.03:.15);
+  cam.position.lerp(_cv,_cm===0?.25:_cm===3?.04:.18);
   cam.lookAt(_ct);
 
 
   // Dynamic FOV - widens at high speed
 
-  let _targetFov=68+spd*30+(isDrifting?5:0);if(_gateActive){const gd=_gateZ-car.position.z;if(gd>0&&gd<40)_targetFov=Math.max(55,_targetFov-((40-gd)/40)*15)}if(_cm===2)_targetFov+=8;/*bumper cam wider*/if(turboTimer>0)_targetFov+=5;
+  let _targetFov=65+spd*40+(isDrifting?8:0);if(_gateActive){const gd=_gateZ-car.position.z;if(gd>0&&gd<40)_targetFov=Math.max(55,_targetFov-((40-gd)/40)*15)}if(_cm===2)_targetFov+=8;/*bumper cam wider*/if(turboTimer>0)_targetFov+=5;
 
-  cam.fov+=((_targetFov-cam.fov)*.06);
+  cam.fov+=((_targetFov-cam.fov)*.1);
 
   cam.updateProjectionMatrix();
   // Dynamic bloom + exposure
-  if(window._bloomPass){window._bloomPass.strength=0.25+spd*0.3+(isDrifting?0.15:0);window._bloomPass.threshold=0.92-spd*0.05}
+  if(window._bloomPass){window._bloomPass.strength=0.2+spd*0.5+(isDrifting?0.15:0);window._bloomPass.threshold=0.92-spd*0.05}
   // chromaPass disabled
-  renderer.toneMappingExposure=1.3+spd*0.2+(turboTimer>0?0.15:0);
+  renderer.toneMappingExposure=1.2+spd*0.4+(turboTimer>0?0.15:0);
 
 
 
