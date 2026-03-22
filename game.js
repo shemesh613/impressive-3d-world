@@ -4079,7 +4079,7 @@ function _processGateChoice(isGreen){
 
   scenarioActive=false;document.getElementById('gateSituation').style.display='none';
 
-  nextScenarioAt=car.position.z+220+Math.random()*130;
+  nextScenarioAt=car.position.z+400+Math.random()*200;
 
 
 
@@ -4261,7 +4261,7 @@ function choose(type){
 
 
 
-  nextScenarioAt=car.position.z+250+Math.random()*150;
+  nextScenarioAt=car.position.z+400+Math.random()*200;
 
 }
 
@@ -4688,7 +4688,7 @@ function _realStartGame(){
 
   spd=0;dir=0;boostTimer=0;shieldTimer=0;turboTimer=0;lastMilestone=0;scenarioActive=false;scenariosAnswered=0;
 
-  usedScenarios=[];nextScenarioAt=300;
+  usedScenarios=[];nextScenarioAt=600;
 
   car.position.set(0,roadY(200),200);
 
