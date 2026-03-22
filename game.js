@@ -6277,3 +6277,35 @@ function updateTimeOfDay(){
   renderer.setClearColor(fogColor);
   if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=skyInt;
 }
+
+// ---- ROAD BARRIERS (concrete walls like Crazy Cars) ----
+{
+  var BSEGS=500,BLEN=16;
+  var barrierGeo=new THREE.BoxGeometry(0.4,1.2,BLEN+4);
+  var barrierMat=new THREE.MeshStandardMaterial({color:0x2a2a30,roughness:0.75,metalness:0.05});
+  var barrierL=new THREE.InstancedMesh(barrierGeo,barrierMat,BSEGS);
+  var barrierR=new THREE.InstancedMesh(barrierGeo,barrierMat,BSEGS);
+  // Red-white stripe on top
+  var stripeGeo=new THREE.BoxGeometry(0.42,0.08,BLEN+4);
+  var stripeMat=new THREE.MeshStandardMaterial({color:0xcc3333,roughness:0.5,metalness:0.1,emissive:0x441111,emissiveIntensity:0.2});
+  var stripeL=new THREE.InstancedMesh(stripeGeo,stripeMat,BSEGS);
+  var stripeR=new THREE.InstancedMesh(stripeGeo,stripeMat,BSEGS);
+  for(var bi=0;bi<BSEGS;bi++){
+    var bz=-50+bi*BLEN,bzc=bz+BLEN/2,bx=roadX(bzc),by=roadY(bzc);
+    var bca=Math.atan2(roadX(bzc+2)-roadX(bzc-2),4);
+    dummy.rotation.set(0,bca,0);dummy.scale.setScalar(1);
+    dummy.position.set(bx-8.5*Math.cos(bca),by+0.5,bzc+8.5*Math.sin(bca));dummy.updateMatrix();
+    barrierL.setMatrixAt(bi,dummy.matrix);
+    dummy.position.set(bx-8.5*Math.cos(bca),by+1.15,bzc+8.5*Math.sin(bca));dummy.updateMatrix();
+    stripeL.setMatrixAt(bi,dummy.matrix);
+    dummy.position.set(bx+8.5*Math.cos(bca),by+0.5,bzc-8.5*Math.sin(bca));dummy.updateMatrix();
+    barrierR.setMatrixAt(bi,dummy.matrix);
+    dummy.position.set(bx+8.5*Math.cos(bca),by+1.15,bzc-8.5*Math.sin(bca));dummy.updateMatrix();
+    stripeR.setMatrixAt(bi,dummy.matrix);
+  }
+  barrierL.instanceMatrix.needsUpdate=true;barrierR.instanceMatrix.needsUpdate=true;
+  stripeL.instanceMatrix.needsUpdate=true;stripeR.instanceMatrix.needsUpdate=true;
+  barrierL.castShadow=true;barrierR.castShadow=true;
+  scene.add(barrierL);scene.add(barrierR);
+  scene.add(stripeL);scene.add(stripeR);
+}
