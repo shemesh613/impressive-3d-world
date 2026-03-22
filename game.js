@@ -1094,11 +1094,11 @@ scene.add((() => {
 
 // ---- CURVED ROAD (Box - no z-fighting) ----
 {
-  const RSEGS=200,SLEN=40;
+  const RSEGS=500,SLEN=16;
   const _roadMat=new THREE.MeshStandardMaterial({roughness:0.5,metalness:0.2,color:0x2a2a38,envMapIntensity:0.6});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
-  const roadInst=new THREE.InstancedMesh(new THREE.BoxGeometry(16,0.15,SLEN+5),_roadMat,RSEGS);
+  const roadInst=new THREE.InstancedMesh(new THREE.BoxGeometry(16,0.15,SLEN+8),_roadMat,RSEGS);
   const edgeMat=new THREE.MeshStandardMaterial({color:0x334455,roughness:0.5,metalness:0.1,emissive:0x112233,emissiveIntensity:0.1});window._edgeMat=edgeMat;
-  const _newCurbGeo=new THREE.BoxGeometry(0.35,0.2,SLEN+5);
+  const _newCurbGeo=new THREE.BoxGeometry(0.35,0.2,SLEN+8);
   const _newCurbMat=new THREE.MeshStandardMaterial({color:0x3a3a4a,roughness:0.6,metalness:0.15});
   const _curbL=new THREE.InstancedMesh(_newCurbGeo,_newCurbMat,RSEGS);
   const _curbR=new THREE.InstancedMesh(_newCurbGeo,_newCurbMat,RSEGS);
@@ -3595,10 +3595,10 @@ function narrateHebrew(text){
   if(!window.speechSynthesis)return;
   window.speechSynthesis.cancel();
   var u=new SpeechSynthesisUtterance(text);
-  u.lang='he-IL';u.rate=0.9;u.pitch=1.0;u.volume=0.8;
+  u.lang='he-IL';u.rate=0.85;u.pitch=1.3;u.volume=0.9;
   // Try to find Hebrew voice
   var voices=window.speechSynthesis.getVoices();
-  for(var i=0;i<voices.length;i++){if(voices[i].lang&&voices[i].lang.indexOf('he')>=0){u.voice=voices[i];break}}
+  var femaleVoice=null;for(var i=0;i<voices.length;i++){if(voices[i].lang&&voices[i].lang.indexOf('he')>=0){if(!femaleVoice)femaleVoice=voices[i];if(voices[i].name&&(voices[i].name.indexOf('Female')>=0||voices[i].name.indexOf('female')>=0||voices[i].name.indexOf('Carmit')>=0||voices[i].name.indexOf('Microsoft')>=0))femaleVoice=voices[i]}}if(femaleVoice)u.voice=femaleVoice
   window.speechSynthesis.speak(u);
 }
 // Preload voices
@@ -3655,39 +3655,65 @@ function _createForkRoad(z){
   if(_forkGroup){scene.remove(_forkGroup)}
   _forkGroup=new THREE.Group();
   var rx=roadX(z);var ry=roadY(z);
-  // Left fork road
-  var forkGeo=new THREE.BoxGeometry(6,0.12,25);
-  var forkMatL=new THREE.MeshStandardMaterial({color:0x2a3a2a,roughness:0.5,metalness:0.15});
+
+  // Wide fork roads with glowing edges
+  var forkGeo=new THREE.BoxGeometry(7,0.14,40);
+  var forkMatL=new THREE.MeshStandardMaterial({color:0x1a2e22,roughness:0.45,metalness:0.2,emissive:0x0a1a0e,emissiveIntensity:0.15});
   var forkL=new THREE.Mesh(forkGeo,forkMatL);
-  forkL.position.set(rx-5,ry-0.02,z+15);
-  forkL.rotation.y=0.15;
-  _forkGroup.add(forkL);
-  // Right fork road
-  var forkMatR=new THREE.MeshStandardMaterial({color:0x3a2a2a,roughness:0.5,metalness:0.15});
+  forkL.position.set(rx-6,ry-0.01,z+22);forkL.rotation.y=0.12;_forkGroup.add(forkL);
+
+  var forkMatR=new THREE.MeshStandardMaterial({color:0x2e1a1a,roughness:0.45,metalness:0.2,emissive:0x1a0a0a,emissiveIntensity:0.15});
   var forkR=new THREE.Mesh(forkGeo,forkMatR);
-  forkR.position.set(rx+5,ry-0.02,z+15);
-  forkR.rotation.y=-0.15;
-  _forkGroup.add(forkR);
-  // Divider (triangle island between forks)
-  var divGeo=new THREE.BoxGeometry(1.5,0.2,20);
-  var divMat=new THREE.MeshStandardMaterial({color:0x1a3a1a,roughness:0.8});
+  forkR.position.set(rx+6,ry-0.01,z+22);forkR.rotation.y=-0.12;_forkGroup.add(forkR);
+
+  // Green/Red glow strips on each fork
+  var glowGeoL=new THREE.BoxGeometry(0.3,0.15,35);
+  var glowMatGreen=new THREE.MeshStandardMaterial({color:0x22cc55,emissive:0x22cc55,emissiveIntensity:1.5,roughness:0.1});
+  var glowMatRed=new THREE.MeshStandardMaterial({color:0xcc3333,emissive:0xcc3333,emissiveIntensity:1.5,roughness:0.1});
+
+  // Left fork edge glow
+  var gL1=new THREE.Mesh(glowGeoL,_gateIsGreenLeft?glowMatGreen:glowMatRed);
+  gL1.position.set(rx-9.5,ry+0.1,z+22);gL1.rotation.y=0.12;_forkGroup.add(gL1);
+  var gL2=new THREE.Mesh(glowGeoL,_gateIsGreenLeft?glowMatGreen:glowMatRed);
+  gL2.position.set(rx-2.5,ry+0.1,z+22);gL2.rotation.y=0.12;_forkGroup.add(gL2);
+
+  // Right fork edge glow
+  var gR1=new THREE.Mesh(glowGeoL,_gateIsGreenLeft?glowMatRed:glowMatGreen);
+  gR1.position.set(rx+2.5,ry+0.1,z+22);gR1.rotation.y=-0.12;_forkGroup.add(gR1);
+  var gR2=new THREE.Mesh(glowGeoL,_gateIsGreenLeft?glowMatRed:glowMatGreen);
+  gR2.position.set(rx+9.5,ry+0.1,z+22);gR2.rotation.y=-0.12;_forkGroup.add(gR2);
+
+  // Center divider island (raised, with grass texture look)
+  var divGeo=new THREE.BoxGeometry(2,0.3,30);
+  var divMat=new THREE.MeshStandardMaterial({color:0x1a3a1a,roughness:0.9,metalness:0.0});
   var div=new THREE.Mesh(divGeo,divMat);
-  div.position.set(rx,ry+0.05,z+12);
-  _forkGroup.add(div);
-  // Choice signs (3D text boards)
-  var signGeo=new THREE.BoxGeometry(3.5,1.5,0.15);
-  var signMatGreen=new THREE.MeshStandardMaterial({color:0x1a3a2a,emissive:0x0a2a1a,emissiveIntensity:0.3,roughness:0.4});
-  var signMatRed=new THREE.MeshStandardMaterial({color:0x3a1a1a,emissive:0x2a0a0a,emissiveIntensity:0.3,roughness:0.4});
-  // Post for left sign
-  var postGeo=new THREE.BoxGeometry(0.15,3,0.15);
-  var postMat=new THREE.MeshStandardMaterial({color:0x666666,roughness:0.5,metalness:0.3});
-  var postL=new THREE.Mesh(postGeo,postMat);postL.position.set(rx-5,ry+1.5,z+5);_forkGroup.add(postL);
-  var postR=new THREE.Mesh(postGeo,postMat);postR.position.set(rx+5,ry+1.5,z+5);_forkGroup.add(postR);
-  // Signs
-  var sL=new THREE.Mesh(signGeo,_gateIsGreenLeft?signMatGreen:signMatRed);
-  sL.position.set(rx-5,ry+3.5,z+5);_forkGroup.add(sL);
-  var sR=new THREE.Mesh(signGeo,_gateIsGreenLeft?signMatRed:signMatGreen);
-  sR.position.set(rx+5,ry+3.5,z+5);_forkGroup.add(sR);
+  div.position.set(rx,ry+0.1,z+18);_forkGroup.add(div);
+
+  // BIG choice arches with glow
+  var archGeo=new THREE.BoxGeometry(7,0.6,0.4);
+  var pillarGeo=new THREE.BoxGeometry(0.5,6,0.5);
+  var archMatGreen=new THREE.MeshStandardMaterial({color:0x22aa55,emissive:0x11aa33,emissiveIntensity:0.8,roughness:0.3,metalness:0.4});
+  var archMatRed=new THREE.MeshStandardMaterial({color:0xcc3333,emissive:0xaa1111,emissiveIntensity:0.8,roughness:0.3,metalness:0.4});
+
+  // Left arch
+  var lMat=_gateIsGreenLeft?archMatGreen:archMatRed;
+  var lp1=new THREE.Mesh(pillarGeo,lMat);lp1.position.set(rx-9.5,ry+3,z+8);_forkGroup.add(lp1);
+  var lp2=new THREE.Mesh(pillarGeo,lMat);lp2.position.set(rx-2.5,ry+3,z+8);_forkGroup.add(lp2);
+  var lt=new THREE.Mesh(archGeo,lMat);lt.position.set(rx-6,ry+6.2,z+8);_forkGroup.add(lt);
+
+  // Right arch
+  var rMat=_gateIsGreenLeft?archMatRed:archMatGreen;
+  var rp1=new THREE.Mesh(pillarGeo,rMat);rp1.position.set(rx+2.5,ry+3,z+8);_forkGroup.add(rp1);
+  var rp2=new THREE.Mesh(pillarGeo,rMat);rp2.position.set(rx+9.5,ry+3,z+8);_forkGroup.add(rp2);
+  var rt=new THREE.Mesh(archGeo,rMat);rt.position.set(rx+6,ry+6.2,z+8);_forkGroup.add(rt);
+
+  // Arrow signs on ground pointing into each fork
+  var arrowGeo=new THREE.BoxGeometry(2,0.12,3);
+  var arrowL=new THREE.Mesh(arrowGeo,_gateIsGreenLeft?glowMatGreen:glowMatRed);
+  arrowL.position.set(rx-4,ry+0.1,z+2);arrowL.rotation.y=0.2;_forkGroup.add(arrowL);
+  var arrowR=new THREE.Mesh(arrowGeo,_gateIsGreenLeft?glowMatRed:glowMatGreen);
+  arrowR.position.set(rx+4,ry+0.1,z+2);arrowR.rotation.y=-0.2;_forkGroup.add(arrowR);
+
   scene.add(_forkGroup);
 }
 function _removeForkRoad(){
@@ -5955,9 +5981,9 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
   const _cz=car.position.z;
 
-  const _camDist=12+spd*6;// pull back at speed (closer)
+  const _camDist=18+spd*8;// pull back at speed (closer)
 
-  const _camHeight=5+spd*3;// rise at speed (lower)
+  const _camHeight=8+spd*4;// rise at speed (lower)
 
   const _behindZ=_cz-_camDist;
 
@@ -5969,7 +5995,7 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
   const _hillCamY=roadY(_behindZ);
 
-  const _lookAheadZ=_cz+15+spd*10;// look further at speed
+  const _lookAheadZ=_cz+25+spd*12;// look further at speed
 
   // Speed shake
 
