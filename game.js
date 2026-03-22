@@ -1672,7 +1672,7 @@ var _makeCarGeo=function(w,h,l){  var g=new THREE.BoxGeometry(w,h,l,1,1,1);  var
 
 {
 
-  const CT_N=6;
+  const CT_N=10;
 
   const ctGeo=_makeCarGeo(2,0.6,1.1);
 
@@ -2240,7 +2240,7 @@ var _makeCarGeo=function(w,h,l){  var g=new THREE.BoxGeometry(w,h,l,1,1,1);  var
 
 {
 
-  const ONC_N=8;
+  const ONC_N=12;
 
   const oncBodyGeo=_makeCarGeo(1.8,0.9,3);
 
@@ -5343,7 +5343,7 @@ if(window._underGlow){var ug=window._underGlow;if(shieldTimer>0){ug.color.setHex
     checkNearMiss();
     // Spawn
 
-    if(fc%200===0){spawnGreen();if(Math.random()<.06)spawnObstacle();if(Math.random()<.08)spawnPowerup()}
+    if(fc%120===0){spawnGreen();if(Math.random()<.06)spawnObstacle();if(Math.random()<.08)spawnPowerup()}
 
     // Achievement system
 
@@ -5635,7 +5635,7 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
     }
 
-    if(fc%120===0&&activeCount<3&&spd>0.1){
+    if(fc%80===0&&activeCount<5&&spd>0.1){
 
       for(let i=0;i<od.n;i++){if(!od.data[i].active){od.data[i].active=true;od.data[i].z=car.position.z+60+Math.random()*30;od.data[i].x=roadX(od.data[i].z)-3.5+Math.random()*1.5;od.data[i].spd=0.08+Math.random()*0.1;break;}}
 
@@ -5717,7 +5717,7 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
     }
 
-    if(fc%200===0&&activeCount<2&&spd>0.08){
+    if(fc%120===0&&activeCount<4&&spd>0.08){
 
       const nextCrossZ=Math.ceil(car.position.z/80)*80+50;
 
