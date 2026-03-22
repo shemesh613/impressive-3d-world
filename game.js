@@ -1097,9 +1097,9 @@ scene.add((() => {
   const RSEGS=500,SLEN=16;
   const _roadMat=new THREE.MeshStandardMaterial({roughness:0.5,metalness:0.2,color:0x2a2a38,envMapIntensity:0.6});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
   const roadInst=new THREE.InstancedMesh(new THREE.BoxGeometry(16,0.15,SLEN+8),_roadMat,RSEGS);
-  const edgeMat=new THREE.MeshStandardMaterial({color:0x334455,roughness:0.5,metalness:0.1,emissive:0x112233,emissiveIntensity:0.1});window._edgeMat=edgeMat;
+  const edgeMat=new THREE.MeshStandardMaterial({color:0x1a1a22,roughness:0.6,metalness:0.05,emissive:0x000000,emissiveIntensity:0});window._edgeMat=edgeMat;
   const _newCurbGeo=new THREE.BoxGeometry(0.35,0.2,SLEN+8);
-  const _newCurbMat=new THREE.MeshStandardMaterial({color:0x3a3a4a,roughness:0.6,metalness:0.15});
+  const _newCurbMat=new THREE.MeshStandardMaterial({color:0x1a1a22,roughness:0.7,metalness:0.1});
   const _curbL=new THREE.InstancedMesh(_newCurbGeo,_newCurbMat,RSEGS);
   const _curbR=new THREE.InstancedMesh(_newCurbGeo,_newCurbMat,RSEGS);
   for(let i=0;i<RSEGS;i++){
