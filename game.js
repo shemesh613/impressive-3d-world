@@ -1166,12 +1166,12 @@ scene.add((() => {
     dummy.position.set(gx+12*Math.cos(gca),gy+0.005,gzc-12*Math.sin(gca));dummy.updateMatrix();grInstR.setMatrixAt(gi,dummy.matrix);
   }
   grInstL.instanceMatrix.needsUpdate=true;grInstR.instanceMatrix.needsUpdate=true;
-  scene.add(grInstL);scene.add(grInstR);
+  //scene.add(grInstL);scene.add(grInstR); // grass removed - cleaner look
 }
   swInstL.instanceMatrix.needsUpdate=true;swInstR.instanceMatrix.needsUpdate=true;
   swInstL.receiveShadow=true;swInstR.receiveShadow=true;
   //scene.add(swInstL);scene.add(swInstR);
-}// ---- GUARDRAILS (road barriers) ----{  var grGeo=new THREE.BoxGeometry(0.06,0.18,SLEN+2);  var grMat=new THREE.MeshStandardMaterial({color:0x444455,roughness:0.6,metalness:0.3,envMapIntensity:0.5});  var grPostGeo=new THREE.BoxGeometry(0.12,0.7,0.12);  var grL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  var grR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  for(var gi2=0;gi2<RSEGS;gi2++){    var gz2=-50+gi2*SLEN,gzc2=gz2+SLEN/2,gx2=roadX(gzc2),gy2=roadY(gzc2);    var ga2=Math.atan2(roadX(gzc2+2)-roadX(gzc2-2),4);    dummy.position.set(gx2-7.5*Math.cos(ga2),gy2+0.35,gzc2+7.5*Math.sin(ga2));    dummy.rotation.set(0,ga2,0);dummy.scale.setScalar(1);dummy.updateMatrix();    grL.setMatrixAt(gi2,dummy.matrix);    dummy.position.set(gx2+7.5*Math.cos(ga2),gy2+0.35,gzc2-7.5*Math.sin(ga2));    dummy.updateMatrix();    grR.setMatrixAt(gi2,dummy.matrix);  }  grL.instanceMatrix.needsUpdate=true;grR.instanceMatrix.needsUpdate=true;  grL.castShadow=true;grR.castShadow=true;  scene.add(grL);scene.add(grR);
+}// ---- GUARDRAILS (road barriers) ----{  var grGeo=new THREE.BoxGeometry(0.06,0.18,SLEN+2);  var grMat=new THREE.MeshStandardMaterial({color:0x444455,roughness:0.6,metalness:0.3,envMapIntensity:0.5});  var grPostGeo=new THREE.BoxGeometry(0.12,0.7,0.12);  var grL=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  var grR=new THREE.InstancedMesh(grGeo,grMat,RSEGS);  for(var gi2=0;gi2<RSEGS;gi2++){    var gz2=-50+gi2*SLEN,gzc2=gz2+SLEN/2,gx2=roadX(gzc2),gy2=roadY(gzc2);    var ga2=Math.atan2(roadX(gzc2+2)-roadX(gzc2-2),4);    dummy.position.set(gx2-7.5*Math.cos(ga2),gy2+0.35,gzc2+7.5*Math.sin(ga2));    dummy.rotation.set(0,ga2,0);dummy.scale.setScalar(1);dummy.updateMatrix();    grL.setMatrixAt(gi2,dummy.matrix);    dummy.position.set(gx2+7.5*Math.cos(ga2),gy2+0.35,gzc2-7.5*Math.sin(ga2));    dummy.updateMatrix();    grR.setMatrixAt(gi2,dummy.matrix);  }  grL.instanceMatrix.needsUpdate=true;grR.instanceMatrix.needsUpdate=true;  grL.castShadow=true;grR.castShadow=true;  //scene.add(grL);//scene.add(grR);
 
 
 
