@@ -5313,6 +5313,8 @@ if(window._underGlow){var ug=window._underGlow;if(shieldTimer>0){ug.color.setHex
 
 
 
+    if(fc%30===0)updateTimeOfDay();
+    checkNearMiss();
     // Spawn
 
     if(fc%200===0){spawnGreen();if(Math.random()<.06)spawnObstacle();if(Math.random()<.08)spawnPowerup()}
@@ -6199,3 +6201,53 @@ const _ls=document.getElementById('loadScreen');if(_ls)setTimeout(()=>{_ls.class
 
 addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(typeof composer!=='undefined')composer.setSize(innerWidth,innerHeight);if(typeof fxaaPass!=='undefined')fxaaPass.uniforms['resolution'].value.set(1/innerWidth,1/innerHeight)});
 
+
+// ---- NEAR-MISS SCORING ----
+var _nearMissCD=0;
+function checkNearMiss(){
+  if(_nearMissCD>0){_nearMissCD--;return}
+  var cx=car.position.x,cz=car.position.z;
+  // Check oncoming traffic
+  if(window._oncData){var od=window._oncData;for(var i=0;i<od.n;i++){var o=od.data[i];if(!o.active)continue;var dx=Math.abs(cx-o.x),dz=Math.abs(cz-o.z);if(dx<3&&dx>1.5&&dz<4){_nearMissCD=60;score+=15;sfxCollect();var proj=_v.set(o.x,2,o.z).project(cam);showPopup('NEAR MISS! +15',(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,'#ff9900');return}}}
+  // Check cross traffic
+  if(window._ctData){var ct=window._ctData;for(var i=0;i<ct.n;i++){var c=ct.data[i];if(!c.active)continue;var dx=Math.abs(cx-c.x),dz=Math.abs(cz-c.crossZ);if(dx<3&&dx>1.5&&dz<3){_nearMissCD=60;score+=15;sfxCollect();var proj=_v.set(c.x,2,c.crossZ).project(cam);showPopup('NEAR MISS! +15',(proj.x*.5+.5)*innerWidth,(-(proj.y*.5)+.5)*innerHeight,'#ff9900');return}}}
+}
+
+// ---- TILT STEERING (mobile) ----
+if(window.DeviceOrientationEvent){
+  window.addEventListener('deviceorientation',function(e){
+    if(!window._isMobileDevice)return;
+    if(e.gamma!==null){
+      // gamma = left/right tilt (-90 to 90)
+      window._mobileSteer=Math.max(-1,Math.min(1,e.gamma/30));
+    }
+  });
+}
+
+// ---- TIME OF DAY CYCLE (distance-based) ----
+function updateTimeOfDay(){
+  if(!gameActive)return;
+  var dist=car.position.z;
+  var cycle=(dist%3000)/3000; // full cycle every 3000m
+  var r,g,b,fogColor,skyInt;
+  if(cycle<0.25){// night→dawn
+    var t=cycle/0.25;
+    r=0x0a+Math.floor(t*0x10);g=0x16+Math.floor(t*0x14);b=0x28+Math.floor(t*0x08);
+    fogColor=(r<<16)|(g<<8)|b;skyInt=0.15+t*0.2;
+  }else if(cycle<0.5){// dawn→day
+    var t=(cycle-0.25)/0.25;
+    r=0x1a+Math.floor(t*0x15);g=0x2a+Math.floor(t*0x15);b=0x30+Math.floor(t*0x20);
+    fogColor=(r<<16)|(g<<8)|b;skyInt=0.35+t*0.3;
+  }else if(cycle<0.75){// day→dusk
+    var t=(cycle-0.5)/0.25;
+    r=0x2f-Math.floor(t*0x15);g=0x3f-Math.floor(t*0x1a);b=0x50-Math.floor(t*0x18);
+    fogColor=(r<<16)|(g<<8)|b;skyInt=0.65-t*0.25;
+  }else{// dusk→night
+    var t=(cycle-0.75)/0.25;
+    r=0x1a-Math.floor(t*0x10);g=0x25-Math.floor(t*0x0f);b=0x38-Math.floor(t*0x10);
+    fogColor=(r<<16)|(g<<8)|b;skyInt=0.4-t*0.25;
+  }
+  if(scene.fog)scene.fog.color.setHex(fogColor);
+  renderer.setClearColor(fogColor);
+  if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=skyInt;
+}
