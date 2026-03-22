@@ -864,21 +864,21 @@ composer.addPass(colorPass);
 
 // Film Grain removed — cleaner image
 
-scene.fog=new THREE.FogExp2(0x0a0e14,.0012);
+scene.fog=new THREE.FogExp2(0x1a2040,0.0006);
 
 // Environment map for reflections
 var _pmremGen=new THREE.PMREMGenerator(renderer);
 _pmremGen.compileEquirectangularShader();
 var _envScene=new THREE.Scene();
 _envScene.background=new THREE.Color(0x0d0d1e);
-var _envL1=new THREE.DirectionalLight(0xffeedd,1.5);_envL1.position.set(1,1.5,0.5);_envScene.add(_envL1);
+var _envL1=new THREE.DirectionalLight(0xffeedd,1.8);_envL1.position.set(1,1.5,0.5);_envScene.add(_envL1);
 _envScene.add(new THREE.HemisphereLight(0x4466aa,0x0a0a1a,1.0));
 // City reflection geometry — buildings, ground, sky
 [{p:[12,4,0],c:0x1a2a44,s:[25,12,25]},{p:[-12,4,0],c:0x1a2a44,s:[25,12,25]},{p:[0,-6,0],c:0x111118,s:[40,4,40]},{p:[0,15,0],c:0x141428,s:[40,8,40]},{p:[8,2,8],c:0x1a3322,s:[15,8,15]},{p:[-8,2,-8],c:0x332211,s:[15,8,15]},{p:[0,6,12],c:0x223344,s:[20,15,8]},{p:[0,6,-12],c:0x223344,s:[20,15,8]},{p:[5,1,0],c:0xffdd55,s:[0.5,0.5,0.5]},{p:[-5,1,0],c:0xffdd55,s:[0.5,0.5,0.5]}].forEach(function(b){var bm=new THREE.Mesh(new THREE.BoxGeometry(b.s[0],b.s[1],b.s[2]),new THREE.MeshBasicMaterial({color:b.c}));bm.position.set(b.p[0],b.p[1],b.p[2]);_envScene.add(bm)});
 var _envRT=_pmremGen.fromScene(_envScene,0,0.1,100);
 scene.environment=_envRT.texture;
 
-const ambLight=new THREE.AmbientLight(0x111822,0.25);scene.add(ambLight);
+const ambLight=new THREE.AmbientLight(0x88aacc,0.6);scene.add(ambLight);
 var hemiLight=new THREE.HemisphereLight(0x1a2244,0x050a05,0.2);scene.add(hemiLight);
 
 const dirLight=new THREE.DirectionalLight(0xffeedd,1.2);dirLight.position.set(30,50,40);
@@ -931,10 +931,10 @@ const skyGeo=new THREE.SphereGeometry(340,48,24);
 var _skyCanvas=document.createElement('canvas');_skyCanvas.width=1;_skyCanvas.height=512;
 var _skyCtx=_skyCanvas.getContext('2d');
 var _skyGrad=_skyCtx.createLinearGradient(0,0,0,512);
-_skyGrad.addColorStop(0,'#050510');     // top: near-black space
+_skyGrad.addColorStop(0,'#0a0a20');     // top: near-black space
 _skyGrad.addColorStop(0.15,'#0a0a20');  // upper: very dark blue
-_skyGrad.addColorStop(0.35,'#12123a');  // mid-upper: deep blue
-_skyGrad.addColorStop(0.55,'#1e1a3e');  // mid: muted purple
+_skyGrad.addColorStop(0.35,'#1a1a4a');  // mid-upper: deep blue
+_skyGrad.addColorStop(0.55,'#2a2050');  // mid: muted purple
 _skyGrad.addColorStop(0.72,'#2a1e35');  // lower: dark wine
 _skyGrad.addColorStop(0.85,'#3a2530');  // horizon: subtle warmth
 _skyGrad.addColorStop(0.95,'#4a3028');  // near-bottom: muted amber
@@ -1040,7 +1040,7 @@ var _roadTex=(function(){
   var cv=document.createElement('canvas');cv.width=512;cv.height=512;
   var ctx=cv.getContext('2d');
   // Dark asphalt base with warm tint
-  ctx.fillStyle='#1a1a26';ctx.fillRect(0,0,512,512);
+  ctx.fillStyle='#2a2a36';ctx.fillRect(0,0,512,512);
   // Multi-layer asphalt noise (fine + coarse grain)
   for(var i=0;i<12000;i++){var x=Math.random()*512,y=Math.random()*512,v=22+Math.random()*28;ctx.fillStyle='rgb('+v+','+(v+1)+','+(v+5)+')';ctx.fillRect(x,y,1+Math.random()*1.5,1+Math.random()*1.5)}
   for(var i=0;i<3000;i++){var x=Math.random()*512,y=Math.random()*512,v=35+Math.random()*20;ctx.globalAlpha=0.3;ctx.fillStyle='rgb('+v+','+(v+2)+','+(v+6)+')';ctx.fillRect(x,y,2+Math.random()*4,2+Math.random()*4)}
@@ -1095,7 +1095,7 @@ scene.add((() => {
 // ---- CURVED ROAD (Box - no z-fighting) ----
 {
   const RSEGS=500,SLEN=16;
-  const _roadMat=new THREE.MeshStandardMaterial({roughness:0.5,metalness:0.2,color:0x2a2a38,envMapIntensity:0.6});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
+  const _roadMat=new THREE.MeshStandardMaterial({roughness:0.4,metalness:0.25,color:0x3a3a48,envMapIntensity:0.8});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
   const roadInst=new THREE.InstancedMesh(new THREE.BoxGeometry(16,0.15,SLEN+8),_roadMat,RSEGS);
   const edgeMat=new THREE.MeshStandardMaterial({color:0x1a1a22,roughness:0.6,metalness:0.05,emissive:0x000000,emissiveIntensity:0});window._edgeMat=edgeMat;
   const _newCurbGeo=new THREE.BoxGeometry(0.35,0.2,SLEN+8);
@@ -2411,7 +2411,7 @@ for(let z=-100;z<=7000;z+=10){
 {
 
   const geo=new THREE.BoxGeometry(1,1,1);
-  const mat=new THREE.MeshStandardMaterial({roughness:0.45,metalness:0.3,envMapIntensity:1.5});
+  const mat=new THREE.MeshStandardMaterial({roughness:0.35,metalness:0.4,envMapIntensity:2.0});
   const inst=new THREE.InstancedMesh(geo,mat,bdata.length);
   const palettes=[[0x1e2d3d,0x253545,0x1a2535,0x2d3d4d],[0x352520,0x3e2e28,0x2a1e18,0x453528],[0x202040,0x1a1a35,0x282848,0x151530],[0x1a2e25,0x203828,0x15281e,0x284035],[0x351a25,0x3e2030,0x2a1018,0x452838],[0x1a2e3d,0x203545,0x142530,0x1e3545],[0x353220,0x3e3a28,0x2a2618,0x453e28]];
   function getPalette(z,i){var pi=((Math.floor(z/250)%palettes.length)+palettes.length)%palettes.length;return palettes[pi][i%palettes[pi].length]}
@@ -5092,15 +5092,15 @@ function animate(){
 
     const _mob=!!window._isMobileDevice;
 
-    const maxSpd=_gateActive?(_mob?.22:.40):turboTimer>0?(_mob?.55:.95):boostTimer>0?(_mob?.45:.78):(_mob?.35:.60);
+    const maxSpd=_gateActive?(_mob?.30:.50):turboTimer>0?(_mob?.65:1.2):boostTimer>0?(_mob?.55:.95):(_mob?.45:.80);
 
-    if(keys.ArrowUp||keys.KeyW){var _accel=_mob?.014:.028;var _gearBoost=gear<=2?1.4:gear<=3?1.1:0.85;spd=Math.min(maxSpd,spd+_accel*_gearBoost);spd-=spd*spd*0.05}/*aerodynamic drag*/
+    if(keys.ArrowUp||keys.KeyW){var _accel=_mob?.018:.035;var _gearBoost=gear<=2?1.5:gear<=3?1.2:0.9;spd=Math.min(maxSpd,spd+_accel*_gearBoost);spd-=spd*0.008}/*aerodynamic drag*/
 
     else if(keys.ArrowDown||keys.KeyS)spd=Math.max(-.15,spd-.02);
     // Brake screech at high speed
     if((keys.ArrowDown||keys.KeyS)&&spd>0.25&&fc%30===0){if(!audioCtx)return;var bn=audioCtx.createBufferSource();var bsr=audioCtx.sampleRate;var bbuf=audioCtx.createBuffer(1,bsr*.15,bsr);var bd=bbuf.getChannelData(0);for(var bi=0;bi<bd.length;bi++){var bt=bi/bsr;bd[bi]=(Math.random()*2-1)*Math.max(0,1-bt*8)*.08*_masterVol}bn.buffer=bbuf;var bf=audioCtx.createBiquadFilter();bf.type="bandpass";bf.frequency.value=2000+spd*3000;bf.Q.value=2;bn.connect(bf);bf.connect(audioCtx.destination);bn.start()}
 
-    else{spd*=_mob?.97:.985;if(Math.abs(spd)<.003)spd=0}
+    else{spd*=_mob?.975:.992;if(Math.abs(spd)<.002)spd=0}
 
 
 
@@ -5981,9 +5981,9 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
 
   const _cz=car.position.z;
 
-  const _camDist=18+spd*8;// pull back at speed (closer)
+  const _camDist=16+spd*10;// pull back at speed (closer)
 
-  const _camHeight=8+spd*4;// rise at speed (lower)
+  const _camHeight=7+spd*5;// rise at speed (lower)
 
   const _behindZ=_cz-_camDist;
 
@@ -6021,7 +6021,7 @@ if(false&&window._blnData){const bd=window._blnData;for(let i=0;i<bd.n;i++){cons
   // Dynamic bloom + exposure
   if(window._bloomPass){window._bloomPass.strength=0.2+spd*0.5+(isDrifting?0.15:0);window._bloomPass.threshold=0.92-spd*0.05}
   // chromaPass disabled
-  renderer.toneMappingExposure=1.2+spd*0.4+(turboTimer>0?0.15:0);
+  renderer.toneMappingExposure=1.6+spd*0.3+(turboTimer>0?0.15:0);
 
 
 
@@ -6282,12 +6282,12 @@ function updateTimeOfDay(){
 {
   var BSEGS=500,BLEN=16;
   var barrierGeo=new THREE.BoxGeometry(0.4,1.2,BLEN+4);
-  var barrierMat=new THREE.MeshStandardMaterial({color:0x2a2a30,roughness:0.75,metalness:0.05});
+  var barrierMat=new THREE.MeshStandardMaterial({color:0x4a4a55,roughness:0.6,metalness:0.15});
   var barrierL=new THREE.InstancedMesh(barrierGeo,barrierMat,BSEGS);
   var barrierR=new THREE.InstancedMesh(barrierGeo,barrierMat,BSEGS);
   // Red-white stripe on top
   var stripeGeo=new THREE.BoxGeometry(0.42,0.08,BLEN+4);
-  var stripeMat=new THREE.MeshStandardMaterial({color:0xcc3333,roughness:0.5,metalness:0.1,emissive:0x441111,emissiveIntensity:0.2});
+  var stripeMat=new THREE.MeshStandardMaterial({color:0xff4444,roughness:0.3,metalness:0.2,emissive:0xff2222,emissiveIntensity:0.6});
   var stripeL=new THREE.InstancedMesh(stripeGeo,stripeMat,BSEGS);
   var stripeR=new THREE.InstancedMesh(stripeGeo,stripeMat,BSEGS);
   for(var bi=0;bi<BSEGS;bi++){
