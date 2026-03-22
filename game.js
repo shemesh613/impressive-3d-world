@@ -1094,11 +1094,11 @@ scene.add((() => {
 
 // ---- CURVED ROAD (Box - no z-fighting) ----
 {
-  const RSEGS=900,SLEN=9;
+  const RSEGS=200,SLEN=40;
   const _roadMat=new THREE.MeshStandardMaterial({roughness:0.5,metalness:0.2,color:0x2a2a38,envMapIntensity:0.6});window._roadMat=_roadMat;_roadMat.map=_roadTex;_roadMat.color.set(0xffffff);_roadMat.needsUpdate=true;
-  const roadInst=new THREE.InstancedMesh(new THREE.BoxGeometry(16,0.15,SLEN+2.5),_roadMat,RSEGS);
+  const roadInst=new THREE.InstancedMesh(new THREE.BoxGeometry(16,0.15,SLEN+5),_roadMat,RSEGS);
   const edgeMat=new THREE.MeshStandardMaterial({color:0x334455,roughness:0.5,metalness:0.1,emissive:0x112233,emissiveIntensity:0.1});window._edgeMat=edgeMat;
-  const _newCurbGeo=new THREE.BoxGeometry(0.35,0.2,SLEN+2);
+  const _newCurbGeo=new THREE.BoxGeometry(0.35,0.2,SLEN+5);
   const _newCurbMat=new THREE.MeshStandardMaterial({color:0x3a3a4a,roughness:0.6,metalness:0.15});
   const _curbL=new THREE.InstancedMesh(_newCurbGeo,_newCurbMat,RSEGS);
   const _curbR=new THREE.InstancedMesh(_newCurbGeo,_newCurbMat,RSEGS);
@@ -1193,7 +1193,7 @@ scene.add((() => {
 
   }
 
-  inst.instanceMatrix.needsUpdate=true;scene.add(inst);
+  inst.instanceMatrix.needsUpdate=true;//scene.add(inst); // old windows removed
 
   // White edge dashes
 
@@ -2467,7 +2467,7 @@ for(let z=-100;z<=7000;z+=10){
 
   }
 
-  winInst.count=wi;winInst.instanceMatrix.needsUpdate=true;scene.add(winInst);
+  winInst.count=wi;winInst.instanceMatrix.needsUpdate=true;//scene.add(winInst);
 
   // Neon signs on buildings
 
@@ -2505,7 +2505,7 @@ for(let z=-100;z<=7000;z+=10){
 
   }
 
-  neonInst.instanceMatrix.needsUpdate=true;neonInst.instanceColor.needsUpdate=true;scene.add(neonInst);
+  neonInst.instanceMatrix.needsUpdate=true;neonInst.instanceColor.needsUpdate=true;//scene.add(neonInst);
 
 }
 
@@ -2581,7 +2581,7 @@ for(let z=-100;z<=7000;z+=10){
 
   antInst.instanceMatrix.needsUpdate=true;antLInst.instanceMatrix.needsUpdate=true;
 
-  scene.add(antInst);scene.add(antLInst);
+  //scene.add(antInst);scene.add(antLInst);
 
 }
 
@@ -2599,7 +2599,7 @@ for(let z=-100;z<=7000;z+=10){
 
   for(let i=0;i<n;i++){dummy.position.set(wp[i*3],wp[i*3+1],wp[i*3+2]);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix)}
 
-  inst.instanceMatrix.needsUpdate=true;scene.add(inst);
+  inst.instanceMatrix.needsUpdate=true;//scene.add(inst); // old windows removed
 
 }
 
@@ -2629,7 +2629,7 @@ for(let z=-100;z<=7000;z+=10){
   }
   ledgeInst.count=li;
   ledgeInst.instanceMatrix.needsUpdate=true;
-  scene.add(ledgeInst);
+  //scene.add(ledgeInst);
 }
 
 // ---- ROOFTOP CAPS ----
@@ -2709,7 +2709,7 @@ for(let z=-100;z<=7000;z+=10){
   sfInst.count=si3;
   sfInst.instanceMatrix.needsUpdate=true;
   sfInst.instanceColor.needsUpdate=true;
-  scene.add(sfInst);
+  //scene.add(sfInst);
 }
 
 // ---- TREES removed ----// ---- STREET LAMPS ----{  const lampPositions=[];  for(let z=-60;z<=7000;z+=18){const _lrx=roadX(z);lampPositions.push([_lrx-6,z],[_lrx+6,z])}  const poleGeo=new THREE.CylinderGeometry(.06,.06,4,4);  const poleMat=new THREE.MeshPhongMaterial({color:0x888888,shininess:20});  const poleInst=new THREE.InstancedMesh(poleGeo,poleMat,lampPositions.length);  const glowGeo=new THREE.SphereGeometry(.4,6,6);  const glowMat2=new THREE.MeshStandardMaterial({color:0xffffcc,emissive:0xffdd66,emissiveIntensity:2.5,roughness:0.1,metalness:0.3});  const glowInst=new THREE.InstancedMesh(glowGeo,glowMat2,lampPositions.length);  lampPositions.forEach(([x,z],i)=>{    dummy.position.set(x,roadY(z)+2,z);dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();    poleInst.setMatrixAt(i,dummy.matrix);    dummy.position.set(x,roadY(z)+4.2,z);dummy.updateMatrix();    glowInst.setMatrixAt(i,dummy.matrix);  });  poleInst.instanceMatrix.needsUpdate=true;glowInst.instanceMatrix.needsUpdate=true;  scene.add(poleInst);scene.add(glowInst);}
@@ -2848,7 +2848,7 @@ for(let z=-100;z<=7000;z+=10){
 
   bbBoardInst.instanceColor.needsUpdate=true;
 
-  scene.add(bbPoleInst);scene.add(bbBoardInst);
+  //scene.add(bbPoleInst);scene.add(bbBoardInst); // removed
 
 }
 
