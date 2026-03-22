@@ -1086,7 +1086,7 @@ scene.add((() => {
   m.rotation.x=-Math.PI/2;m.position.y=-0.5;m.position.z=3500;m.receiveShadow=false;return m;
 
 })());
-// ---- LOW GROUND FOG ----scene.add((function(){var fogMat=new THREE.MeshBasicMaterial({color:0x0a0e14,transparent:true,opacity:0.3,side:THREE.DoubleSide,fog:true,depthWrite:false});var fogPlane=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),fogMat);fogPlane.rotation.x=-Math.PI/2;fogPlane.position.set(0,0.1,3500);fogPlane.renderOrder=1;return fogPlane})());scene.add((function(){var fm2=new THREE.MeshBasicMaterial({color:0x0e0e18,transparent:true,opacity:0.08,side:THREE.DoubleSide,fog:true,depthWrite:false});var fp2=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),fm2);fp2.rotation.x=-Math.PI/2;fp2.position.set(0,0.5,3500);fp2.renderOrder=2;return fp2})());
+// ---- LOW GROUND FOG (disabled) ----//scene.add((function(){var fogMat=new THREE.MeshBasicMaterial({color:0x0a0e14,transparent:true,opacity:0.3,side:THREE.DoubleSide,fog:true,depthWrite:false});var fogPlane=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),fogMat);fogPlane.rotation.x=-Math.PI/2;fogPlane.position.set(0,0.1,3500);fogPlane.renderOrder=1;return fogPlane})());//scene.add((function(){var fm2=new THREE.MeshBasicMaterial({color:0x0e0e18,transparent:true,opacity:0.08,side:THREE.DoubleSide,fog:true,depthWrite:false});var fp2=new THREE.Mesh(new THREE.PlaneGeometry(400,14000),fm2);fp2.rotation.x=-Math.PI/2;fp2.position.set(0,0.5,3500);fp2.renderOrder=2;return fp2})());
 
 
 
@@ -1209,13 +1209,13 @@ scene.add((() => {
 
 {
 
-  const g=new THREE.PlaneGeometry(.2,3);const m=new THREE.MeshStandardMaterial({color:0xfbbf24,emissive:0xfbbf24,emissiveIntensity:0.15,roughness:0.5,metalness:0.0});
+  const g=new THREE.BoxGeometry(.2,0.06,3);const m=new THREE.MeshStandardMaterial({color:0xfbbf24,emissive:0xfbbf24,emissiveIntensity:0.15,roughness:0.5,metalness:0.0});
 
   const inst=new THREE.InstancedMesh(g,m,600);
 
   for(let i=0;i<600;i++){
 
-    const _z=-50+i*6;dummy.position.set(roadX(_z),roadY(_z)+.03,_z);dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
+    const _z=-50+i*6;dummy.position.set(roadX(_z),roadY(_z)+0.06,_z);dummy.rotation.set(0,0,0);dummy.scale.setScalar(1);dummy.updateMatrix();
 
     inst.setMatrixAt(i,dummy.matrix);
 
@@ -1225,7 +1225,7 @@ scene.add((() => {
 
   // White edge dashes
 
-  const edgeDG=new THREE.PlaneGeometry(.12,2);
+  const edgeDG=new THREE.BoxGeometry(.12,0.06,2);
 
   const edgeDM=new THREE.MeshStandardMaterial({color:0xcccccc,emissive:0xaaaaaa,emissiveIntensity:0.1,roughness:0.5});
 
@@ -1247,7 +1247,7 @@ scene.add((() => {
 
   edgeDL.instanceMatrix.needsUpdate=true;edgeDR.instanceMatrix.needsUpdate=true;
 
-  scene.add(edgeDL);scene.add(edgeDR);
+  //scene.add(edgeDL);scene.add(edgeDR); // removed: z-fighting
 
 }
 
@@ -1622,19 +1622,19 @@ scene.add((() => {
 
   const crossN=40;
 
-  const crossGeo=new THREE.PlaneGeometry(40,5);
+  const crossGeo=new THREE.BoxGeometry(40,0.06,5);
 
   const crossMat=new THREE.MeshStandardMaterial({color:0x22222e,roughness:0.5,metalness:0.15});
 
   const crossInst=new THREE.InstancedMesh(crossGeo,crossMat,crossN);
 
-  const zebraGeo=new THREE.PlaneGeometry(1.4,.6);
+  const zebraGeo=new THREE.BoxGeometry(1.4,0.08,.6);
 
-  const zebraMat=new THREE.MeshStandardMaterial({roughness:0.7,metalness:0.05,color:0x777777,transparent:true,opacity:0.35});
+  const zebraMat=new THREE.MeshStandardMaterial({roughness:0.7,metalness:0.05,color:0xaaaaaa});
 
   const zebraInst=new THREE.InstancedMesh(zebraGeo,zebraMat,crossN*5);
 
-  const sideRoadGeo=new THREE.PlaneGeometry(8,30);
+  const sideRoadGeo=new THREE.BoxGeometry(8,0.06,30);
 
   const sideRoadMat=new THREE.MeshStandardMaterial({color:0x22222e,roughness:0.55,metalness:0.1});
 
@@ -1648,17 +1648,17 @@ scene.add((() => {
 
     dummy.rotation.set(-Math.PI/2,0,0);dummy.scale.setScalar(1);
 
-    dummy.position.set(x,ihy+.013,z);dummy.updateMatrix();crossInst.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x,ihy+0.04,z);dummy.rotation.set(0,0,0);dummy.updateMatrix();crossInst.setMatrixAt(i,dummy.matrix);
 
-    dummy.position.set(x-12,ihy+.011,z);dummy.rotation.set(-Math.PI/2,0,Math.PI/2);dummy.updateMatrix();sideRoadL.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x-12,ihy+0.04,z);dummy.rotation.set(0,0,Math.PI/2);dummy.updateMatrix();sideRoadL.setMatrixAt(i,dummy.matrix);
 
-    dummy.position.set(x+12,ihy+.011,z);dummy.updateMatrix();sideRoadR.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x+12,ihy+0.04,z);dummy.updateMatrix();sideRoadR.setMatrixAt(i,dummy.matrix);
 
     for(let j=0;j<10;j++){
 
       dummy.rotation.set(-Math.PI/2,0,0);
 
-      dummy.position.set(x-4.5+j*1,ihy+.025,z);dummy.updateMatrix();
+      dummy.position.set(x-4.5+j*1,ihy+0.08,z);dummy.updateMatrix();
 
       zebraInst.setMatrixAt(i*10+j,dummy.matrix);
 
@@ -2464,9 +2464,9 @@ for(let z=-100;z<=7000;z+=10){
 
   const WIN_N=Math.min(600,bdata.length*3);
 
-  const winGeo=new THREE.PlaneGeometry(0.4,0.5);
+  const winGeo=new THREE.BoxGeometry(0.4,0.5,0.12);
 
-  const winMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd55,emissiveIntensity:3.5,roughness:0.05,side:THREE.DoubleSide});
+  const winMat=new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffdd55,emissiveIntensity:3.5,roughness:0.05});
 
   const winInst=new THREE.InstancedMesh(winGeo,winMat,WIN_N);
 
@@ -2488,7 +2488,7 @@ for(let z=-100;z<=7000;z+=10){
 
       const wy=ry+2+row*2.5;
 
-      const wx=bx+facing*(bw/2+0.01);
+      const wx=bx+facing*(bw/2+0.12);
 
       dummy.position.set(wx,wy,bz+(Math.random()-.5)*b[4]*.6);
 
@@ -2512,7 +2512,7 @@ for(let z=-100;z<=7000;z+=10){
 
   const NEON_N=20;
 
-  const neonGeo=new THREE.PlaneGeometry(1.8,0.6);
+  const neonGeo=new THREE.BoxGeometry(1.8,0.6,0.1);
 
   const neonInst=new THREE.InstancedMesh(neonGeo,new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:0.4,roughness:0.0,side:THREE.DoubleSide}),NEON_N);
 
@@ -2532,7 +2532,7 @@ for(let z=-100;z<=7000;z+=10){
 
     neonInst.instanceColor.setXYZ(ni,_nc.r,_nc.g,_nc.b);
 
-    dummy.position.set(b[0]+facing*(b[2]/2+0.02),roadY(b[1])+b[3]*0.6,b[1]);
+    dummy.position.set(b[0]+facing*(b[2]/2+0.15),roadY(b[1])+b[3]*0.6,b[1]);
 
     dummy.rotation.set(0,facing>0?-Math.PI/2:Math.PI/2,0);
 
@@ -2720,7 +2720,7 @@ for(let z=-100;z<=7000;z+=10){
 
 // ---- GROUND FLOOR STOREFRONTS ----
 {
-  var sfGeo=new THREE.BoxGeometry(1,0.4,0.05);
+  var sfGeo=new THREE.BoxGeometry(1,0.4,0.2);
   var sfMat=new THREE.MeshStandardMaterial({roughness:0.3,metalness:0.1,emissive:0x553318,emissiveIntensity:1.2});
   var SF_N=Math.min(200,bdata.length);
   var sfInst=new THREE.InstancedMesh(sfGeo,sfMat,SF_N);
@@ -2734,7 +2734,7 @@ for(let z=-100;z<=7000;z+=10){
     // Face toward road
     var rx3=roadX(bd3[1]);
     var facing=bd3[0]<rx3?1:-1;
-    dummy.position.set(bd3[0]+facing*bd3[2]*0.5,sy3,bd3[1]);
+    dummy.position.set(bd3[0]+facing*(bd3[2]*0.5+0.15),sy3,bd3[1]);
     dummy.scale.set(bd3[2]*0.8,1,1);
     dummy.rotation.set(0,facing>0?0:Math.PI,0);
     dummy.updateMatrix();
