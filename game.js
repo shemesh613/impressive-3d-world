@@ -4842,7 +4842,7 @@ function updateHUD(){
   if(window._carBeam)window._carBeam.material.opacity=spd>0.05?Math.min(0.06,spd*0.12):0;
     
 
-  scene.fog.density=0.0008-spd*0.0003;scene.fog.color.setHex(spd>0.1?0x1e1e30:0x1a1a2e);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=0.25+spd*0.15;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.0+spd*0.15;var _tFov=68+spd*25;cam.fov+=(Math.min(88,_tFov)-cam.fov)*0.03;cam.updateProjectionMatrix();
+  scene.fog.density=0.0005-spd*0.0002;scene.fog.color.setHex(spd>0.1?0x1a2040:0x1a2040);if(scene.children[0]&&scene.children[0].isAmbientLight)scene.children[0].intensity=0.5+spd*0.2;if(scene.children[1]&&scene.children[1].isDirectionalLight)scene.children[1].intensity=1.5+spd*0.2;var _tFov=65+spd*40;cam.fov+=(Math.min(105,_tFov)-cam.fov)*0.08;cam.updateProjectionMatrix();
     // Dynamic vignette at speed
     if(typeof colorPass!=='undefined'&&colorPass.uniforms){colorPass.uniforms['vignetteAmount'].value=0.3+spd*0.15}// fog clears at speed
 
